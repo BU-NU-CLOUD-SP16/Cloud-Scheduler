@@ -1,15 +1,16 @@
-# Cloud-Scheduler
 
 Cloud Scheduler for Next Generation Data Centers
+================================================
 
-1.   Vision and Goals Of The Project:
-=====================================
+Vision and Goals Of The Project:
+-------------------------------------
 
 In the next generation data centers, the nodes should support multiple workloads in addition to the traditional web services which run today. These workloads have different resource requirements which must be addressed by the data centers. This can be achieved by introducing a new scheduling layer, which can effectively schedule different workloads by scaling the clusters dynamically.
 A core part of the Massachusetts Open Cloud is a Hardware as a Service project to create a new fundamental layer in cloud datacenters. HaaS supports allocating a set of computer nodes (bare hardware) with network isolation between those nodes and the rest of the cloud. They can scale their deployments by allocating and freeing hardware nodes, without having to change any physical setup of the datacenter. HaaS interacts with Bare Metal Imaging (BMI) services, to deploy images on physical nodes. 
 To scale the nodes based on resource requirement, we need an efficient distributed scheduling framework. We achieve this by introducing Apache Mesos on top of BMI to schedule multiple workloads. Apache Mesos is a stable scheduler of frameworks, which can efficiently allocate resources for different frameworks.
 
-Goals:
+###Goals:
+
 Verify compatibility of different workloads/frameworks with Apache Mesos.
 Develop a simple scheduler to test the BMI-HaaS architecture.
 Integration of Apache Mesos on top of the BMI-HaaS architecture.
