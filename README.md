@@ -32,6 +32,7 @@ The workloads will simulate the end users. The scheduling architecture will be u
 
 ###High Level Architecture:
 
+![alt Architecture](architecture.jpg "Title")
 
 ##Acceptance criteria
 Development of a simple scheduler to test the BMI-HaaS architecture.
