@@ -3,7 +3,7 @@
  */
 public interface ElasticityPlugin {
 
-    public int scaleUp(Object data);
-    public boolean scaleDown(Object node,Object data);
+    public int scaleUp(Data data);
+    public boolean scaleDown(Node node,Data data);
 
 }

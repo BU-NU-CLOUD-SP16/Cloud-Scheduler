@@ -3,14 +3,16 @@
  */
 public class MesosElasticityPlugin implements ElasticityPlugin {
 
-
+    @DataQuery(queries = {"SELECT * FROM blah"})
     @Override
-    public int scaleUp(Object data) {
+    public int scaleUp(Data data) {
         return 0;
     }
 
+    @DataQuery(queries = {"SELECT * FROM blah2"})
+    @NodeQuery(query = "SELECT * FROM slave")
     @Override
-    public boolean scaleDown(Object node, Object data) {
+    public boolean scaleDown(Node node, Data data) {
         return false;
     }
 }
