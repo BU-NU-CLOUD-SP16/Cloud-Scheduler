@@ -8,13 +8,22 @@ import java.util.ArrayList;
    where each list is a row of data from db */
 public class Data {
 
-    private ArrayList data;
+    private String query;
+    private ArrayList<ArrayList> data;
 
-    public ArrayList getData() {
+    public String getQuery() {
+        return query;
+    }
+
+    public void setQuery(String query) {
+        this.query = query;
+    }
+
+    public ArrayList<ArrayList> getData() {
         return data;
     }
 
-    public void setData(ArrayList data) {
+    public void setData(ArrayList<ArrayList> data) {
         this.data = data;
     }
 }

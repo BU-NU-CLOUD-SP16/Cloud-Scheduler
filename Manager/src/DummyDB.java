@@ -4,9 +4,9 @@
 public class DummyDB {
 
 
-    public String[] executeQuery(String query)
+    public String[][] executeQuery(String query)
     {
-        String data[] = {"1","blah","blah"};
+        String data[][] = {{"1","blah","blah"}};
         return data;
     }
 
