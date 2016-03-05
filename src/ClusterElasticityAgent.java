@@ -2,8 +2,6 @@
  * Created by Praveen on 3/2/2016.
  */
 
-import interfaces.RequestResourcesClusterElasticityAgentCommand;
-
 import java.io.IOException;
 import static spark.Spark.*;
 
