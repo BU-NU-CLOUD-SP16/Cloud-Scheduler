@@ -71,7 +71,7 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
             scalerPlugin = (ClusterScalerPlugin) clusterScalerPluginClass.getConstructors()[0].newInstance(null);
 
 
-            Method[] methods = elasticityPluginClass.getMethods();
+            Method[] methods = elasticityPluginClass.getDeclaredMethods();
 
             for(Method method : methods)
             {
@@ -104,19 +104,14 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
         }
 
 
-        new Timer().scheduleAtFixedRate(new ClusterElasticityAgentTimerTask(this, new ScaleClusterElasticityAgentCommand() {
-            @Override
-            public void execute() {
-
-            }
-        }),0,pollInterval);
+        new Timer().scheduleAtFixedRate(new ClusterElasticityAgentTimerTask(this, new ScaleClusterElasticityAgentCommand()),0,pollInterval);
 
         while(true)
         {
 
             try {
                 ClusterElasticityAgentCommand command = workerQueue.take();
-
+                String name = command.getClass().getName();
                 switch(command.getClass().getName())
                 {
                     case SCALE_COMMAND:

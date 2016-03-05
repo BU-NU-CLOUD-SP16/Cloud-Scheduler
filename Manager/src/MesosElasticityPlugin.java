@@ -13,8 +13,8 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         return 0;
     }
 
-    @DataQuery(queries = {"SELECT * FROM blah2"})
-    @NodeQuery(query = "SELECT * FROM slave")
+    @DataQuery(queries = {"SELECT * FROM framework f inner join runs_on r on r.framework_id=f.framework_id inner join slave s s.slave_id=r.slave_id"})
+    @NodeQuery(query = "SELECT * FROM Slave")
     @Override
     public boolean scaleDown(Node node, ArrayList<Data> data)
     {
@@ -24,6 +24,6 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
 
     @Override
     public int requestResources(String query) {
-        return 0;
+        return 1;
     }
 }
