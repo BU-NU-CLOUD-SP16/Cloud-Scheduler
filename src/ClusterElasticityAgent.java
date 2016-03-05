@@ -2,16 +2,18 @@
  * Created by Praveen on 3/2/2016.
  */
 
+import interfaces.RequestResourcesClusterElasticityAgentCommand;
+
 import java.io.IOException;
 import static spark.Spark.*;
 
-public class CEAgent {
+public class ClusterElasticityAgent {
 
     private CommandLineArguments arguments;
-    private static CEManagerFrameworkImpl elasticityManager = null;
+    private ClusterElasticityManager elasticityManager;
     private CollectorPluginFrameworkImpl resourceCollector;
 
-    public CEAgent() {
+    public ClusterElasticityAgent() {
     }
 
     public CommandLineArguments getArguments() {
@@ -22,12 +24,12 @@ public class CEAgent {
         this.arguments = arguments;
     }
 
-    public static CEManagerFrameworkImpl getElasticityManager() {
-        return CEAgent.elasticityManager;
+    public ClusterElasticityManager getElasticityManager() {
+        return elasticityManager;
     }
 
-    public static void setElasticityManager(CEManagerFrameworkImpl elasticityManager) {
-        CEAgent.elasticityManager = elasticityManager;
+    public void setElasticityManager(ClusterElasticityManager elasticityManager) {
+        this.elasticityManager = elasticityManager;
     }
 
     public CollectorPluginFrameworkImpl getResourceCollector() {
@@ -40,12 +42,12 @@ public class CEAgent {
 
     public static void main(String args[]){
 
-        CEAgent agent = new CEAgent();
+        ClusterElasticityAgent agent = new ClusterElasticityAgent();
 
         CommandLineArguments argumentList = new CommandLineArguments();
         try {
             argumentList.parseCommandLineArguments(args);
-        } catch (CEAgentException e) {
+        } catch (ClusterElasticityAgentException e) {
             e.printStackTrace();
             System.exit(1);
         }
@@ -68,7 +70,7 @@ public class CEAgent {
         collectorThread.start();
         agent.setResourceCollector(collectorPlugin);
 
-        CEManagerFrameworkImpl elasticityManager = new CEManagerFrameworkImpl(argumentList);
+        ClusterElasticityManager elasticityManager = new ClusterElasticityManager(argumentList);
         Thread elasticityManagerThread = new Thread(elasticityManager);
         elasticityManagerThread.start();
         agent.setElasticityManager(elasticityManager);
@@ -78,14 +80,14 @@ public class CEAgent {
             String responseString = "";
 
             try {
-                CEAgent.getElasticityManager().notifyResourceScaling(new CEAgentCommand() {
+                agent.getElasticityManager().notifyResourceScaling(new RequestResourcesClusterElasticityAgentCommand() {
                     public void execute() {
                         /*System.out.println("Handled HTTP Request");*/
                     }
                 });
                 res.status(200);
                 res.body("Success");
-            }catch(CEAgentException e){
+            }catch(ClusterElasticityAgentException e){
                 e.printStackTrace();
                 res.status(400);
                 res.body("Failure");

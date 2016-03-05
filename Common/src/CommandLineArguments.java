@@ -33,12 +33,12 @@ public class CommandLineArguments {
     }
 
     @Option(name="-mesos-master-ip",usage="sets mesos master ip")
-    public void setMesosMasterIP(String mesosMasterIP) throws CEAgentException {
+    public void setMesosMasterIP(String mesosMasterIP) throws ClusterElasticityAgentException {
         if(mesosMasterIP.matches("^\\d+\\.\\d+\\.\\d+\\.\\d+$")){
             this.mesosMasterIP = mesosMasterIP;
         }
         else{
-            throw new CEAgentException("Wrong Mesos Master IP Format!!");
+            throw new ClusterElasticityAgentException("Wrong Mesos Master IP Format!!");
         }
     }
 
@@ -47,11 +47,11 @@ public class CommandLineArguments {
     }
 
     @Option(name="-mesos-master-port",usage="sets mesos master port")
-    public void setMesosMasterPort(Integer mesosMasterPort) throws CEAgentException {
+    public void setMesosMasterPort(Integer mesosMasterPort) throws ClusterElasticityAgentException {
         if(mesosMasterPort > NULL_PORT)
             this.mesosMasterPort = mesosMasterPort;
         else
-            throw new CEAgentException("Invalid Port specified!!");
+            throw new ClusterElasticityAgentException("Invalid Port specified!!");
     }
 
     public File getCollectorPluginJar() {
@@ -59,11 +59,11 @@ public class CommandLineArguments {
     }
 
     @Option(name="-collector-plugin",usage="sets collector plugin jar name")
-    public void setCollectorPluginJar(File collectorPluginJar) throws CEAgentException {
+    public void setCollectorPluginJar(File collectorPluginJar) throws ClusterElasticityAgentException {
         if(collectorPluginJar.exists())
             this.collectorPluginJar = collectorPluginJar;
         else
-            throw new CEAgentException("Collector Plugin Jar Doesn't Exit!!");
+            throw new ClusterElasticityAgentException("Collector Plugin Jar Doesn't Exit!!");
     }
 
     public File getCemanagerPluginJar() {
@@ -71,11 +71,11 @@ public class CommandLineArguments {
     }
 
     @Option(name="-cemanager-plugin",usage="sets CEManager plugin jar name")
-    public void setCemanagerPluginJar(File cemanagerPluginJar) throws CEAgentException {
+    public void setCemanagerPluginJar(File cemanagerPluginJar) throws ClusterElasticityAgentException {
         if(cemanagerPluginJar.exists())
             this.cemanagerPluginJar = cemanagerPluginJar;
         else
-            throw new CEAgentException("CEManager Plugin Jar not found!!");
+            throw new ClusterElasticityAgentException("CEManager Plugin Jar not found!!");
     }
 
     public String getCollectorPluginMainClass() {
@@ -96,7 +96,7 @@ public class CommandLineArguments {
         this.cemanagerPluginMainClass = cemanagerPluginMainClass;
     }
 
-    public void parseCommandLineArguments(String[] args) throws CEAgentException {
+    public void parseCommandLineArguments(String[] args) throws ClusterElasticityAgentException {
         CmdLineParser parser = new CmdLineParser(this);
 
         try {
@@ -105,7 +105,7 @@ public class CommandLineArguments {
             // handling of wrong arguments
             System.err.println(e.getMessage());
             parser.printUsage(System.err);
-            throw new CEAgentException("Command Line Arguments Error!!");
+            throw new ClusterElasticityAgentException("Command Line Arguments Error!!");
         }
     }
 }

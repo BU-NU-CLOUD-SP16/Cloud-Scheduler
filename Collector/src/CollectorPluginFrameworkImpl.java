@@ -7,11 +7,11 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class CollectorPluginFrameworkImpl implements CollectorPluginFramework {
 
-    private final LinkedBlockingQueue<CEAgentCommand> workerQueue;
+    private final LinkedBlockingQueue<ClusterElasticityAgentCommand> workerQueue;
     private final CommandLineArguments arguments;
 
     public CollectorPluginFrameworkImpl(CommandLineArguments argumentList) {
-        workerQueue = new LinkedBlockingQueue<CEAgentCommand>();
+        workerQueue = new LinkedBlockingQueue<ClusterElasticityAgentCommand>();
         arguments = argumentList;
     }
 
@@ -19,12 +19,12 @@ public class CollectorPluginFrameworkImpl implements CollectorPluginFramework {
         System.out.println("Collector Plugin Framework Started!!");
         while (true) {
             try {
-                new Timer().schedule(new CEAgentTimerTask(this, new CEAgentCommand() {
+                new Timer().schedule(new ClusterElasticityAgentTimerTask(this, new ClusterElasticityAgentCommand() {
                     public void execute() {
                         /*System.out.println("Handled Collector Plugin Timer Expiry");*/
                     }
                 }), 5000);
-                CEAgentCommand command = workerQueue.take();
+                ClusterElasticityAgentCommand command = workerQueue.take();
                 command.execute();
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -35,7 +35,7 @@ public class CollectorPluginFrameworkImpl implements CollectorPluginFramework {
         }
     }
 
-    public void notifyTimerExpiry(CEAgentCommand workerCommand) throws CEAgentException {
+    public void notifyTimerExpiry(ClusterElasticityAgentCommand workerCommand) throws ClusterElasticityAgentException {
 
         try {
             workerQueue.put(workerCommand);
@@ -43,7 +43,7 @@ public class CollectorPluginFrameworkImpl implements CollectorPluginFramework {
             e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
-            throw new CEAgentException("Failed to Queue HTTP Request for scaling resource!!");
+            throw new ClusterElasticityAgentException("Failed to Queue HTTP Request for scaling resource!!");
         }
 
     }

@@ -48,7 +48,7 @@ public class ModuleLoader {
     /* Test Class Loader */
     public static void testLoadedModule(String className, String methodName){
         try {
-            ClassLoader classLoader = CEAgent.class.getClassLoader();
+            ClassLoader classLoader = ClusterElasticityAgent.class.getClassLoader();
             Class aClass = classLoader.loadClass(className);
             System.out.println("aClass.getName() = " + aClass.getName());
             Object myObject = aClass.newInstance();

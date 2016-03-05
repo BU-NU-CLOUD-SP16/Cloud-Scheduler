@@ -1,3 +1,9 @@
+import annotations.DataQuery;
+import annotations.NodeQuery;
+import interfaces.ElasticityPlugin;
+import wrappers.Data;
+import wrappers.Node;
+
 import java.util.ArrayList;
 
 /**

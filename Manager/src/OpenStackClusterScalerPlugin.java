@@ -1,3 +1,5 @@
+import interfaces.ClusterScalerPlugin;
+
 /**
  * Created by chemistry_sourabh on 3/4/16.
  */

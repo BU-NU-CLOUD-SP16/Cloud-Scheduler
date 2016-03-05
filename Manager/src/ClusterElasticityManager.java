@@ -1,15 +1,29 @@
+import annotations.DataQuery;
+import annotations.NodeQuery;
+import interfaces.ClusterElasticityManagerFramework;
+import interfaces.ClusterScalerPlugin;
+import interfaces.ElasticityPlugin;
+import interfaces.ScaleClusterElasticityAgentCommand;
+import wrappers.Data;
+import wrappers.Node;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Timer;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Created by chemistry_sourabh on 3/2/16.
  */
-public class ClusterElasticityManager extends Thread {
+public class ClusterElasticityManager implements ClusterElasticityManagerFramework {
 
     private static final String SCALE_DOWN_METHOD = "scaleDown";
     private static final String SCALE_UP_METHOD = "scaleUp";
+    private static final String REQUEST_RESOURCES_METHOD = "requestResources";
 
+    private static final String REQUEST_RESOURCES_COMMAND = "RequestResourcesClusterElasticityAgentCommand";
+    private static final String SCALE_COMMAND = "ScaleClusterElasticityAgentCommand";
     // The poll interval which is an int that tells the frequency at which the polling should take place
     // The Plugin's class name which is a string
     private int pollInterval;
@@ -30,11 +44,13 @@ public class ClusterElasticityManager extends Thread {
     private ArrayList<Data> scaleDownData;
     private ArrayList<Data> scaleUpData;
 
-    public ClusterElasticityManager(int pollInterval, String elasticityPluginClassName, String clusterScalerPluginClassName) {
-        this.pollInterval = pollInterval;
-        this.elasticityPluginClassName = elasticityPluginClassName;
-        this.clusterScalerPluginClassName = clusterScalerPluginClassName;
+    private LinkedBlockingQueue<ClusterElasticityAgentCommand> workerQueue;
 
+    public ClusterElasticityManager(CommandLineArguments arguments) {
+        this.pollInterval = 5000;
+        this.elasticityPluginClassName = arguments.getCemanagerPluginMainClass();
+        this.clusterScalerPluginClassName = "OpenStackClusterScalerPlugin";
+        workerQueue = new LinkedBlockingQueue<>();
         database = new DummyDB();
     }
 
@@ -81,6 +97,8 @@ public class ClusterElasticityManager extends Thread {
                     DataQuery dataQuery = method.getAnnotation(DataQuery.class);
                     scaleUpDataQueries = dataQuery.queries();
                 }
+
+
             }
         }
 
@@ -95,34 +113,59 @@ public class ClusterElasticityManager extends Thread {
         }
 
 
+        new Timer().scheduleAtFixedRate(new ClusterElasticityAgentTimerTask(this, new ScaleClusterElasticityAgentCommand() {
+            @Override
+            public void execute() {
+
+            }
+        }),0,pollInterval);
+
         while(true)
         {
 
-            fetchData();
-
-            int newNodes = elasticityPlugin.scaleUp(scaleUpData);
-
-            for(ArrayList nodeData: scaleDownNodeData.getData())
-            {
-                Node node = new Node();
-                node.setData(nodeData);
-                boolean shouldDelete = elasticityPlugin.scaleDown(node,scaleDownData);
-                if(shouldDelete)
-                {
-                    scalerPlugin.deleteNode("");
-                }
-            }
-
-            for(int i=0;i<newNodes;i++)
-            {
-                scalerPlugin.createNewNode();
-            }
-
             try {
-                ClusterElasticityManager.sleep(pollInterval);
+                ClusterElasticityAgentCommand command = workerQueue.take();
+
+                switch(command.getClass().getName())
+                {
+                    case SCALE_COMMAND:
+                        fetchData();
+
+                        int newNodes = elasticityPlugin.scaleUp(scaleUpData);
+
+                        for(ArrayList nodeData: scaleDownNodeData.getData())
+                        {
+                            Node node = new Node();
+                            node.setData(nodeData);
+                            boolean shouldDelete = elasticityPlugin.scaleDown(node,scaleDownData);
+                            if(shouldDelete)
+                            {
+                                scalerPlugin.deleteNode("");
+                            }
+                        }
+
+                        for(int i=0;i<newNodes;i++)
+                        {
+                            scalerPlugin.createNewNode();
+                        }
+                    case REQUEST_RESOURCES_COMMAND:
+                        int newNodesCount = elasticityPlugin.requestResources("");
+                        for(int i=0;i<newNodesCount;i++)
+                        {
+                            scalerPlugin.createNewNode();
+                        }
+
+                    default:
+                        command.execute();
+
+                }
+
+                command.execute();
+
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+
         }
     }
 
@@ -154,4 +197,27 @@ public class ClusterElasticityManager extends Thread {
     }
 
 
+    @Override
+    public void notifyResourceScaling(ClusterElasticityAgentCommand workerCommand) throws ClusterElasticityAgentException {
+        try {
+            workerQueue.put(workerCommand);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new ClusterElasticityAgentException("Failed to Queue HTTP Request for scaling resource!!");
+        }
+    }
+
+    @Override
+    public void notifyTimerExpiry(ClusterElasticityAgentCommand workerCommand) throws ClusterElasticityAgentException {
+        try {
+            workerQueue.put(workerCommand);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new ClusterElasticityAgentException("Failed to Queue HTTP Request for scaling resource!!");
+        }
+    }
 }

@@ -4,13 +4,13 @@
 
 import java.lang.Exception;
 
-public class CEAgentException extends Exception {
+public class ClusterElasticityAgentException extends Exception {
     //Parameterless Constructor
-    public CEAgentException() {
+    public ClusterElasticityAgentException() {
     }
 
     //Constructor that accepts a message
-    public CEAgentException(String message) {
+    public ClusterElasticityAgentException(String message) {
         super(message);
     }
 }

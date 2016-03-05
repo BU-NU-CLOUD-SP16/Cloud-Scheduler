@@ -1,3 +1,8 @@
+package interfaces;
+
+import wrappers.Data;
+import wrappers.Node;
+
 import java.util.ArrayList;
 
 /**
@@ -6,7 +11,7 @@ import java.util.ArrayList;
 public interface ElasticityPlugin {
 
     public int scaleUp(ArrayList<Data> data);
-    public boolean scaleDown(Node node,ArrayList<Data> data);
+    public boolean scaleDown(Node node, ArrayList<Data> data);
     public int requestResources(String query);
 
 }
