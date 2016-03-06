@@ -1,4 +1,11 @@
 /**
  * Created by chemistry_sourabh on 3/4/16.
  */
-public interface RequestResourcesClusterElasticityAgentCommand extends ClusterElasticityAgentCommand {}
+public class RequestResourcesClusterElasticityAgentCommand implements ClusterElasticityAgentCommand {
+
+    @Override
+    public void execute() {
+
+    }
+
+}

@@ -54,7 +54,7 @@ public class ClusterElasticityAgent {
         try {
             ModuleLoader.addFile(argumentList.getCollectorPluginJar());
             ModuleLoader.addFile(argumentList.getCemanagerPluginJar());
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
         }
@@ -78,11 +78,7 @@ public class ClusterElasticityAgent {
             String responseString = "";
 
             try {
-                agent.getElasticityManager().notifyResourceScaling(new RequestResourcesClusterElasticityAgentCommand() {
-                    public void execute() {
-                        /*System.out.println("Handled HTTP Request");*/
-                    }
-                });
+                agent.getElasticityManager().notifyResourceScaling(new RequestResourcesClusterElasticityAgentCommand());
                 res.status(200);
                 res.body("Success");
             }catch(ClusterElasticityAgentException e){
