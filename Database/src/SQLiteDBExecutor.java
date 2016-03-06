@@ -5,10 +5,10 @@ import java.sql.*;
 /**
  * Created by Akshaya on 05-03-2016.
  */
-public class SQLiteDBExecutor implements IDBExecutor {
+public class SQLiteDBExecutor implements DBExecutor {
 
     //Executes a Select statement and returns a Double Dimensional String array
-    public String[][] executeSelect(String str)throws Exception{
+    public String[][] executeSelect(String str){
         Connection c = null;
         Statement stmt = null;
         String [][] table_values = new String[100][20];
@@ -37,13 +37,12 @@ public class SQLiteDBExecutor implements IDBExecutor {
         } catch(Exception e){
             e.printStackTrace();
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
-            System.exit(0);
         }
 
         return table_values;
     }
     // Executes any DML statement
-    public void executeUpdate(String str) throws Exception{
+    public void executeUpdate(String str){
         Connection c = null;
         Statement stmt = null;
         try {
@@ -63,7 +62,6 @@ public class SQLiteDBExecutor implements IDBExecutor {
             System.out.println("here??????");
             e.printStackTrace();
             System.err.println( e.getClass().getName() + ": " + 			e.getMessage() );
-            System.exit(0);
         }
     }
 
@@ -94,7 +92,7 @@ public class SQLiteDBExecutor implements IDBExecutor {
     }
 
     //Deletes all the rows in all the tables in DB
-    public void clearDB()throws Exception{
+    public void clearDB(){
         Connection c = null;
         Statement stmt = null;
         try {
@@ -116,7 +114,6 @@ public class SQLiteDBExecutor implements IDBExecutor {
             System.out.println("here??????");
             e.printStackTrace();
             System.err.println( e.getClass().getName() + ": " + 			e.getMessage() );
-            System.exit(0);
         }
     }
 

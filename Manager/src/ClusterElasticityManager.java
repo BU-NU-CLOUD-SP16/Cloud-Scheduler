@@ -20,12 +20,13 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
     private int pollInterval;
     private String elasticityPluginClassName;
     private String clusterScalerPluginClassName;
+    private String databaseExecutorPluginClassName;
 
     private ElasticityPlugin elasticityPlugin;
     private ClusterScalerPlugin scalerPlugin;
 
     // Instance to database API
-    private DummyDB database;
+    private DBExecutor database;
 
     private String scaleDownDataQueries[];
     private String scaleDownNodeQuery;
@@ -41,8 +42,8 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
         this.pollInterval = 5000;
         this.elasticityPluginClassName = arguments.getCemanagerPluginMainClass();
         this.clusterScalerPluginClassName = "OpenStackClusterScalerPlugin";
+        this.databaseExecutorPluginClassName = "SQLiteDBExecutor";
         workerQueue = new LinkedBlockingQueue<>();
-        database = new DummyDB();
     }
 
     private Data convertToData(String data[][])
@@ -67,8 +68,10 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
         {
             Class elasticityPluginClass = Class.forName(elasticityPluginClassName);
             Class clusterScalerPluginClass = Class.forName(clusterScalerPluginClassName);
+            Class databaseExecutorPluginClass = Class.forName(databaseExecutorPluginClassName);
             elasticityPlugin = (ElasticityPlugin) elasticityPluginClass.getConstructors()[0].newInstance(null);
             scalerPlugin = (ClusterScalerPlugin) clusterScalerPluginClass.getConstructors()[0].newInstance(null);
+            database = (DBExecutor) databaseExecutorPluginClass.getConstructors()[0].newInstance(null);
 
 
             Method[] methods = elasticityPluginClass.getDeclaredMethods();
@@ -161,7 +164,7 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
 
         for(String query : scaleDownDataQueries)
         {
-            String data[][] = database.executeQuery(query);
+            String data[][] = database.executeSelect(query);
             Data dataObject = convertToData(data);
             dataObject.setQuery(query);
             scaleDownData.add(dataObject);
@@ -169,13 +172,13 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
 
         for(String query : scaleUpDataQueries)
         {
-            String data[][] = database.executeQuery(query);
+            String data[][] = database.executeSelect(query);
             Data dataObject = convertToData(data);
             dataObject.setQuery(query);
             scaleUpData.add(dataObject);
         }
 
-        String data[][] = database.executeQuery(scaleDownNodeQuery);
+        String data[][] = database.executeSelect(scaleDownNodeQuery);
         Data dataObject = convertToData(data);
         dataObject.setQuery(scaleDownNodeQuery);
         scaleDownNodeData = dataObject;
