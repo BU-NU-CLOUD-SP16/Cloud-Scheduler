@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.IOException;
 import java.sql.*;
+import java.io.*;
 
 /**
  * Created by Akshaya on 05-03-2016.
@@ -89,6 +90,7 @@ public class SQLiteDBExecutor implements DBExecutor {
             System.err.println( e.getClass().getName() + ": " + 			e.getMessage() );
             System.exit(0);
         }*/
+        FileInputStream fstream = new FileInputStream(f);
     }
 
     //Deletes all the rows in all the tables in DB
