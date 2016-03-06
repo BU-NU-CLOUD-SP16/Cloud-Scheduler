@@ -1,11 +1,6 @@
 import java.io.File;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.Statement;
-import com.ibatis.common.jdbc.ScriptRunner;
+import java.sql.*;
 
 /**
  * Created by Akshaya on 05-03-2016.
