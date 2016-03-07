@@ -8,6 +8,6 @@ import java.util.ArrayList;
 public interface DBExecutor {
     public ArrayList executeSelect(String str);
     public void executeUpdate(String str);
-    public void executeScript(File f) throws IOException;
+    public void executeScript(File f) throws Exception;
     public void clearDB();
 }

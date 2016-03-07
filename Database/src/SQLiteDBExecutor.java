@@ -42,7 +42,6 @@ public class SQLiteDBExecutor implements DBExecutor {
             System.err.println( e.getClass().getName()
                     + ": " + e.getMessage() );
         }
-
         return table_values;
     }
     // Executes any DML statement
@@ -70,7 +69,7 @@ public class SQLiteDBExecutor implements DBExecutor {
     }
 
     //Under Construction
-    public void executeScript(File f) throws IOException{
+    public void executeScript(File f) throws Exception{
         /*Connection c = null;
         Statement stmt = null;
         try {
@@ -78,7 +77,6 @@ public class SQLiteDBExecutor implements DBExecutor {
             c = DriverManager.getConnection("jdbc:sqlite:cloudScheduler.db");
 
             System.out.println("Opened database successfully");
-            ScriptRunner sr = new ScriptRunner();
             String sql = str;
             //stmt.executeUpdate(sql);
             stmt = c.createStatement();
@@ -93,7 +91,36 @@ public class SQLiteDBExecutor implements DBExecutor {
             System.err.println( e.getClass().getName() + ": " + 			e.getMessage() );
             System.exit(0);
         }*/
-        FileInputStream fstream = new FileInputStream(f);
+        Connection conn = null;
+        Statement stmt = null;
+        BufferedReader br = new BufferedReader(new FileReader(f));
+        try {
+            StringBuilder sb = new StringBuilder();
+            String line = br.readLine();
+            while (line != null) {
+                sb.append(line);
+                sb.append("\n");
+                line = br.readLine();
+            }
+            String all_Sql = sb.toString();
+            String[] sql = all_Sql.split(";");
+
+            Class.forName("org.sqlite.JDBC");
+            conn = DriverManager.getConnection("jdbc:sqlite:cloudScheduler.db");
+            System.out.println("Opened database successfully");
+
+            stmt = conn.createStatement();
+            for (int i = 0; i < sql.length; i++) {
+                stmt.executeUpdate(sql[i]);
+            }
+            stmt.close();
+            conn.close();
+        }catch ( Exception e ) {
+            System.out.println("Exception??????");
+            e.printStackTrace();
+            System.err.println( e.getClass().getName() + ": " + 			e.getMessage() );
+            System.exit(0);
+        }
     }
 
     //Deletes all the rows in all the tables in DB
