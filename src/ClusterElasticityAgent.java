@@ -78,7 +78,7 @@ public class ClusterElasticityAgent {
             String responseString = "";
 
             try {
-                agent.getElasticityManager().notifyResourceScaling(new RequestResourcesClusterElasticityAgentCommand());
+                agent.getElasticityManager().notifyResourceScaling("");
                 res.status(200);
                 res.body("Success");
             }catch(ClusterElasticityAgentException e){

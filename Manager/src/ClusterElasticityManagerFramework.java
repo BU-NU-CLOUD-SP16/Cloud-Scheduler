@@ -4,6 +4,6 @@
 
 public interface ClusterElasticityManagerFramework extends ClusterElasticityAgentFramework {
 
-    public void notifyResourceScaling(ClusterElasticityAgentCommand workerCommand) throws ClusterElasticityAgentException;
+    public void notifyResourceScaling(String parameters) throws ClusterElasticityAgentException;
 
 }
