@@ -3,6 +3,6 @@
  */
 public interface ClusterScalerPlugin {
 
-    public boolean createNewNode();
-    public boolean deleteNode(String id);
+    public boolean createNewNode(Node node);
+    public boolean deleteNode(Node node);
 }

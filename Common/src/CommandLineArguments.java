@@ -20,7 +20,7 @@ public class CommandLineArguments {
 
     private String collectorPluginMainClass;
 
-    private String cemanagerPluginMainClass;
+    private String cemanagerPluginMainClass = "MesosElasticityPlugin";
 
     private static final Integer NULL_PORT = 0;
 

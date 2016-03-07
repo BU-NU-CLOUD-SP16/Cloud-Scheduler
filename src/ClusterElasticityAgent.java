@@ -51,13 +51,14 @@ public class ClusterElasticityAgent {
         }
         agent.setArguments(argumentList);
 
+        /*
         try {
             ModuleLoader.addFile(argumentList.getCollectorPluginJar());
             ModuleLoader.addFile(argumentList.getCemanagerPluginJar());
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
-        }
+        }*/
 
         /*// Test
         ModuleLoader.testLoadedModule(argumentList.getCollectorPluginMainClass().toString(), "printHello");

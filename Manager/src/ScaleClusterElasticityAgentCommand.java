@@ -1,6 +1,5 @@
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * Created by chemistry_sourabh on 3/4/16.
@@ -9,19 +8,12 @@ public class ScaleClusterElasticityAgentCommand implements ClusterElasticityAgen
 
     private static final String SCALE_DOWN_METHOD = "scaleDown";
     private static final String SCALE_UP_METHOD = "scaleUp";
-    private static final String SETUP_METHOD = "setup";
+    private static final String SETUP_METHOD = "fetch";
 
     private ElasticityPlugin elasticityPlugin;
     private ClusterScalerPlugin clusterScalerPlugin;
     private DBExecutor database;
-    private ArrayList<Data> scaleDownData;
-    private ArrayList<Data> scaleUpData;
-    private ArrayList<Data> setupData;
     private String[] setupDataQueries;
-    private String[] scaleDownDataQueries;
-    private String scaleDownNodeQuery;
-    private String[] scaleUpDataQueries;
-    private Data scaleDownNodeData;
 
     public ScaleClusterElasticityAgentCommand(ElasticityPlugin elasticityPlugin, ClusterScalerPlugin clusterScalerPlugin, DBExecutor database) {
         this.elasticityPlugin = elasticityPlugin;
@@ -36,31 +28,17 @@ public class ScaleClusterElasticityAgentCommand implements ClusterElasticityAgen
 
         for(Method method : methods)
         {
-            if(method.getName().equals(SCALE_DOWN_METHOD))
-            {
-                DataQuery dataQuery = method.getAnnotation(DataQuery.class);
-                NodeQuery nodeQuery = method.getAnnotation(NodeQuery.class);
-                scaleDownDataQueries = dataQuery.queries();
-                scaleDownNodeQuery = nodeQuery.query();
-            }
 
-            else if(method.getName().equals(SCALE_UP_METHOD))
-            {
-                DataQuery dataQuery = method.getAnnotation(DataQuery.class);
-                scaleUpDataQueries = dataQuery.queries();
-            }
-
-            else if(method.getName().equals(SETUP_METHOD))
+            if(method.getName().equals(SETUP_METHOD))
             {
                 DataQuery dataQuery = method.getAnnotation(DataQuery.class);
                 setupDataQueries = dataQuery.queries();
             }
 
-
         }
     }
 
-    private ArrayList<Data> executeQueries(String[] queries)
+    private ArrayList<Data> fetchData(String[] queries)
     {
         ArrayList<Data> datas = new ArrayList<>();
         for(String query : queries)
@@ -78,45 +56,24 @@ public class ScaleClusterElasticityAgentCommand implements ClusterElasticityAgen
         return datas;
     }
 
-    private void fetchData() {
-
-        setupData = executeQueries(setupDataQueries);
-        scaleDownData = executeQueries(scaleDownDataQueries);
-        scaleUpData = executeQueries(scaleUpDataQueries);
-
-
-        if(!scaleDownNodeQuery.equals(""))
-        {
-            ArrayList<String[]> data = database.executeSelect(scaleDownNodeQuery);
-            Data dataObject = new Data();
-            dataObject.setData(data);
-            dataObject.setQuery(scaleDownNodeQuery);
-            scaleDownNodeData = dataObject;
-        }
-    }
 
     @Override
     public void execute() {
-        fetchData();
 
-        elasticityPlugin.setup(setupData);
+        elasticityPlugin.fetch(fetchData(setupDataQueries));
 
-        int newNodes = elasticityPlugin.scaleUp(scaleUpData);
+        ArrayList<Node> newNodes = elasticityPlugin.scaleUp();
 
-        for(String nodeData[]: scaleDownNodeData.getData())
+        for(Node newNode : newNodes)
         {
-            Node node = new Node();
-            node.setData(nodeData);
-            boolean shouldDelete = elasticityPlugin.scaleDown(node,scaleDownData);
-            if(shouldDelete)
-            {
-                clusterScalerPlugin.deleteNode("");
-            }
+            clusterScalerPlugin.createNewNode(newNode);
         }
 
-        for(int i=0;i<newNodes;i++)
+        ArrayList<Node> shouldBeDeletedNodes = elasticityPlugin.scaleDown();
+
+        for(Node nodeToBeDeleted : shouldBeDeletedNodes)
         {
-            clusterScalerPlugin.createNewNode();
+            clusterScalerPlugin.deleteNode(nodeToBeDeleted);
         }
     }
 }

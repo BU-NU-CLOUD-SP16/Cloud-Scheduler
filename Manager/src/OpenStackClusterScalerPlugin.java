@@ -3,13 +3,13 @@
  */
 public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
 
-    public boolean createNewNode()
+    public boolean createNewNode(Node node)
     {
         System.out.println("Created new node");
         return true;
     }
 
-    public boolean deleteNode(String id)
+    public boolean deleteNode(Node node)
     {
         System.out.println("Deleted Node");
         return true;

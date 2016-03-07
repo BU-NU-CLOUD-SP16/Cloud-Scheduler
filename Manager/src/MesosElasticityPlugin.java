@@ -32,50 +32,71 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
     private static final int CLUSTER_ALLOCATED_CPU = 4;
 
 
-    // Can be used to fetch policy data from file
+    private long last_time = System.currentTimeMillis();
+
+    private ArrayList<Framework> frameworks;
+    private ArrayList<Slave> slaves;
+    // Should be used to fetch required data from db and policy info from files
     // Will be called at beginning of each command
-    @DataQuery(queries = "")
+    @DataQuery(queries = {"select * from slave","select * from framework","select * from runs_on"})
     @Override
-    public void setup(ArrayList<Data> data)
+    public void fetch(ArrayList<Data> data)
     {
+        last_time = System.currentTimeMillis();
+        Data slaveData = data.get(0);
+        Data frameworkData = data.get(1);
+        Data runsOnData = data.get(2);
+
+        frameworks = convertToFrameworkObjects(frameworkData);
+        slaves = convertToSlaveObjects(slaveData);
+        connect(frameworks,slaves,runsOnData);
 
     }
 
-    @DataQuery(queries = {"select * from slave","select * from framework"})
     @Override
-    public int scaleUp(ArrayList<Data> data)
+    public ArrayList<Node> scaleUp()
     {
-        Data slaveData = data.get(0);
-        Data frameworkData = data.get(1);
-
-        float clusterMetrics[] = calculateClusterMetrics(slaveData);
+        ArrayList<Node> nodes = new ArrayList<>();
+        float clusterMetrics[] = calculateClusterMetrics();
 
         if (clusterMetrics[CLUSTER_LOAD] > 0.85)
         {
-            return 1;
+            nodes.add(new OpenStackNode());
+            return nodes;
         }
 
         else if(clusterMetrics[CLUSTER_FREE_MEM]/clusterMetrics[CLUSTER_TOT_MEM] < 0.1)
         {
-            return 1;
+            nodes.add(new OpenStackNode());
+            return nodes;
         }
 
         System.out.println(Arrays.toString(clusterMetrics));
 
-        String[] underObservationFrameworks = findActiveFrameworksWithNoResources(frameworkData);
+        ArrayList<Framework> underObservationFrameworks = findActiveFrameworksWithNoResources();
+        boolean freeCPUSPresent = isFreeCPUPresent();
+        System.out.println(underObservationFrameworks);
 
-        System.out.println(Arrays.toString(underObservationFrameworks));
+        if(!freeCPUSPresent && underObservationFrameworks.size() > 0)
+        {
+            nodes.add(new OpenStackNode());
+            return nodes;
+        }
 
-        return 0;
+        else
+        {
+            //Observe Framework for a while
+        }
+        System.out.println(last_time);
+        return nodes;
     }
 
-    @DataQuery(queries = {"SELECT Framework.*, Slave.* FROM Framework INNER JOIN Runs_On ON Runs_On.Framework_ID == Framework.Framework_ID INNER JOIN Slave ON Runs_On.Slave_ID == Slave.Slave_ID"})
-    @NodeQuery(query = "SELECT * FROM Slave")
+
     @Override
-    public boolean scaleDown(Node node, ArrayList<Data> data)
+    public ArrayList<Node> scaleDown()
     {
         System.out.println("Scale Down");
-        return false;
+        return null;
     }
 
     @Override
@@ -85,9 +106,8 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         return Integer.parseInt(parameters.substring(equalIndex+1,parameters.length()).trim());
     }
 
-    private float[] calculateClusterMetrics(Data slaveData)
+    private float[] calculateClusterMetrics()
     {
-        ArrayList<String []> data = slaveData.getData();
 
         float tot_load = 0;
         float tot_free_mem = 0;
@@ -95,35 +115,157 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         float tot_cpu = 0;
         float tot_allocated_cpu = 0;
 
-        for(String row[] : data)
+        for(Slave slave : slaves)
         {
-            tot_load +=  Float.parseFloat(row[SLAVE_LOAD])/Float.parseFloat(row[SLAVE_CPU]);
-            tot_free_mem +=  Float.parseFloat(row[SLAVE_FREE_MEM]);
-            tot_tot_mem +=  Float.parseFloat(row[SLAVE_TOTAL_MEM]);
-            tot_cpu +=  Float.parseFloat(row[SLAVE_CPU]);
-            tot_allocated_cpu += Float.parseFloat(row[SLAVE_ALLOCATED_CPU])*Float.parseFloat(row[SLAVE_CPU]);
+            tot_load +=  slave.getLoad()/slave.getCpu();
+            tot_free_mem +=  slave.getFree_mem();
+            tot_tot_mem +=  slave.getTotal_mem();
+            tot_cpu +=  slave.getCpu();
+            tot_allocated_cpu += slave.getAllocated_cpu() * slave.getCpu();
         }
 
 
         tot_allocated_cpu = (tot_allocated_cpu/tot_cpu) * 100;
 
-        tot_load = tot_load/data.size();
+        tot_load = tot_load/slaves.size();
 
         float metrics[] = {tot_load,tot_free_mem,tot_tot_mem,tot_cpu,tot_allocated_cpu};
 
         return metrics;
     }
 
-    private String[] findActiveFrameworksWithNoResources(Data frameworkData)
+    private ArrayList<Framework> findActiveFrameworksWithNoResources()
     {
-        ArrayList<String> frameworks = new ArrayList<>();
-        for(String row[] : frameworkData.getData())
+        ArrayList <Framework> frameworks = new ArrayList<>();
+        for(Framework framework : frameworks)
         {
-            if(Float.parseFloat(row[FRAMEWORK_CPU]) == 0 && Float.parseFloat(row[FRAMEWORK_ACTIVE]) == 1 && Float.parseFloat(row[FRAMEWORK_MEMORY]) == 0)
+            if(framework.getCpu() == 0 && framework.isActive() && framework.getMemory() == 0)
             {
-                frameworks.add(row[FRAMEWORK_FID]);
+                frameworks.add(framework);
             }
         }
-        return frameworks.toArray(new String[1]);
+        return frameworks;
+    }
+
+    private boolean isFreeCPUPresent() {
+
+        for(Slave slave : slaves)
+        {
+            if(slave.getAllocated_cpu() < 1)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private ArrayList<Framework> convertToFrameworkObjects(Data frameworkData) {
+        ArrayList<Framework> frameworks = new ArrayList<>();
+
+        for(String row[] : frameworkData.getData())
+        {
+            Framework f = new Framework();
+            f.setId(row[FRAMEWORK_FID]);
+            f.setName(row[FRAMEWORK_NAME]);
+            if(Integer.parseInt(row[FRAMEWORK_ACTIVE]) == 1)
+            {
+                f.setActive(true);
+            }
+
+            else
+            {
+                f.setActive(false);
+            }
+
+            f.setCpu(Integer.parseInt(row[FRAMEWORK_CPU]));
+            f.setMemory(Float.parseFloat(row[FRAMEWORK_MEMORY]));
+            if(Integer.parseInt(row[FRAMEWORK_SCHEDULED_TASKS]) == 1)
+            {
+                f.setScheduled_tasks(true);
+            }
+
+            else
+            {
+                f.setScheduled_tasks(false);
+            }
+            frameworks.add(f);
+        }
+
+        return frameworks;
+    }
+
+    private ArrayList<Slave> convertToSlaveObjects(Data slaveData) {
+        ArrayList<Slave> slaves = new ArrayList<>();
+
+        for(String row[] : slaveData.getData())
+        {
+            Slave s = new Slave();
+            s.setId(row[SLAVE_SID]);
+            s.setLoad(Float.parseFloat(row[SLAVE_LOAD]));
+            s.setCpu(Integer.parseInt(row[SLAVE_CPU]));
+            s.setAllocated_cpu(Float.parseFloat(row[SLAVE_ALLOCATED_CPU]));
+            s.setFree_mem(Float.parseFloat(row[SLAVE_FREE_MEM]));
+            s.setTotal_mem(Float.parseFloat(row[SLAVE_TOTAL_MEM]));
+            s.setIp(row[SLAVE_IP]);
+            s.setHostname(row[SLAVE_HOSTNAME]);
+            slaves.add(s);
+        }
+
+        return slaves;
+    }
+
+    private void connect(ArrayList<Framework> frameworks, ArrayList<Slave> slaves, Data runsOnData)
+    {
+        for(Framework f : frameworks)
+        {
+            ArrayList<Slave> match = new ArrayList<>();
+            for(String row[] : runsOnData.getData())
+            {
+                if(row[0].equals(""+f.getId()))
+                {
+                    match.add(findSlave(row[1],slaves));
+                }
+            }
+            f.setAllocated_slaves(match);
+        }
+
+        for(Slave s : slaves)
+        {
+            ArrayList<Framework> match = new ArrayList<>();
+            for(String row[] : runsOnData.getData())
+            {
+                if(row[1].equals(""+s.getId()))
+                {
+                    match.add(findFramework(row[0],frameworks));
+                }
+            }
+            s.setFrameworks_running(match);
+        }
+    }
+
+    private Slave findSlave(String id, ArrayList<Slave> slaves)
+    {
+        for(Slave slave : slaves)
+        {
+            if(slave.getId().equals(id))
+            {
+                return slave;
+            }
+        }
+
+        return null;
+    }
+
+    private Framework findFramework(String id, ArrayList<Framework> frameworks)
+    {
+        for(Framework framework : frameworks)
+        {
+            if(framework.getId().equals(id))
+            {
+                return framework;
+            }
+        }
+        return null;
     }
 }

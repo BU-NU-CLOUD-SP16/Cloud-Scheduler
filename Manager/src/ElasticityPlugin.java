@@ -5,9 +5,9 @@ import java.util.ArrayList;
  */
 public interface ElasticityPlugin {
 
-    public int scaleUp(ArrayList<Data> data);
-    public boolean scaleDown(Node node, ArrayList<Data> data);
+    public ArrayList<Node> scaleUp();
+    public ArrayList<Node> scaleDown();
     public int requestResources(String parameters);
-    public void setup(ArrayList<Data> data);
+    public void fetch(ArrayList<Data> data);
 
 }
