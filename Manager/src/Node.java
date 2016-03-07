@@ -8,13 +8,13 @@ import java.util.ArrayList;
 essential data of the node  */
 public class Node {
 
-    private ArrayList data;
+    private String[] data;
 
-    public ArrayList getData() {
+    public String[] getData() {
         return data;
     }
 
-    public void setData(ArrayList data) {
+    public void setData(String[] data) {
         this.data = data;
     }
 }

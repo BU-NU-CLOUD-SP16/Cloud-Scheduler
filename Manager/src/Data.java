@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public class Data {
 
     private String query;
-    private ArrayList<ArrayList> data;
+    private ArrayList<String[]> data;
 
     public String getQuery() {
         return query;
@@ -19,11 +19,20 @@ public class Data {
         this.query = query;
     }
 
-    public ArrayList<ArrayList> getData() {
+    public ArrayList<String []> getData() {
         return data;
     }
 
-    public void setData(ArrayList<ArrayList> data) {
+    public void setData(ArrayList<String[]> data) {
         this.data = data;
+    }
+
+
+    @Override
+    public String toString() {
+        return "Data{" +
+                "query='" + query + '\'' +
+                ", data=" + data +
+                '}';
     }
 }
