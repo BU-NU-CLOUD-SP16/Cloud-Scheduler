@@ -30,7 +30,7 @@ public class ScaleClusterElasticityAgentCommand implements ClusterElasticityAgen
         processAnnotations();
     }
 
-    private Data convertToData(String data[][])
+    private Data convertToData(ArrayList<String[]> data)
     {
         Data dataObject = new Data();
         ArrayList<ArrayList> rows = new ArrayList<>();
@@ -82,7 +82,7 @@ public class ScaleClusterElasticityAgentCommand implements ClusterElasticityAgen
 
         for(String query : setupDataQueries)
         {
-            String data[][] = database.executeSelect(query);
+            ArrayList<String[]> data = database.executeSelect(query);
             Data dataObject = convertToData(data);
             dataObject.setQuery(query);
             setupData.add(dataObject);
@@ -90,7 +90,7 @@ public class ScaleClusterElasticityAgentCommand implements ClusterElasticityAgen
 
         for(String query : scaleDownDataQueries)
         {
-            String data[][] = database.executeSelect(query);
+            ArrayList<String[]> data = database.executeSelect(query);
             Data dataObject = convertToData(data);
             dataObject.setQuery(query);
             scaleDownData.add(dataObject);
@@ -98,13 +98,13 @@ public class ScaleClusterElasticityAgentCommand implements ClusterElasticityAgen
 
         for(String query : scaleUpDataQueries)
         {
-            String data[][] = database.executeSelect(query);
+            ArrayList<String[]> data = database.executeSelect(query);
             Data dataObject = convertToData(data);
             dataObject.setQuery(query);
             scaleUpData.add(dataObject);
         }
 
-        String data[][] = database.executeSelect(scaleDownNodeQuery);
+        ArrayList<String[]> data = database.executeSelect(scaleDownNodeQuery);
         Data dataObject = convertToData(data);
         dataObject.setQuery(scaleDownNodeQuery);
         scaleDownNodeData = dataObject;

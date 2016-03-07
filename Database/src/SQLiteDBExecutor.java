@@ -11,11 +11,11 @@ import java.util.List;
 public class SQLiteDBExecutor implements DBExecutor {
 
     //Executes a Select statement and returns a Double Dimensional String array
-    public ArrayList executeSelect(String str){
+    public ArrayList<String[]> executeSelect(String str){
         Connection c = null;
         Statement stmt = null;
 //        String [][] table_values = new String[100][20];
-        ArrayList<String []> table_values = new ArrayList<>();
+        ArrayList<String[]> table_values = new ArrayList<>();
         try {
             Class.forName("org.sqlite.JDBC");
             c = DriverManager.getConnection(
