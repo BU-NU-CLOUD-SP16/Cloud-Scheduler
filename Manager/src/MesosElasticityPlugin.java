@@ -5,6 +5,13 @@ import java.util.ArrayList;
  */
 public class MesosElasticityPlugin implements ElasticityPlugin {
 
+    @DataQuery(queries = "")
+    @Override
+    public void setup(ArrayList<Data> data)
+    {
+
+    }
+
     @DataQuery(queries = {"SELECT * FROM blah"})
     @Override
     public int scaleUp(ArrayList<Data> data)
@@ -23,7 +30,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
     }
 
     @Override
-    public int requestResources(String query) {
+    public int requestResources(String parameters) {
         return 1;
     }
 }

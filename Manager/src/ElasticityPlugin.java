@@ -7,6 +7,7 @@ public interface ElasticityPlugin {
 
     public int scaleUp(ArrayList<Data> data);
     public boolean scaleDown(Node node, ArrayList<Data> data);
-    public int requestResources(String query);
+    public int requestResources(String parameters);
+    public void setup(ArrayList<Data> data);
 
 }
