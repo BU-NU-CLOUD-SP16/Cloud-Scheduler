@@ -7,9 +7,9 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="com.sparkjava:spark-core:2.3" level="project" />
-    <orderEntry type="module" module-name="Collector" />
-    <orderEntry type="module" module-name="Common" />
-    <orderEntry type="module" module-name="Manager" />
+    <orderEntry type="library" exported="" name="com.sparkjava:spark-core:2.3" level="project" />
+    <orderEntry type="module" module-name="Collector" exported="" />
+    <orderEntry type="module" module-name="Common" exported="" />
+    <orderEntry type="module" module-name="Manager" exported="" />
   </component>
 </module>

@@ -30,21 +30,6 @@ public class ScaleClusterElasticityAgentCommand implements ClusterElasticityAgen
         processAnnotations();
     }
 
-    private Data convertToData(ArrayList<String[]> data)
-    {
-        Data dataObject = new Data();
-        ArrayList<ArrayList> rows = new ArrayList<>();
-
-        for(String row[] : data)
-        {
-            ArrayList<String> rowList = new ArrayList<>(Arrays.asList(row));
-            rows.add(rowList);
-        }
-
-        dataObject.setData(rows);
-        return dataObject;
-    }
-
     private void processAnnotations()
     {
         Method[] methods = elasticityPlugin.getClass().getDeclaredMethods();
@@ -75,40 +60,39 @@ public class ScaleClusterElasticityAgentCommand implements ClusterElasticityAgen
         }
     }
 
+    private ArrayList<Data> executeQueries(String[] queries)
+    {
+        ArrayList<Data> datas = new ArrayList<>();
+        for(String query : queries)
+        {
+            if(query.equals(""))
+            {
+                continue;
+            }
+            ArrayList<String[]> data = database.executeSelect(query);
+            Data dataObject = new Data();
+            dataObject.setData(data);
+            dataObject.setQuery(query);
+            datas.add(dataObject);
+        }
+        return datas;
+    }
+
     private void fetchData() {
-        scaleDownData = new ArrayList<>();
-        scaleUpData = new ArrayList<>();
-        setupData = new ArrayList<>();
 
-        for(String query : setupDataQueries)
+        setupData = executeQueries(setupDataQueries);
+        scaleDownData = executeQueries(scaleDownDataQueries);
+        scaleUpData = executeQueries(scaleUpDataQueries);
+
+
+        if(!scaleDownNodeQuery.equals(""))
         {
-            ArrayList<String[]> data = database.executeSelect(query);
-            Data dataObject = convertToData(data);
-            dataObject.setQuery(query);
-            setupData.add(dataObject);
+            ArrayList<String[]> data = database.executeSelect(scaleDownNodeQuery);
+            Data dataObject = new Data();
+            dataObject.setData(data);
+            dataObject.setQuery(scaleDownNodeQuery);
+            scaleDownNodeData = dataObject;
         }
-
-        for(String query : scaleDownDataQueries)
-        {
-            ArrayList<String[]> data = database.executeSelect(query);
-            Data dataObject = convertToData(data);
-            dataObject.setQuery(query);
-            scaleDownData.add(dataObject);
-        }
-
-        for(String query : scaleUpDataQueries)
-        {
-            ArrayList<String[]> data = database.executeSelect(query);
-            Data dataObject = convertToData(data);
-            dataObject.setQuery(query);
-            scaleUpData.add(dataObject);
-        }
-
-        ArrayList<String[]> data = database.executeSelect(scaleDownNodeQuery);
-        Data dataObject = convertToData(data);
-        dataObject.setQuery(scaleDownNodeQuery);
-        scaleDownNodeData = dataObject;
-
     }
 
     @Override
@@ -119,7 +103,7 @@ public class ScaleClusterElasticityAgentCommand implements ClusterElasticityAgen
 
         int newNodes = elasticityPlugin.scaleUp(scaleUpData);
 
-        for(ArrayList nodeData: scaleDownNodeData.getData())
+        for(String nodeData[]: scaleDownNodeData.getData())
         {
             Node node = new Node();
             node.setData(nodeData);

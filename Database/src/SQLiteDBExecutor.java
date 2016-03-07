@@ -35,8 +35,8 @@ public class SQLiteDBExecutor implements DBExecutor {
             rs.close();
             stmt.close();
             c.close();
-            System.out.println("table_values:"+table_values);
-            System.out.println(table_values.get(0)[1]);
+//            System.out.println("table_values:"+table_values);
+//            System.out.println(table_values.get(0)[1]);
         } catch(Exception e){
             e.printStackTrace();
             System.err.println( e.getClass().getName()

@@ -35,7 +35,7 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
 
     @Override
     public void run() {
-
+        System.out.println("Cluster Elasticity Manager Started");
         try
         {
             Class elasticityPluginClass = Class.forName(elasticityPluginClassName);
@@ -56,7 +56,7 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
             System.err.println(ex);
         }
 
-
+        System.out.println("Timer Started");
         new Timer().scheduleAtFixedRate(new ClusterElasticityAgentTimerTask(this, new ScaleClusterElasticityAgentCommand(elasticityPlugin,scalerPlugin,database)),0,pollInterval);
 
         while(true)

@@ -32,7 +32,7 @@ public class SQLiteJDBC
 
             sql = "CREATE TABLE Slave" +
                     "(Slave_ID TEXT NOT NULL," +
-                    "Load_5min REAL" +
+                    "Load_5min REAL," +
                     "Free_Memory REAL," +
                     "Total_Memory REAL," +
                     "CPU INTEGER," +
