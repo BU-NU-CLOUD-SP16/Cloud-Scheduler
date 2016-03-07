@@ -2,6 +2,8 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.*;
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Akshaya on 05-03-2016.
@@ -9,35 +11,36 @@ import java.io.*;
 public class SQLiteDBExecutor implements DBExecutor {
 
     //Executes a Select statement and returns a Double Dimensional String array
-    public String[][] executeSelect(String str){
+    public ArrayList executeSelect(String str){
         Connection c = null;
         Statement stmt = null;
-        String [][] table_values = new String[100][20];
+//        String [][] table_values = new String[100][20];
+        ArrayList<String []> table_values = new ArrayList<>();
         try {
             Class.forName("org.sqlite.JDBC");
-            c = DriverManager.getConnection("jdbc:sqlite:cloudScheduler.db");
+            c = DriverManager.getConnection(
+                    "jdbc:sqlite:cloudScheduler.db");
             stmt = c.createStatement();
             ResultSet rs = stmt.executeQuery(str);
             ResultSetMetaData rsmd= rs.getMetaData();
             int colCount = rsmd.getColumnCount();
 //            String [][] table_values = new String[100][colCount];
-            int j = 0;
             while(rs.next()){
                 String[] values = new String [colCount];
                 for(int i = 1;i <= rsmd.getColumnCount();i++){
                     values[i-1] = rs.getObject(i).toString();
                 }
-                table_values [j] = values;
-                j++;
+                table_values.add(values);
             }
             rs.close();
             stmt.close();
             c.close();
             System.out.println("table_values:"+table_values);
-            System.out.println(table_values[0][1]);
+            System.out.println(table_values.get(0)[1]);
         } catch(Exception e){
             e.printStackTrace();
-            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            System.err.println( e.getClass().getName()
+                    + ": " + e.getMessage() );
         }
 
         return table_values;

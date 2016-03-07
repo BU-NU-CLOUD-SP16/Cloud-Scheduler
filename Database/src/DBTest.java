@@ -8,9 +8,9 @@ public class DBTest {
         String str = "INSERT INTO Framework values ('2','Framework1',20,56.0,1,10);";
         String str2 = "SELECT * FROM Framework;";
         try {
-//            obj.executeSelect(str2);
+            obj.executeSelect(str2);
 //            obj.executeUpdate(str);
-            obj.clearDB();
+//            obj.clearDB();
         } catch (Exception e) {
             e.printStackTrace();
         }
