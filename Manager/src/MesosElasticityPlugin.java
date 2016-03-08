@@ -1,4 +1,8 @@
 import java.awt.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -36,6 +40,14 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
     private static final int SLAVE_NEW_FILTER = 300000;
 
     private static final int MIN_SLAVES = 2;
+    private static final double SCALE_UP_CLUSTER_LOAD_THRESHOLD = 0.85;
+    private static final double SCALE_UP_CLUSTER_MEM_THRESHOLD = 0.1;
+    private static final double SCALE_UP_SLAVE_LOAD_THRESHOLD = 0.85;
+    private static final double SCALE_UP_SLAVE_MEM_THRESHOLD = 0.1;
+    private static final double SCALE_DOWN_CLUSTER_LOAD_THRESHOLD = 0.8;
+    private static final double SCALE_DOWN_CLUSTER_MEM_THRESHOLD = 0.3;
+    private static final double SCALE_DOWN_SLAVE_LOAD_THRESHOLD = 0.1;
+    private static final double SCALE_DOWN_SLAVE_MEM_THRESHOLD = 0.7;
 
     private long last_time = System.currentTimeMillis();
 
@@ -59,6 +71,17 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         Data slaveData = data.get(0);
         Data frameworkData = data.get(1);
         Data runsOnData = data.get(2);
+
+        try {
+            FileReader fr = new FileReader(new File("thresholds.json"));
+
+            BufferedReader br = new BufferedReader(fr);
+
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
 
         ArrayList<Framework> newFrameworks = convertToFrameworkObjects(frameworkData);
         ArrayList<Slave> newSlaves = convertToSlaveObjects(slaveData);
@@ -90,12 +113,12 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         ArrayList<Node> nodes = new ArrayList<>();
         float clusterMetrics[] = calculateClusterMetrics();
 
-        if (clusterMetrics[CLUSTER_LOAD] > 0.85 || clusterMetrics[CLUSTER_FREE_MEM]/clusterMetrics[CLUSTER_TOT_MEM] < 0.1)
+        if (clusterMetrics[CLUSTER_LOAD] > SCALE_UP_CLUSTER_LOAD_THRESHOLD || clusterMetrics[CLUSTER_FREE_MEM]/clusterMetrics[CLUSTER_TOT_MEM] < SCALE_UP_CLUSTER_MEM_THRESHOLD)
         {
             nodes.add(new OpenStackNode());
             return nodes;
         }
-        
+
         System.out.println(Arrays.toString(clusterMetrics));
 
 
@@ -204,7 +227,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
 
 
 
-            if(clusterMetrics[CLUSTER_LOAD] < 0.8 && clusterMetrics[CLUSTER_FREE_MEM]/clusterMetrics[CLUSTER_TOT_MEM] > 0.30)
+            if(clusterMetrics[CLUSTER_LOAD] < SCALE_DOWN_CLUSTER_LOAD_THRESHOLD && clusterMetrics[CLUSTER_FREE_MEM]/clusterMetrics[CLUSTER_TOT_MEM] > SCALE_DOWN_CLUSTER_MEM_THRESHOLD)
             {
                 if(slave.getLoad() < 0.1 || slave.getFree_mem()/slave.getTotal_mem() > 0.7)
                 {
@@ -463,7 +486,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
 
         for(Slave slave : this.slaves)
         {
-            if(slave.getLoad()/slave.getCpu() > 0.85 || slave.getFree_mem()/slave.getTotal_mem() < 0.1)
+            if(slave.getLoad()/slave.getCpu() > SCALE_UP_CLUSTER_LOAD_THRESHOLD || slave.getFree_mem()/slave.getTotal_mem() < SCALE_UP_CLUSTER_MEM_THRESHOLD)
             {
                 slaves.add(slave);
             }
