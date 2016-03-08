@@ -22,10 +22,24 @@ public class CommandLineArguments {
 
     private String cemanagerPluginMainClass;
 
+    private File ddlFile;
+
     private static final Integer NULL_PORT = 0;
 
     public CommandLineArguments() {
 
+    }
+
+    public File getDdlFile() {
+        return ddlFile;
+    }
+
+    @Option(name="-db-schema",usage="sets DB Schema File")
+    public void setDdlFile(File ddlFile) throws ClusterElasticityAgentException {
+        if(ddlFile.exists())
+            this.ddlFile = ddlFile;
+        else
+            throw new ClusterElasticityAgentException("DB Schema File doesn't exist");
     }
 
     public String getMesosMasterIP() {

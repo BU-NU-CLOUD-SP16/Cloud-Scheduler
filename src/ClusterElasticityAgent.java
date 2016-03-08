@@ -10,6 +10,7 @@ public class ClusterElasticityAgent {
     private CommandLineArguments arguments;
     private ClusterElasticityManager elasticityManager;
     private CollectorPluginFrameworkImpl resourceCollector;
+    private SQLiteDBExecutor dbHandle;
 
     public ClusterElasticityAgent() {
     }
@@ -36,6 +37,14 @@ public class ClusterElasticityAgent {
 
     public void setResourceCollector(CollectorPluginFrameworkImpl resourceCollector) {
         this.resourceCollector = resourceCollector;
+    }
+
+    public SQLiteDBExecutor getDbHandle() {
+        return dbHandle;
+    }
+
+    public void setDbHandle(SQLiteDBExecutor dbHandle) {
+        this.dbHandle = dbHandle;
     }
 
     public static void main(String args[]){
@@ -73,6 +82,15 @@ public class ClusterElasticityAgent {
         elasticityManagerThread.start();
         agent.setElasticityManager(elasticityManager);
 
+        SQLiteDBExecutor dbExecutor = new SQLiteDBExecutor();
+        try {
+            dbExecutor.executeScript(argumentList.getDdlFile());
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+        agent.setDbHandle(dbExecutor);
+
         // Route the end-point request-resource
         post("/request-resource", (req, res) -> {
             String responseString = "";
@@ -90,7 +108,13 @@ public class ClusterElasticityAgent {
             return res.body();
         });
 
-        while(true);
+        while(true){
+            try {
+                Thread.sleep(5000);
+            } catch(InterruptedException ex) {
+                Thread.currentThread().interrupt();
+            }
+        }
 
     }
 }
