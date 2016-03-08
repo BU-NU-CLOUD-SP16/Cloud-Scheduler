@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 /**
  * Created by chemistry_sourabh on 3/4/16.
  */
@@ -15,10 +17,10 @@ public class RequestResourcesClusterElasticityAgentCommand implements ClusterEla
 
     @Override
     public void execute() {
-        int newNodesCount = elasticityPlugin.requestResources(parameters);
-        for(int i=0;i<newNodesCount;i++)
+        ArrayList<Node> newNodes = elasticityPlugin.requestResources(parameters);
+        for(Node newNode : newNodes)
         {
-            clusterScalerPlugin.createNewNode();
+            clusterScalerPlugin.createNewNode(newNode);
         }
     }
 

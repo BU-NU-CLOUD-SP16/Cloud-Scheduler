@@ -14,7 +14,26 @@ public class Slave {
     private String ip;
     private String hostname;
 
+    private int filterTime;
+    private boolean filterSet;
+
     private ArrayList<Framework> frameworks_running;
+
+    public int getFilterTime() {
+        return filterTime;
+    }
+
+    public void setFilterTime(int filterTime) {
+        this.filterTime = filterTime;
+    }
+
+    public boolean isFilterSet() {
+        return filterSet;
+    }
+
+    public void setFilterSet(boolean filterSet) {
+        this.filterSet = filterSet;
+    }
 
     public String getId() {
         return id;
@@ -86,5 +105,13 @@ public class Slave {
 
     public void setFrameworks_running(ArrayList<Framework> frameworks_running) {
         this.frameworks_running = frameworks_running;
+    }
+
+    public void copy(Slave slave)
+    {
+        this.id = slave.getId();
+        this.free_mem = slave.getFree_mem();
+        this.load = slave.getLoad();
+        this.allocated_cpu = slave.getAllocated_cpu();
     }
 }

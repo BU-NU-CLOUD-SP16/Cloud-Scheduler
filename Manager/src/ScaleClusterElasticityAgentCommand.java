@@ -64,16 +64,19 @@ public class ScaleClusterElasticityAgentCommand implements ClusterElasticityAgen
 
         ArrayList<Node> newNodes = elasticityPlugin.scaleUp();
 
-        for(Node newNode : newNodes)
-        {
-            clusterScalerPlugin.createNewNode(newNode);
+
+        if(newNodes != null) {
+            for (Node newNode : newNodes) {
+               Node node = clusterScalerPlugin.createNewNode(newNode);
+                elasticityPlugin.notifyNewNodeCreation(node);
+            }
         }
 
         ArrayList<Node> shouldBeDeletedNodes = elasticityPlugin.scaleDown();
-
-        for(Node nodeToBeDeleted : shouldBeDeletedNodes)
-        {
-            clusterScalerPlugin.deleteNode(nodeToBeDeleted);
+        if(shouldBeDeletedNodes != null) {
+            for (Node nodeToBeDeleted : shouldBeDeletedNodes) {
+                clusterScalerPlugin.deleteNode(nodeToBeDeleted);
+            }
         }
     }
 }

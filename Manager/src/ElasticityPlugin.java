@@ -7,7 +7,8 @@ public interface ElasticityPlugin {
 
     public ArrayList<Node> scaleUp();
     public ArrayList<Node> scaleDown();
-    public int requestResources(String parameters);
+    public ArrayList<Node> requestResources(String parameters);
     public void fetch(ArrayList<Data> data);
+    public void notifyNewNodeCreation(Node node);
 
 }

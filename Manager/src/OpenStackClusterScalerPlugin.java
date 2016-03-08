@@ -3,10 +3,12 @@
  */
 public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
 
-    public boolean createNewNode(Node node)
+    public Node createNewNode(Node node)
     {
         System.out.println("Created new node");
-        return true;
+        OpenStackNode newNode = new OpenStackNode();
+        newNode.setIp("192.168.0.10");
+        return newNode;
     }
 
     public boolean deleteNode(Node node)

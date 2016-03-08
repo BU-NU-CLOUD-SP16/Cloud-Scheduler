@@ -11,6 +11,24 @@ public class Framework {
     private float memory;
     private boolean active;
     private boolean scheduled_tasks;
+    private int filterTime;
+    private boolean filterSet;
+
+    public int getFilterTime() {
+        return filterTime;
+    }
+
+    public void setFilterTime(int filterTime) {
+        this.filterTime = filterTime;
+    }
+
+    public boolean isFilterSet() {
+        return filterSet;
+    }
+
+    public void setFilterSet(boolean filterSet) {
+        this.filterSet = filterSet;
+    }
 
     public ArrayList<Slave> getAllocated_slaves() {
         return allocated_slaves;
@@ -81,5 +99,13 @@ public class Framework {
 
     public void setScheduled_tasks(boolean scheduled_tasks) {
         this.scheduled_tasks = scheduled_tasks;
+    }
+
+    public void copy(Framework framework)
+    {
+        this.cpu = framework.getCpu();
+        this.memory = framework.getMemory();
+        this.active = framework.isActive();
+        this.scheduled_tasks = framework.isScheduled_tasks();
     }
 }

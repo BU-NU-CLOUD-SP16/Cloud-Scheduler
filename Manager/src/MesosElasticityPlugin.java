@@ -1,3 +1,4 @@
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -31,26 +32,54 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
     private static final int CLUSTER_CPU = 3;
     private static final int CLUSTER_ALLOCATED_CPU = 4;
 
+    private static final int FRAMEWORK_FILTER = 30000;
+    private static final int SLAVE_NEW_FILTER = 300000;
 
     private long last_time = System.currentTimeMillis();
 
     private ArrayList<Framework> frameworks;
     private ArrayList<Slave> slaves;
+
+    public MesosElasticityPlugin()
+    {
+        frameworks = new ArrayList<>();
+        slaves = new ArrayList<>();
+    }
+
+
     // Should be used to fetch required data from db and policy info from files
     // Will be called at beginning of each command
     @DataQuery(queries = {"select * from slave","select * from framework","select * from runs_on"})
     @Override
     public void fetch(ArrayList<Data> data)
     {
-        last_time = System.currentTimeMillis();
+        long current_time = System.currentTimeMillis();
         Data slaveData = data.get(0);
         Data frameworkData = data.get(1);
         Data runsOnData = data.get(2);
 
-        frameworks = convertToFrameworkObjects(frameworkData);
-        slaves = convertToSlaveObjects(slaveData);
+        ArrayList<Framework> newFrameworks = convertToFrameworkObjects(frameworkData);
+        ArrayList<Slave> newSlaves = convertToSlaveObjects(slaveData);
+        integrateFrameworks(newFrameworks);
+        integrateSlaves(newSlaves);
         connect(frameworks,slaves,runsOnData);
 
+        for(Framework f : frameworks)
+        {
+            if(f.isFilterSet())
+            {
+                f.setFilterTime(f.getFilterTime() - (int) (current_time - last_time));
+            }
+        }
+
+        for(Slave s : slaves)
+        {
+            if(s.isFilterSet())
+            {
+                s.setFilterTime(s.getFilterTime() - (int) (current_time - last_time));
+            }
+        }
+        last_time = current_time;
     }
 
     @Override
@@ -73,8 +102,25 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
 
         System.out.println(Arrays.toString(clusterMetrics));
 
+
+        ArrayList<Slave> slavesWithResourceCrunch = findSlavesWithResourceCrunch();
+
+        for(Slave slave : slavesWithResourceCrunch)
+        {
+            ArrayList<Framework> frameworksOnSlave = slave.getFrameworks_running();
+            for(Framework framework : frameworksOnSlave)
+            {
+                if(framework.getAllocated_slaves().size() == 1)
+                {
+                    nodes.add(new OpenStackNode());
+                    return nodes;
+                }
+            }
+        }
+
         ArrayList<Framework> underObservationFrameworks = findActiveFrameworksWithNoResources();
         boolean freeCPUSPresent = isFreeCPUPresent();
+
         System.out.println(underObservationFrameworks);
 
         if(!freeCPUSPresent && underObservationFrameworks.size() > 0)
@@ -86,6 +132,29 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         else
         {
             //Observe Framework for a while
+            boolean createNewNode = false;
+            for(Framework f : underObservationFrameworks)
+            {
+                if(!f.isFilterSet()) {
+                    f.setFilterTime(FRAMEWORK_FILTER);
+                    f.setFilterSet(true);
+                }
+                else
+                {
+                    if(f.getFilterTime() <= 0)
+                    {
+                        f.setFilterTime(0);
+                        f.setFilterSet(false);
+                        createNewNode = true;
+                    }
+                }
+            }
+
+            if(createNewNode)
+            {
+                nodes.add(new OpenStackNode());
+                return nodes;
+            }
         }
         System.out.println(last_time);
         return nodes;
@@ -100,10 +169,27 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
     }
 
     @Override
-    public int requestResources(String parameters)
+    public ArrayList<Node> requestResources(String parameters)
     {
         int equalIndex = parameters.indexOf('=');
-        return Integer.parseInt(parameters.substring(equalIndex+1,parameters.length()).trim());
+        int newNodesCount = Integer.parseInt(parameters.substring(equalIndex+1,parameters.length()).trim());
+        ArrayList<Node> newNodes = new ArrayList<>();
+        for(int i=0;i<newNodesCount;i++)
+        {
+            newNodes.add(new OpenStackNode());
+        }
+        return newNodes;
+    }
+
+    @Override
+    public void notifyNewNodeCreation(Node node)
+    {
+       /* OpenStackNode openStackNode = (OpenStackNode) node;
+        Slave slave = new Slave();
+        slave.setIp(openStackNode.getIp());
+        slave.setFilterTime(SLAVE_NEW_FILTER);
+        slave.setFilterSet(true);
+        slaves.add(slave);*/
     }
 
     private float[] calculateClusterMetrics()
@@ -137,7 +223,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
     private ArrayList<Framework> findActiveFrameworksWithNoResources()
     {
         ArrayList <Framework> frameworks = new ArrayList<>();
-        for(Framework framework : frameworks)
+        for(Framework framework : this.frameworks)
         {
             if(framework.getCpu() == 0 && framework.isActive() && framework.getMemory() == 0)
             {
@@ -244,11 +330,64 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         }
     }
 
+    private void integrateSlaves(ArrayList<Slave> newSlaves)
+    {
+        ArrayList<Slave> oldSlaves = slaves;
+        slaves = new ArrayList<>();
+        for(Slave newS : newSlaves)
+        {
+            Slave existingS = findSlaveWithIP(newS.getIp(),oldSlaves);
+            if(existingS == null)
+            {
+                slaves.add(newS);
+            }
+
+            else
+            {
+                existingS.copy(newS);
+                slaves.add(existingS);
+            }
+        }
+    }
+
+    private void integrateFrameworks(ArrayList<Framework> newFrameworks)
+    {
+        ArrayList<Framework> oldFrameworks = frameworks;
+        frameworks = new ArrayList<>();
+        for(Framework newF : newFrameworks)
+        {
+            Framework existingF = findFramework(newF.getId(),oldFrameworks);
+            if(existingF == null)
+            {
+                frameworks.add(newF);
+            }
+
+            else
+            {
+                existingF.copy(newF);
+                frameworks.add(existingF);
+            }
+        }
+    }
+
     private Slave findSlave(String id, ArrayList<Slave> slaves)
     {
         for(Slave slave : slaves)
         {
             if(slave.getId().equals(id))
+            {
+                return slave;
+            }
+        }
+
+        return null;
+    }
+
+    private Slave findSlaveWithIP(String ip, ArrayList<Slave> slaves)
+    {
+        for(Slave slave : slaves)
+        {
+            if(slave.getIp().equals(ip))
             {
                 return slave;
             }
@@ -268,4 +407,18 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         }
         return null;
     }
+
+    private ArrayList<Slave> findSlavesWithResourceCrunch() {
+        ArrayList<Slave> slaves = new ArrayList<>();
+
+        for(Slave slave : this.slaves)
+        {
+            if(slave.getLoad()/slave.getCpu() > 0.85 || slave.getFree_mem()/slave.getTotal_mem() < 0.1)
+            {
+                slaves.add(slave);
+            }
+        }
+        return slaves;
+    }
+
 }
