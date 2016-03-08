@@ -3,6 +3,9 @@
  */
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 import static spark.Spark.*;
 
 public class ClusterElasticityAgent {
@@ -10,7 +13,7 @@ public class ClusterElasticityAgent {
     private CommandLineArguments arguments;
     private ClusterElasticityManager elasticityManager;
     private CollectorPluginFrameworkImpl resourceCollector;
-    private SQLiteDBExecutor dbHandle;
+    private DBExecutor dbHandle;
 
     public ClusterElasticityAgent() {
     }
@@ -39,11 +42,11 @@ public class ClusterElasticityAgent {
         this.resourceCollector = resourceCollector;
     }
 
-    public SQLiteDBExecutor getDbHandle() {
+    public DBExecutor getDbHandle() {
         return dbHandle;
     }
 
-    public void setDbHandle(SQLiteDBExecutor dbHandle) {
+    public void setDbHandle(DBExecutor dbHandle) {
         this.dbHandle = dbHandle;
     }
 
@@ -63,6 +66,11 @@ public class ClusterElasticityAgent {
         try {
             ModuleLoader.addFile(argumentList.getCollectorPluginJar());
             ModuleLoader.addFile(argumentList.getCemanagerPluginJar());
+            ModuleLoader.addFile(argumentList.getClusterScalerPluginJar());
+
+            if(argumentList.getDbExecutorPluginJar().isFile())
+                ModuleLoader.addFile(argumentList.getClusterScalerPluginJar());
+
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
@@ -82,9 +90,17 @@ public class ClusterElasticityAgent {
         elasticityManagerThread.start();
         agent.setElasticityManager(elasticityManager);
 
-        SQLiteDBExecutor dbExecutor = new SQLiteDBExecutor();
+        DBExecutor dbExecutor = null;
         try {
+            ClassLoader classLoader = ClusterElasticityAgent.class.getClassLoader();
+            Class aClass = classLoader.loadClass(argumentList.getDbExecutorPluginMainClass());
+            dbExecutor = (DBExecutor) aClass.newInstance();
             dbExecutor.executeScript(argumentList.getDdlFile());
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            System.exit(1);
+        } catch (InstantiationException e) {
+            System.exit(1);
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
