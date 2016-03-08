@@ -2,10 +2,6 @@
  * Created by Praveen on 3/2/2016.
  */
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
 import static spark.Spark.*;
 
 public class ClusterElasticityAgent {
@@ -70,7 +66,7 @@ public class ClusterElasticityAgent {
             ModuleLoader.addFile(argumentList.getClusterScalerPluginJar());
 
             if(argumentList.getDbExecutorPluginJar().isFile())
-                ModuleLoader.addFile(argumentList.getClusterScalerPluginJar());
+                ModuleLoader.addFile(argumentList.getDbExecutorPluginJar());
 
         } catch (Exception e) {
             e.printStackTrace();

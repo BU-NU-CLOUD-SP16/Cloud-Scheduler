@@ -1,9 +1,7 @@
 import java.io.File;
-import java.io.IOException;
 import java.sql.*;
 import java.io.*;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Akshaya on 05-03-2016.

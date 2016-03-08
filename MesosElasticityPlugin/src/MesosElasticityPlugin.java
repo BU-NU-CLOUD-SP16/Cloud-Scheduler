@@ -1,4 +1,6 @@
-import java.awt.*;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -40,14 +42,14 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
     private static final int SLAVE_NEW_FILTER = 300000;
 
     private static final int MIN_SLAVES = 2;
-    private static final double SCALE_UP_CLUSTER_LOAD_THRESHOLD = 0.85;
-    private static final double SCALE_UP_CLUSTER_MEM_THRESHOLD = 0.1;
-    private static final double SCALE_UP_SLAVE_LOAD_THRESHOLD = 0.85;
-    private static final double SCALE_UP_SLAVE_MEM_THRESHOLD = 0.1;
-    private static final double SCALE_DOWN_CLUSTER_LOAD_THRESHOLD = 0.8;
-    private static final double SCALE_DOWN_CLUSTER_MEM_THRESHOLD = 0.3;
-    private static final double SCALE_DOWN_SLAVE_LOAD_THRESHOLD = 0.1;
-    private static final double SCALE_DOWN_SLAVE_MEM_THRESHOLD = 0.7;
+    private double SCALE_UP_CLUSTER_LOAD_THRESHOLD = 0.85;
+    private double SCALE_UP_CLUSTER_MEM_THRESHOLD = 0.1;
+    private double SCALE_UP_SLAVE_LOAD_THRESHOLD = 0.85;
+    private double SCALE_UP_SLAVE_MEM_THRESHOLD = 0.1;
+    private double SCALE_DOWN_CLUSTER_LOAD_THRESHOLD = 0.8;
+    private double SCALE_DOWN_CLUSTER_MEM_THRESHOLD = 0.3;
+    private double SCALE_DOWN_SLAVE_LOAD_THRESHOLD = 0.1;
+    private double SCALE_DOWN_SLAVE_MEM_THRESHOLD = 0.7;
 
     private long last_time = System.currentTimeMillis();
 
@@ -75,7 +77,18 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         try {
             FileReader fr = new FileReader(new File("thresholds.json"));
 
-            BufferedReader br = new BufferedReader(fr);
+            Gson gson = new Gson();
+            JsonObject obj = gson.fromJson(fr, JsonObject.class);
+
+            SCALE_UP_CLUSTER_LOAD_THRESHOLD = obj.get("thresholds").getAsJsonObject().get("scale_up").getAsJsonObject().get("cluster").getAsJsonObject().get("load").getAsDouble();
+            SCALE_UP_CLUSTER_MEM_THRESHOLD = obj.get("thresholds").getAsJsonObject().get("scale_up").getAsJsonObject().get("cluster").getAsJsonObject().get("memory").getAsDouble();
+            SCALE_UP_SLAVE_LOAD_THRESHOLD = obj.get("thresholds").getAsJsonObject().get("scale_up").getAsJsonObject().get("slave").getAsJsonObject().get("load").getAsDouble();
+            SCALE_UP_SLAVE_MEM_THRESHOLD = obj.get("thresholds").getAsJsonObject().get("scale_up").getAsJsonObject().get("slave").getAsJsonObject().get("memory").getAsDouble();
+            SCALE_DOWN_CLUSTER_LOAD_THRESHOLD = obj.get("thresholds").getAsJsonObject().get("scale_down").getAsJsonObject().get("cluster").getAsJsonObject().get("load").getAsDouble();
+            SCALE_DOWN_CLUSTER_MEM_THRESHOLD = obj.get("thresholds").getAsJsonObject().get("scale_down").getAsJsonObject().get("cluster").getAsJsonObject().get("memory").getAsDouble();
+            SCALE_DOWN_SLAVE_LOAD_THRESHOLD = obj.get("thresholds").getAsJsonObject().get("scale_down").getAsJsonObject().get("slave").getAsJsonObject().get("load").getAsDouble();
+            SCALE_DOWN_SLAVE_MEM_THRESHOLD = obj.get("thresholds").getAsJsonObject().get("scale_down").getAsJsonObject().get("slave").getAsJsonObject().get("memory").getAsDouble();
+
 
 
         } catch (FileNotFoundException e) {

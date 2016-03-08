@@ -1,0 +1,16 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="ClusterElasticityAgent">
+    <output-path>$PROJECT_DIR$/out/artifacts/ClusterElasticityAgent</output-path>
+    <root id="archive" name="ClusterElasticityAgent.jar">
+      <element id="module-output" name="Cloud-Scheduler" />
+      <element id="library" level="project" name="com.sparkjava:spark-core:2.3" />
+      <element id="module-output" name="Collector" />
+      <element id="module-output" name="Common" />
+      <element id="library" level="project" name="args4j-2.33" />
+      <element id="module-output" name="Database" />
+      <element id="library" level="project" name="sqlite-jdbc-3.8.11.2" />
+      <element id="module-output" name="Plugin" />
+      <element id="module-output" name="Manager" />
+    </root>
+  </artifact>
+</component>
