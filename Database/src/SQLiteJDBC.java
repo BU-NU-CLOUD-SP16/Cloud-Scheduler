@@ -24,7 +24,8 @@ public class SQLiteJDBC
                     "CPU INTEGER," +
                     "Memory REAL," +
                     "Active INTEGER DEFAULT FALSE NOT NULL," +
-                    "Scheduled_Tasks INTEGER DEFAULT FALSE);";
+                    "Scheduled_Tasks INTEGER DEFAULT FALSE," +
+                    "TimeStamp TIMESTAMP NOT NULL);";
             stmt.executeUpdate(sql);
 
             sql = "CREATE UNIQUE INDEX Framework_Framework_ID_uindex ON Framework (Framework_ID);";
@@ -38,7 +39,8 @@ public class SQLiteJDBC
                     "CPU INTEGER," +
                     "Allocated_CPU REAL," +
                     "IP TEXT NOT NULL," +
-                    "Hostname TEXT);";
+                    "Hostname TEXT," +
+                    "TimeStamp TIMESTAMP NOT NULL);";
             stmt.executeUpdate(sql);
 
             sql = "CREATE UNIQUE INDEX Slave_Slave_ID_uindex ON Slave (Slave_ID);";

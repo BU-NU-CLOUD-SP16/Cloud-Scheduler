@@ -9,13 +9,13 @@ public class DBTest {
     public static void main(String args[]) throws IOException{
         SQLiteDBExecutor obj = new SQLiteDBExecutor();
         SQLiteJDBC obj1 = new SQLiteJDBC();
-        String str = "INSERT INTO Framework values ('2','Framework1',20,56.0,1,10);";
+        String str = "INSERT INTO Framework values ('2','Framework1',20,56.0,1,10,CURRENT_TIMESTAMP);";
         String str2 = "SELECT * FROM Framework;";
 //        File f = new File("TestScript.sql");
         try {
 //            obj.executeSelect(str2);
-//            obj.executeUpdate(str);
-            obj.clearDB();
+            obj.executeUpdate(str);
+//            obj.clearDB();
 //            obj.executeScript(f);
         } catch (Exception e) {
             e.printStackTrace();
