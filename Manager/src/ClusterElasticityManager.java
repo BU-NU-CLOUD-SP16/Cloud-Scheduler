@@ -25,10 +25,10 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
     private LinkedBlockingQueue<ClusterElasticityAgentCommand> workerQueue;
 
     public ClusterElasticityManager(CommandLineArguments arguments) {
-        this.pollInterval = 5000;
+        this.pollInterval = arguments.getPollInterval();
         this.elasticityPluginClassName = arguments.getCemanagerPluginMainClass();
-        this.clusterScalerPluginClassName = "OpenStackClusterScalerPlugin";
-        this.databaseExecutorPluginClassName = "SQLiteDBExecutor";
+        this.clusterScalerPluginClassName = arguments.getClusterScalerPluginMainClass();
+        this.databaseExecutorPluginClassName = arguments.getDbExecutorPluginMainClass();
         workerQueue = new LinkedBlockingQueue<>();
     }
 

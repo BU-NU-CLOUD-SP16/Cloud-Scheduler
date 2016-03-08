@@ -18,14 +18,96 @@ public class CommandLineArguments {
 
     private File cemanagerPluginJar;
 
+    private File clusterScalerPluginJar;
+
+    private File dbExecutorPluginJar;
+
     private String collectorPluginMainClass;
 
     private String cemanagerPluginMainClass = "MesosElasticityPlugin";
 
+    private String clusterScalerPluginMainClass;
+
+    private String dbExecutorPluginMainClass;
+
+    private Integer pollInterval;
+
+    private File ddlFile;
+
     private static final Integer NULL_PORT = 0;
+
+    private static final Integer DEFAULT_INTERVAL = 5000;
+
+    private static final String DEFAULT_DB_EXECUTOR = "SQLiteDBExecutor";
 
     public CommandLineArguments() {
 
+        pollInterval = DEFAULT_INTERVAL;
+        dbExecutorPluginJar = null;
+        dbExecutorPluginMainClass = new String(DEFAULT_DB_EXECUTOR);
+    }
+
+    public File getClusterScalerPluginJar() {
+        return clusterScalerPluginJar;
+    }
+
+    @Option(name="-cluster-scaler-plugin",usage="sets cluster scaler plugin jar file name")
+    public void setClusterScalerPluginJar(File clusterScalerPluginJar) throws ClusterElasticityAgentException {
+        if(clusterScalerPluginJar.exists())
+            this.clusterScalerPluginJar = clusterScalerPluginJar;
+        else
+            throw new ClusterElasticityAgentException("Cluster Scaler Plugin Jar File Not available!!");
+    }
+
+    public File getDbExecutorPluginJar() {
+        return dbExecutorPluginJar;
+    }
+
+    @Option(name="-db-executor-plugin",usage="sets db executor plugin jar file name")
+    public void setDbExecutorPluginJar(File dbExecutorPluginJar) throws ClusterElasticityAgentException {
+        if(dbExecutorPluginJar.exists())
+            this.dbExecutorPluginJar = dbExecutorPluginJar;
+        else
+            throw new ClusterElasticityAgentException("DB Executor Plugin Jar Not Available!!");
+    }
+
+    public String getClusterScalerPluginMainClass() {
+        return clusterScalerPluginMainClass;
+    }
+
+    @Option(name="-cluster-scaler-mainclass",usage="sets cluster scaler main class name")
+    public void setClusterScalerPluginMainClass(String clusterScalerPluginMainClass) {
+        this.clusterScalerPluginMainClass = clusterScalerPluginMainClass;
+    }
+
+    public String getDbExecutorPluginMainClass() {
+        return dbExecutorPluginMainClass;
+    }
+
+    @Option(name="-db-executor-mainclass",usage="sets db executor main class name")
+    public void setDbExecutorPluginMainClass(String dbExecutorPluginMainClass) {
+        this.dbExecutorPluginMainClass = dbExecutorPluginMainClass;
+    }
+
+    public Integer getPollInterval() {
+        return pollInterval;
+    }
+
+    @Option(name="-poll-interval",usage="Sets Polling Interval in milli seconds")
+    public void setPollInterval(Integer pollInterval) {
+        this.pollInterval = pollInterval;
+    }
+
+    public File getDdlFile() {
+        return ddlFile;
+    }
+
+    @Option(name="-db-schema",usage="sets DB Schema File")
+    public void setDdlFile(File ddlFile) throws ClusterElasticityAgentException {
+        if(ddlFile.exists())
+            this.ddlFile = ddlFile;
+        else
+            throw new ClusterElasticityAgentException("DB Schema File doesn't exist");
     }
 
     public String getMesosMasterIP() {
