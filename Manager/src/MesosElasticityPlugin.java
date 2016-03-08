@@ -35,6 +35,8 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
     private static final int FRAMEWORK_FILTER = 30000;
     private static final int SLAVE_NEW_FILTER = 300000;
 
+    private static final int MIN_SLAVES = 2;
+
     private long last_time = System.currentTimeMillis();
 
     private ArrayList<Framework> frameworks;
@@ -88,18 +90,12 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         ArrayList<Node> nodes = new ArrayList<>();
         float clusterMetrics[] = calculateClusterMetrics();
 
-        if (clusterMetrics[CLUSTER_LOAD] > 0.85)
+        if (clusterMetrics[CLUSTER_LOAD] > 0.85 || clusterMetrics[CLUSTER_FREE_MEM]/clusterMetrics[CLUSTER_TOT_MEM] < 0.1)
         {
             nodes.add(new OpenStackNode());
             return nodes;
         }
-
-        else if(clusterMetrics[CLUSTER_FREE_MEM]/clusterMetrics[CLUSTER_TOT_MEM] < 0.1)
-        {
-            nodes.add(new OpenStackNode());
-            return nodes;
-        }
-
+        
         System.out.println(Arrays.toString(clusterMetrics));
 
 
@@ -164,8 +160,62 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
     @Override
     public ArrayList<Node> scaleDown()
     {
-        System.out.println("Scale Down");
-        return null;
+        ArrayList<Node> toBeDeleted = new ArrayList<>();
+        float[] clusterMetrics = calculateClusterMetrics();
+
+        if(slaves.size() == MIN_SLAVES)
+        {
+            return toBeDeleted;
+        }
+
+        for(Slave slave : slaves)
+        {
+            OpenStackNode node = new OpenStackNode();
+            node.setIp(slave.getIp());
+            if(slave.isFilterSet())
+            {
+                if(slave.getFilterTime() > 0)
+                {
+                    continue;
+                }
+
+                else
+                {
+                    slave.setFilterSet(false);
+                    slave.setFilterTime(0);
+                }
+            }
+
+            ArrayList<Framework> frameworksOnSlave = slave.getFrameworks_running();
+
+            boolean canDelete = true;
+            for (Framework f: frameworksOnSlave)
+            {
+                if(f.getAllocated_slaves().size() > 1)
+                {
+                    canDelete = false;
+                }
+            }
+
+            if(!canDelete)
+            {
+                continue;
+            }
+
+
+
+            if(clusterMetrics[CLUSTER_LOAD] < 0.8 && clusterMetrics[CLUSTER_FREE_MEM]/clusterMetrics[CLUSTER_TOT_MEM] > 0.30)
+            {
+                if(slave.getLoad() < 0.1 || slave.getFree_mem()/slave.getTotal_mem() > 0.7)
+                {
+
+                    toBeDeleted.add(node);
+                    continue;
+                }
+            }
+
+        }
+        return toBeDeleted;
     }
 
     @Override
