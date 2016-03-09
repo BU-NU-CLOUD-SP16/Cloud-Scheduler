@@ -26,9 +26,9 @@ public class CommandLineArguments {
 
     private String cemanagerPluginMainClass = "MesosElasticityPlugin";
 
-    private String clusterScalerPluginMainClass;
+    private String clusterScalerPluginMainClass = "OpenStackClusterScalerPlugin";
 
-    private String dbExecutorPluginMainClass;
+    private String dbExecutorPluginMainClass = "SQLiteDBExecutor";
 
     private Integer pollInterval;
 

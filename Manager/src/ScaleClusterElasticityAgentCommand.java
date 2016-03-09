@@ -64,6 +64,7 @@ public class ScaleClusterElasticityAgentCommand implements ClusterElasticityAgen
 
         ArrayList<Node> newNodes = elasticityPlugin.scaleUp();
 
+        clusterScalerPlugin.setup();
 
         if(newNodes != null) {
             for (Node newNode : newNodes) {
