@@ -6,6 +6,7 @@
       <module fileurl="file://$PROJECT_DIR$/Collector/Collector.iml" filepath="$PROJECT_DIR$/Collector/Collector.iml" />
       <module fileurl="file://$PROJECT_DIR$/Common/Common.iml" filepath="$PROJECT_DIR$/Common/Common.iml" />
       <module fileurl="file://$PROJECT_DIR$/Database/Database.iml" filepath="$PROJECT_DIR$/Database/Database.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Demo/Demo.iml" filepath="$PROJECT_DIR$/Demo/Demo.iml" />
       <module fileurl="file://$PROJECT_DIR$/Manager/Manager.iml" filepath="$PROJECT_DIR$/Manager/Manager.iml" />
       <module fileurl="file://$PROJECT_DIR$/MesosElasticityPlugin/MesosElasticityPlugin.iml" filepath="$PROJECT_DIR$/MesosElasticityPlugin/MesosElasticityPlugin.iml" />
       <module fileurl="file://$PROJECT_DIR$/Node/Node.iml" filepath="$PROJECT_DIR$/Node/Node.iml" />

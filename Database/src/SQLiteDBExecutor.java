@@ -68,27 +68,6 @@ public class SQLiteDBExecutor implements DBExecutor {
 
     //Under Construction
     public void executeScript(File f) throws Exception{
-        /*Connection c = null;
-        Statement stmt = null;
-        try {
-            Class.forName("org.sqlite.JDBC");
-            c = DriverManager.getConnection("jdbc:sqlite:cloudScheduler.db");
-
-            System.out.println("Opened database successfully");
-            String sql = str;
-            //stmt.executeUpdate(sql);
-            stmt = c.createStatement();
-//            String sql2 = "INSERT INTO Framework values ('1','Framework1',20,56.0,1,10)";
-            stmt.executeUpdate(sql);
-            stmt.close();
-            //c.commit();
-            c.close();
-        } catch ( Exception e ) {
-            System.out.println("here??????");
-            e.printStackTrace();
-            System.err.println( e.getClass().getName() + ": " + 			e.getMessage() );
-            System.exit(0);
-        }*/
         Connection conn = null;
         Statement stmt = null;
         BufferedReader br = new BufferedReader(new FileReader(f));

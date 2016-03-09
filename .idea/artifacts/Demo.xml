@@ -1,0 +1,16 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Demo">
+    <output-path>$PROJECT_DIR$/out/artifacts/Demo</output-path>
+    <root id="archive" name="Demo.jar">
+      <element id="module-output" name="Demo" />
+      <element id="library" level="project" name="j-text-utils-0.3.3" />
+      <element id="library" level="project" name="commons-lang-2.6" />
+      <element id="module-output" name="Database" />
+      <element id="library" level="project" name="sqlite-jdbc-3.8.11.2" />
+      <element id="module-output" name="Plugin" />
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/META-INF/MANIFEST.MF" />
+      </element>
+    </root>
+  </artifact>
+</component>
