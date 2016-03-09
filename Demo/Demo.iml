@@ -10,8 +10,8 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="Database" exported="" />
     <orderEntry type="library" exported="" name="j-text-utils-0.3.3" level="project" />
     <orderEntry type="library" exported="" name="commons-lang-2.6" level="project" />
+    <orderEntry type="module" module-name="SQLiteDBExecutorPlugin" exported="" />
   </component>
 </module>

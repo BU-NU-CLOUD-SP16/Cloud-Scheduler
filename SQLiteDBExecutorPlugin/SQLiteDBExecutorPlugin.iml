@@ -7,7 +7,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="SQLiteDBExecutorPlugin" exported="" />
+    <orderEntry type="module" module-name="Plugin" exported="" />
     <orderEntry type="library" exported="" name="sqlite-jdbc-3.8.11.2" level="project" />
   </component>
 </module>

@@ -1,8 +1,6 @@
 /**
  * Created by Akshaya on 06-03-2016.
  */
-import java.io.FileReader;
-import java.io.File;
 import java.io.IOException;
 
 public class DBTest {
