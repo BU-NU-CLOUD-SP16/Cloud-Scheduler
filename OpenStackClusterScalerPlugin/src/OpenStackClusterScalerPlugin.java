@@ -45,7 +45,7 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
             JsonArray json = gson.fromJson(fr, JsonArray.class);
 
             slaves = convertToMesosSlaves(json);
-            slaveCount = getLargestSlaveNumber();
+            slaveCount = getLargestSlaveNumber() + 1;
             System.out.println("OpenStack Setup Done");
 
         } catch (IOException e) {
@@ -107,7 +107,6 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
         {
             MesosSlave slave = new MesosSlave();
             slave.setHostname(obj.getAsJsonObject().get("name").getAsString());
-            slave.setIp(obj.getAsJsonObject().get("ip").getAsString());
             slave.setFlavor(obj.getAsJsonObject().get("flavor").getAsJsonObject().get("id").getAsString());
             slave.setNodeId(obj.getAsJsonObject().get("id").getAsString());
             slaves.add(slave);

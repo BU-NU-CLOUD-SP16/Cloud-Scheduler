@@ -11,7 +11,6 @@ def convertDict(servers):
         dict['name'] = server.name
         dict['id'] = server.id
         dict['flavor'] = server.flavor
-        dict['ip'] = server.addresses['Mesos-Cluster'][0]['addr']
         dicts.append(dict)
 
     return dicts
