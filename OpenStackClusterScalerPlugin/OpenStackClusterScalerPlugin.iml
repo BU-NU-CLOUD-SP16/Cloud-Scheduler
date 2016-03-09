@@ -8,6 +8,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="Plugin" exported="" />
-    <orderEntry type="module" module-name="Node" />
+    <orderEntry type="module" module-name="Node" exported="" />
   </component>
 </module>
