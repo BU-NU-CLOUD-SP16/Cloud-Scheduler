@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Class-Path: j-text-utils-0.3.3.jar
+Main-Class: DBOutput
+
