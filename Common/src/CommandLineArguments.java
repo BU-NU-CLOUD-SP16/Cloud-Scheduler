@@ -179,6 +179,7 @@ public class CommandLineArguments {
     }
 
     public void parseCommandLineArguments(String[] args) throws ClusterElasticityAgentException {
+
         CmdLineParser parser = new CmdLineParser(this);
 
         try {

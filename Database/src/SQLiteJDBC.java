@@ -23,8 +23,8 @@ public class SQLiteJDBC
                     "Name TEXT," +
                     "CPU INTEGER," +
                     "Memory REAL," +
-                    "Active INTEGER DEFAULT FALSE NOT NULL," +
-                    "Scheduled_Tasks INTEGER DEFAULT FALSE);";
+                    "Active INTEGER DEFAULT -1 NOT NULL," +
+                    "Scheduled_Tasks INTEGER DEFAULT -1);";
             stmt.executeUpdate(sql);
 
             sql = "CREATE UNIQUE INDEX Framework_Framework_ID_uindex ON Framework (Framework_ID);";
