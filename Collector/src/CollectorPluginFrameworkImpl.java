@@ -7,6 +7,8 @@ import java.util.concurrent.LinkedBlockingQueue;
  * Created by Kovit on 3/8/2016.
  */
 
+// TODO: implementing http framework and endpoints
+// TODO: implementing cache
 // TODO: self code review
 // TODO : testing - top priority
 // TODO: exception handling
@@ -14,6 +16,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 // TODO: checking if method @DataQuery tag
 // TODO: java doc
 // TODO: support bulk insert
+// TODO: package structure
 
 public final class CollectorPluginFrameworkImpl implements ClusterElasticityAgentFramework {
 
@@ -47,11 +50,14 @@ public final class CollectorPluginFrameworkImpl implements ClusterElasticityAgen
             return (DBExecutor) databaseExecutorPluginClass.getConstructor().newInstance();
         }
         catch(ClassNotFoundException ex) {
-            System.err.println("Class "+ elasticityPluginClassName +" not found");
+            System.err.println("Class" +  " not found");
         }
         catch(Exception ex) {
             System.err.println(ex);
         }
+
+        // TODO remove this throw new exception
+        return null;
     }
 
     private List<ICollectorPlugin> getCPluginClsIntances(String collectorPluginMainClass) {
@@ -64,7 +70,7 @@ public final class CollectorPluginFrameworkImpl implements ClusterElasticityAgen
             }
         }
         catch(ClassNotFoundException ex) {
-            System.err.println("Class "+ elasticityPluginClassName +" not found");
+            System.err.println("Class "+ " not found");
         }
         catch(Exception ex) {
             System.err.println(ex);
@@ -86,4 +92,3 @@ public final class CollectorPluginFrameworkImpl implements ClusterElasticityAgen
         }
     }
 }
-

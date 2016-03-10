@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by kovit on 3/9/2016.
@@ -8,7 +9,7 @@ import java.util.ArrayList;
 public final class FrameworkSlaveRelationship implements ICollectorPlugin {
 
     @Override
-    public int fetch(ArrayList<Data> data) {
+    public int fetch(List<Data> data) {
         return 0;
     }
 
