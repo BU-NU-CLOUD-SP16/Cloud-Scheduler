@@ -110,7 +110,7 @@ public final class CollectorPluginFrameworkImpl implements ClusterElasticityAgen
         logger.setLevel(Level.FINE);
         FileHandler logFileHandler = null;
         try {
-            logFileHandler = new FileHandler(arguments.getLogDir() + File.pathSeparator + "Collector_Plugin.log");
+            logFileHandler = new FileHandler(arguments.getLogDir() + File.separator + "Collector_Plugin.log");
             SimpleFormatter formatterTxt = new SimpleFormatter();
             logFileHandler.setFormatter(formatterTxt);
             logger.addHandler(logFileHandler);
