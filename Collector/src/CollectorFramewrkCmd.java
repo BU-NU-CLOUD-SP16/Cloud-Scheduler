@@ -10,7 +10,7 @@ import java.util.logging.Logger;
  * Created by kovit on 3/9/2016.
  */
 public final class CollectorFramewrkCmd implements ClusterElasticityAgentCommand {
-    private final static Logger LOGGER = Logger.getLogger("CollectorFramework");
+    private final static Logger LOGGER = Logger.getLogger(CollectorPluginFrameworkImpl.COLLECTOR_LOGGER_NAME);
     private DBExecutor dbExecutor;
     private List<Object> collectorPluginCls;
     private String masterAddr;

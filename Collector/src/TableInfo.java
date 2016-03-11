@@ -108,4 +108,14 @@ public class TableInfo implements ITableInfo{
     public String getTableName() {
         return tableName;
     }
+
+    @Override
+    public String toString() {
+        return "TableInfo{" +
+                "tableName='" + tableName + '\'' +
+                ", colName=" + colName +
+                ", colValue=" + colValue +
+                ", priority=" + priority +
+                '}';
+    }
 }

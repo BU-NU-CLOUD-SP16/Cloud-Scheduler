@@ -26,7 +26,8 @@ public final class CollectorPluginFrameworkImpl implements ClusterElasticityAgen
 
     private final LinkedBlockingQueue<ClusterElasticityAgentCommand> workerQueue;
     private final CommandLineArguments arguments;
-    private final static Logger LOGGER = Logger.getLogger("CollectorFramework");
+    public final static String COLLECTOR_LOGGER_NAME = "CollectorFramework";
+    private final static Logger LOGGER = Logger.getLogger(COLLECTOR_LOGGER_NAME);
     private final String masterIpAddr;
 
     public CollectorPluginFrameworkImpl(CommandLineArguments argumentList) {
@@ -105,7 +106,7 @@ public final class CollectorPluginFrameworkImpl implements ClusterElasticityAgen
 
     private void logSetup() {
         LogManager.getLogManager().reset();
-        Logger logger = Logger.getLogger("CollectorFramework");
+        Logger logger = Logger.getLogger(COLLECTOR_LOGGER_NAME);
         logger.setLevel(Level.FINE);
         FileHandler logFileHandler = null;
         try {

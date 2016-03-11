@@ -3,9 +3,12 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Created by kovit on 3/9/2016.
@@ -13,14 +16,38 @@ import java.util.Map;
 
 public final class MesosMetric implements ICollectorPluginByTable {
 
+    private final static Logger LOGGER = Logger.getLogger(CollectorPluginFrameworkImpl.COLLECTOR_LOGGER_NAME);
+
     @Override
     public List<ITableInfo> fetch(List<Data> data, String masterAddr) {
-
+        LOGGER.log(Level.FINE, "[Collector Plugin] In fetch");
         List<SlaveDetails> slaveLst = new ArrayList<>();
         List<FrameworkSlaveRelationship> runsOn = new ArrayList<>();
         List<FrameworkDetails> frameworkDetailsLst = new ArrayList<>();
 
-        String stateSummary = HTTP.executeRequest("http://" + masterAddr + "/master/state-summary");
+        String stateSummary = null;
+        String httpReq = "http://" + masterAddr + "/master/state-summary";
+        try {
+            stateSummary = HTTP.executeRequest(httpReq);
+            LOGGER.log(Level.FINE, "[Collector Plugin] Successfully executed HTTP request " + httpReq );
+            LOGGER.log(Level.FINE, "[Collector Plugin] State Summary:");
+            LOGGER.log(Level.FINE, stateSummary);
+        } catch (IOException e) {
+            String errorMsg = "[Collector Plugin] Failed to execute HTTP request " + httpReq
+                    + " .Reason: " + e.getMessage();
+            LOGGER.log(Level.FINE, "[Collector Plugin] Retrying to execute HTTP request " + httpReq);
+            try {
+                stateSummary = HTTP.executeRequest(httpReq);
+                LOGGER.log(Level.FINE, "[Collector Plugin] Successfully executed HTTP request " + httpReq );
+                LOGGER.log(Level.FINE, "[Collector Plugin] State Summary:");
+                LOGGER.log(Level.FINE, stateSummary);
+            } catch (IOException e1) {
+                errorMsg = "[Collector Plugin] Retry attempt 1 Failed to execute HTTP request " + httpReq
+                        + " .Reason: " + e.getMessage();
+                LOGGER.log(Level.SEVERE, errorMsg);
+                throw new IllegalStateException(errorMsg, e1);
+            }
+        }
         // TODO check if stateSummary is not null
         parseStateSummary(stateSummary, slaveLst, frameworkDetailsLst, runsOn);
         populateSlaveUtilization(slaveLst);
@@ -30,24 +57,29 @@ public final class MesosMetric implements ICollectorPluginByTable {
     private List<ITableInfo> convertIntoTableRows(List<SlaveDetails> slaveLst,
                                                   List<FrameworkDetails> frameworkDetailsLst,
                                                   List<FrameworkSlaveRelationship> runsOn) {
+        LOGGER.log(Level.FINE, "[Collector Plugin] In convertIntoTableRows");
         List<ITableInfo> lst = new ArrayList<>();
         slaveTableRows(slaveLst, lst);
         frameworkTableRows(frameworkDetailsLst, lst);
         runsOnTableRows(runsOn, lst);
+        LOGGER.log(Level.FINE, "[Collector Plugin] Total no of rows to be inserted " + lst.size());
         return lst;
     }
 
     private void runsOnTableRows(List<FrameworkSlaveRelationship> runsOn, List<ITableInfo> lst) {
+        LOGGER.log(Level.FINE, "[Collector Plugin] In runsOnTableRows");
         for(FrameworkSlaveRelationship fsr: runsOn) {
             ITableInfo t = new TableInfo("Framework");
             t.addColName("Framework_ID").addColValue(fsr.getFrameworkId())
                     .addColName("Slave_ID").addColValue(fsr.getSlaveId());
             t.setPriority(2);
+            LOGGER.log(Level.FINE, "[Collector Plugin] runs_on table row " + t.toString());
             lst.add(t);
         }
     }
 
     private void frameworkTableRows(List<FrameworkDetails> frameworkDetailsLst, List<ITableInfo> lst) {
+        LOGGER.log(Level.FINE, "[Collector Plugin] In frameworkTableRows");
         for(FrameworkDetails f: frameworkDetailsLst) {
             ITableInfo t = new TableInfo("Framework");
             t.addColName("Framework_ID").addColValue(f.getFrameworkId())
@@ -57,11 +89,13 @@ public final class MesosMetric implements ICollectorPluginByTable {
                     .addColName("Active").addColValue(f.getActive())
                     .addColName("Scheduled_Tasks").addColValue(f.getScheduledTasks());
             t.setPriority(1);
+            LOGGER.log(Level.FINE, "[Collector Plugin] framework table row " + t.toString());
             lst.add(t);
         }
     }
 
     private void slaveTableRows(List<SlaveDetails> slaveLst, List<ITableInfo> lst) {
+        LOGGER.log(Level.FINE, "[Collector Plugin] In slaveTableRows");
         for(SlaveDetails s: slaveLst) {
             ITableInfo t = new TableInfo("Slave");
             t.addColName("Slave_ID").addColValue(s.getSlaveId())
@@ -73,19 +107,45 @@ public final class MesosMetric implements ICollectorPluginByTable {
                     .addColName("Hostname").addColValue(s.getHostName())
                     .addColName("IP").addColValue(s.getIp());
             t.setPriority(0);
+            LOGGER.log(Level.FINE, "[Collector Plugin] slave table row " + t.toString());
             lst.add(t);
         }
     }
 
     private void populateSlaveUtilization(List<SlaveDetails> slaveLst) {
+        LOGGER.log(Level.FINE, "[Collector Plugin] In populateSlaveUtilization");
         for(SlaveDetails slave: slaveLst) {
-            String slaveMetrics = HTTP.executeRequest("http://" + slave.getIpNPort() + "/metrics/snapshot");
+            String slaveMetrics = null;
+            String httpReq = "http://" + slave.getIpNPort() + "/metrics/snapshot";
+            try {
+                slaveMetrics = HTTP.executeRequest(httpReq);
+                LOGGER.log(Level.FINE, "[Collector Plugin] Successfully executed HTTP request " + httpReq);
+                LOGGER.log(Level.FINE, "[Collector Plugin] Slave Metrics:");
+                LOGGER.log(Level.FINE, slaveMetrics);
+            }
+            catch (IOException e) {
+                String errorMsg = "[Collector Plugin] Failed to execute HTTP request " + httpReq
+                        + " .Reason: " + e.getMessage();
+                LOGGER.log(Level.FINE, "[Collector Plugin] Retrying to execute HTTP request " + httpReq);
+                try {
+                    slaveMetrics = HTTP.executeRequest(httpReq);
+                    LOGGER.log(Level.FINE, "[Collector Plugin] Successfully executed HTTP request " + httpReq );
+                    LOGGER.log(Level.FINE, "[Collector Plugin] Slave Metric:");
+                    LOGGER.log(Level.FINE, slaveMetrics);
+                } catch (IOException e1) {
+                    errorMsg = "[Collector Plugin] Retry attempt 1 Failed to execute HTTP request " + httpReq
+                            + " .Reason: " + e.getMessage();
+                    LOGGER.log(Level.SEVERE, errorMsg);
+                    throw new IllegalStateException(errorMsg, e1);
+                }
+            }
             // TODO check if slaveMetrics is not null
             parseSlaveMetrics(slave, slaveMetrics);
         }
     }
 
     private void parseSlaveMetrics(SlaveDetails slave, String slaveMetricsResp) {
+        LOGGER.log(Level.FINE, "[Collector Plugin] In parseSlaveMetrics");
         JsonElement slaveMetrics = new JsonParser().parse(slaveMetricsResp);
         JsonObject smObj = slaveMetrics.getAsJsonObject();
         slave.setAllocatedCpu(smObj.get("slave\\/cpus_used").getAsInt())
@@ -98,6 +158,7 @@ public final class MesosMetric implements ICollectorPluginByTable {
     private static void parseStateSummary(String stateSummaryResp, List<SlaveDetails> slaveLst,
                                           List<FrameworkDetails> frameworkDetailsLst,
                                           List<FrameworkSlaveRelationship> runsOn) {
+        LOGGER.log(Level.FINE, "[Collector Plugin] In parseStateSummary");
         JsonElement stateSummary = new JsonParser().parse(stateSummaryResp);
         JsonArray slaves = stateSummary.getAsJsonObject().getAsJsonArray("slaves");
         JsonArray frameworks = stateSummary.getAsJsonObject().getAsJsonArray("frameworks");
@@ -107,6 +168,7 @@ public final class MesosMetric implements ICollectorPluginByTable {
     }
 
     private static void processFrameworkDetails(JsonArray frameworks, List<FrameworkDetails> frameworkDetailsLst) {
+        LOGGER.log(Level.FINE, "[Collector Plugin] In processFrameworkDetails");
         for(final JsonElement framework : frameworks) {
             JsonObject fObj = framework.getAsJsonObject();
             JsonObject usedResourcesObj = fObj.getAsJsonObject("used_resources");
@@ -122,6 +184,7 @@ public final class MesosMetric implements ICollectorPluginByTable {
     }
 
     private static void processSlaveDetails(JsonArray slaves, List<SlaveDetails> slaveLst, List<FrameworkSlaveRelationship> runsOn) {
+        LOGGER.log(Level.FINE, "[Collector Plugin] In processSlaveDetails");
         for(final JsonElement slave : slaves) {
             SlaveDetails s = new SlaveDetails();
             slaveLst.add(s);
