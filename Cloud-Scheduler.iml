@@ -15,5 +15,6 @@
     <orderEntry type="module" module-name="MesosElasticityPlugin" />
     <orderEntry type="module" module-name="OpenStackClusterScalerPlugin" />
     <orderEntry type="module" module-name="SQLiteDBExecutorPlugin" />
+    <orderEntry type="library" name="spark-core-2.3" level="project" />
   </component>
 </module>

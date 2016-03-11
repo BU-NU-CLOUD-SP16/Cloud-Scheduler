@@ -8,21 +8,18 @@ import java.util.ArrayList;
  */
 public class SQLiteDBExecutor implements DBExecutor {
 
+    private Connection c =null;
+    private Statement stmt = null;
+
     //Executes a Select statement and returns a Double Dimensional String array
     public ArrayList<String[]> executeSelect(String str){
-        Connection c = null;
-        Statement stmt = null;
-//        String [][] table_values = new String[100][20];
+
         ArrayList<String[]> table_values = new ArrayList<>();
         try {
-            Class.forName("org.sqlite.JDBC");
-            c = DriverManager.getConnection(
-                    "jdbc:sqlite:cloudScheduler.db");
             stmt = c.createStatement();
             ResultSet rs = stmt.executeQuery(str);
             ResultSetMetaData rsmd= rs.getMetaData();
             int colCount = rsmd.getColumnCount();
-//            String [][] table_values = new String[100][colCount];
             while(rs.next()){
                 String[] values = new String [colCount];
                 for(int i = 1;i <= rsmd.getColumnCount();i++){
@@ -31,10 +28,8 @@ public class SQLiteDBExecutor implements DBExecutor {
                 table_values.add(values);
             }
             rs.close();
-            stmt.close();
-            c.close();
-//            System.out.println("table_values:"+table_values);
-//            System.out.println(table_values.get(0)[1]);
+//            stmt.close();
+//            c.close();
         } catch(Exception e){
             e.printStackTrace();
             System.err.println( e.getClass().getName()
@@ -44,21 +39,12 @@ public class SQLiteDBExecutor implements DBExecutor {
     }
     // Executes any DML statement
     public void executeUpdate(String str){
-        Connection c = null;
-        Statement stmt = null;
-        try {
-            Class.forName("org.sqlite.JDBC");
-            c = DriverManager.getConnection("jdbc:sqlite:cloudScheduler.db");
-
-            System.out.println("Opened database successfully");
+        try{
             String sql = str;
-            //stmt.executeUpdate(sql);
             stmt = c.createStatement();
-//            String sql2 = "INSERT INTO Framework values ('1','Framework1',20,56.0,1,10)";
             stmt.executeUpdate(sql);
-            stmt.close();
-            //c.commit();
-            c.close();
+//            stmt.close();
+//            c.close();
         } catch ( Exception e ) {
             System.out.println("here??????");
             e.printStackTrace();
@@ -66,10 +52,8 @@ public class SQLiteDBExecutor implements DBExecutor {
         }
     }
 
-    //Under Construction
+    //Executes a list of DML statements
     public void executeScript(File f) throws Exception{
-        Connection conn = null;
-        Statement stmt = null;
         BufferedReader br = new BufferedReader(new FileReader(f));
         try {
             StringBuilder sb = new StringBuilder();
@@ -82,16 +66,12 @@ public class SQLiteDBExecutor implements DBExecutor {
             String all_Sql = sb.toString();
             String[] sql = all_Sql.split(";");
 
-            Class.forName("org.sqlite.JDBC");
-            conn = DriverManager.getConnection("jdbc:sqlite:cloudScheduler.db");
-            System.out.println("Opened database successfully");
-
-            stmt = conn.createStatement();
+            stmt = c.createStatement();
             for (int i = 0; i < sql.length; i++) {
                 stmt.executeUpdate(sql[i]);
             }
-            stmt.close();
-            conn.close();
+//            stmt.close();
+//            c.close();
         }catch ( Exception e ) {
             System.out.println("Exception??????");
             e.printStackTrace();
@@ -102,28 +82,41 @@ public class SQLiteDBExecutor implements DBExecutor {
 
     //Deletes all the rows in all the tables in DB
     public void clearDB(){
-        Connection c = null;
-        Statement stmt = null;
         try {
-            Class.forName("org.sqlite.JDBC");
-            c = DriverManager.getConnection("jdbc:sqlite:cloudScheduler.db");
-
-            System.out.println("Opened Database Successfully");
-            //stmt.executeUpdate(sql);
             stmt = c.createStatement();
             String sql = "Delete from Framework;";
             stmt.executeUpdate(sql);
 
             sql = "Delete from Slave;";
             stmt.executeUpdate(sql);
-            stmt.close();
-            //c.commit();
-            c.close();
+//            stmt.close();
+//            c.close();
         } catch ( Exception e ) {
             System.out.println("here??????");
             e.printStackTrace();
             System.err.println( e.getClass().getName() + ": " + 			e.getMessage() );
         }
+    }
+    public SQLiteDBExecutor(){
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite://H:\\Cloud Computing" +
+            "\\Cloud Scheduling Project\\Cloud-Scheduler\\cloudScheduler.db");
+        } catch (Exception e){
+            e.printStackTrace();
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+        }
+
+    }
+    public SQLiteDBExecutor(String dbLocation){
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:" + dbLocation);
+        } catch (Exception e){
+            e.printStackTrace();
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+        }
+
     }
 
 }
