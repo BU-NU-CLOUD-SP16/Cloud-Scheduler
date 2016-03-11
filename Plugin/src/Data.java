@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by chemistry_sourabh on 3/2/16.
@@ -9,7 +10,7 @@ import java.util.ArrayList;
 public class Data {
 
     private String query;
-    private ArrayList<String[]> data;
+    private List<String[]> data;
 
     public String getQuery() {
         return query;
@@ -19,11 +20,11 @@ public class Data {
         this.query = query;
     }
 
-    public ArrayList<String []> getData() {
+    public List<String []> getData() {
         return data;
     }
 
-    public void setData(ArrayList<String[]> data) {
+    public void setData(List<String[]> data) {
         this.data = data;
     }
 

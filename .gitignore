@@ -96,3 +96,6 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 *.db
+*.orig
+python/.idea
+*.json
