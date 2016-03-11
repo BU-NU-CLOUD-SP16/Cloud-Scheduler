@@ -34,6 +34,8 @@ public class CommandLineArguments {
 
     private File ddlFile;
 
+    private String logDir = System.getProperty("user.dir");
+
     private static final Integer NULL_PORT = 0;
 
     private static final Integer DEFAULT_INTERVAL = 5000;
@@ -45,6 +47,19 @@ public class CommandLineArguments {
         pollInterval = DEFAULT_INTERVAL;
         dbExecutorPluginJar = null;
         dbExecutorPluginMainClass = new String(DEFAULT_DB_EXECUTOR);
+    }
+
+    public String getLogDir() {
+        return logDir;
+    }
+
+    @Option(name="-log-dir",usage="sets log directory")
+    public void setLogDir(String logDir) {
+        File dir = new File(logDir);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        this.logDir = logDir;
     }
 
     public File getClusterScalerPluginJar() {

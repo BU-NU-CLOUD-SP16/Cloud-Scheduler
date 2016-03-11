@@ -2,6 +2,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
+import java.util.logging.Logger;
 
 /**
  * Created by kovit on 3/10/2016.
@@ -32,6 +33,17 @@ public class TableInfo implements ITableInfo{
     @Override
     public int getPriority() {
         return priority;
+    }
+
+    @Override
+    public ITableInfo addColValue(String val, boolean isString) {
+        if (isString) {
+            addColValue(val);
+        }
+        else {
+            colValue.add(val);
+        }
+        return this;
     }
 
     @Override

@@ -12,6 +12,7 @@ public interface ITableInfo {
     ITableInfo addColValue(double val);
     ITableInfo addColValue(short val);
     ITableInfo addColName(String name);
+    ITableInfo addColValue(String val, boolean isString);
     void setPriority(int priority);
     int getPriority();
 }
