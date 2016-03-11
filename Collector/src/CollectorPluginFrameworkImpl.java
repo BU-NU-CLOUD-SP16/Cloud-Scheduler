@@ -13,10 +13,11 @@ import java.util.concurrent.LinkedBlockingQueue;
 // TODO : testing - top priority
 // TODO: exception handling
 // TODO: logging
-// TODO: checking if method @DataQuery tag
 // TODO: java doc
-// TODO: support bulk insert
 // TODO: package structure
+// TODO: checking if method @DataQuery tag
+// TODO: support bulk insert
+// TODO: constants
 
 public final class CollectorPluginFrameworkImpl implements ClusterElasticityAgentFramework {
 
@@ -32,7 +33,7 @@ public final class CollectorPluginFrameworkImpl implements ClusterElasticityAgen
     public void run() {
         new Timer().scheduleAtFixedRate(new ClusterElasticityAgentTimerTask(this,
                 new CollectorFramewrkCmd(getDBExecInstance(arguments.getDbExecutorPluginMainClass()),
-                        getCPluginClsIntances(arguments.getCollectorPluginMainClass()))), 0, arguments.getPollInterval());
+                        getCPluginClsIntances(arguments.getCollectorPluginMainClass()), getMasterAddr())), 0, arguments.getPollInterval());
 
         while(true) {
             try {
@@ -42,6 +43,10 @@ public final class CollectorPluginFrameworkImpl implements ClusterElasticityAgen
                 e.printStackTrace();
             }
         }
+    }
+
+    private String getMasterAddr() {
+        return this.arguments.getMesosMasterIP() + ":" + this.arguments.getMesosMasterPort();
     }
 
     private DBExecutor getDBExecInstance(String dbExecutorPluginMainClass) {
@@ -60,13 +65,13 @@ public final class CollectorPluginFrameworkImpl implements ClusterElasticityAgen
         return null;
     }
 
-    private List<ICollectorPlugin> getCPluginClsIntances(String collectorPluginMainClass) {
+    private List<Object> getCPluginClsIntances(String collectorPluginMainClass) {
         String[] classNamesLst = collectorPluginMainClass.split(",");
-        List<ICollectorPlugin> classInstance = new ArrayList<>(classNamesLst.length);
+        List<Object> classInstance = new ArrayList<>(classNamesLst.length);
 
         try {
             for (String className : classNamesLst) {
-                classInstance.add((ICollectorPlugin) Class.forName(className).getConstructor().newInstance());
+                classInstance.add(Class.forName(className).getConstructor().newInstance());
             }
         }
         catch(ClassNotFoundException ex) {

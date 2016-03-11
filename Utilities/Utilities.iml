@@ -7,8 +7,5 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="Plugin" exported="" />
-    <orderEntry type="module" module-name="Node" exported="" />
-    <orderEntry type="library" name="lib" level="project" />
   </component>
 </module>

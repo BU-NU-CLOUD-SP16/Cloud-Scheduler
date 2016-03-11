@@ -1,25 +1,29 @@
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by kovit on 3/9/2016.
  */
 
-@Table(name="Runs_On")
-public final class FrameworkSlaveRelationship implements ICollectorPlugin {
+public final class FrameworkSlaveRelationship {
 
-    @Override
-    public int fetch(List<Data> data) {
-        return 0;
-    }
+    private String slaveId;
+    private String frameworkId;
 
-    @Column(name="Slave_ID")
     public String getSlaveId() {
-        return null;
+        return slaveId;
     }
 
-    @Column(name="Framework_ID")
+    public FrameworkSlaveRelationship setSlaveId(String slaveId) {
+        this.slaveId = slaveId;
+        return this;
+    }
+
     public String getFrameworkId() {
-        return null;
+        return frameworkId;
+    }
+
+    public FrameworkSlaveRelationship setFrameworkId(String frameworkId) {
+        this.frameworkId = frameworkId;
+        return this;
     }
 }

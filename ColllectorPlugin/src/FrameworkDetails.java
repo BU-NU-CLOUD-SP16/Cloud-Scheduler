@@ -5,41 +5,71 @@ import java.util.List;
  * Created by kovit on 3/9/2016.
  */
 
-@Table(name = "Framework")
-public final class FrameworkDetails implements ICollectorPlugin {
+public final class FrameworkDetails {
 
-    @Override
-    public int fetch(List<Data> data) {
-        return 0;
-    }
+    private String frameworkId;
+    private String name;
+    private int cpu;
+    private float memory;
+    private int active;
+    private int scheduledTasks;
 
-    @Column(name="Framework_ID")
-    public String getFrameworkId() {
-        return null;
-    }
-
-    @Column(name="Name")
-    public String getName() {
-        return null;
-    }
-
-    @Column(name="CPU")
-    public int getNoOfCpu() {
-        return 0;
-    }
-
-    @Column(name="Memory")
     public float getMemory() {
-        return 0;
+        return memory;
     }
 
-    @Column(name="Active")
-    public int isActive() {
-        return 0;
+    public FrameworkDetails setMemory(float memory) {
+        this.memory = memory;
+        return this;
     }
 
-    @Column(name="Scheduled_Tasks")
-    public int getNoOfScheduledTasks() {
-        return 0;
+    public String getFrameworkId() {
+        return frameworkId;
+    }
+
+    public FrameworkDetails setFrameworkId(String frameworkId) {
+        this.frameworkId = frameworkId;
+        return this;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public FrameworkDetails setName(String name) {
+        this.name = name;
+        return this;
+    }
+
+    public int getCpu() {
+        return cpu;
+    }
+
+    public FrameworkDetails setCpu(int cpu) {
+        this.cpu = cpu;
+        return this;
+    }
+
+    public int getActive() {
+        return active;
+    }
+
+    public FrameworkDetails setActive(boolean active) {
+        if (active) {
+            this.active = 1;
+        }
+        else {
+            this.active = 0;
+        }
+        return this;
+    }
+
+    public int getScheduledTasks() {
+        return scheduledTasks;
+    }
+
+    public FrameworkDetails setScheduledTasks(int scheduledTasks) {
+        this.scheduledTasks = scheduledTasks;
+        return this;
     }
 }

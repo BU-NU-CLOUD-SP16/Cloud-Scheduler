@@ -5,51 +5,98 @@ import java.util.List;
  * Created by kovit on 3/9/2016.
  */
 
-@Table(name="Slave")
-public final class SlaveDetails implements ICollectorPlugin {
+public final class SlaveDetails {
 
-    @Override
-    public int fetch(List<Data> data) {
-        return 0;
+    private String slaveId;
+    private float load5Min;
+    private float freeMemory;
+    private float totalMemory;
+    private int cpu;
+    private int allocatedCpu;
+    private String ip;
+    private String hostName;
+
+    public String getIpNPort() {
+        return ipNPort;
     }
 
-    @Column(name="Slave_ID")
+    public void setIpNPort(String ipNPort) {
+        this.ipNPort = ipNPort;
+    }
+
+    private String ipNPort;
+
+
     public String getSlaveId() {
-        return null;
+        return slaveId;
     }
 
-    @Column(name="Load_5min")
-    public float getLoad5min() {
-        return 0;
+    public SlaveDetails setSlaveId(String slaveId) {
+        this.slaveId = slaveId;
+        return this;
     }
 
-    @Column(name="Free_Memory")
+    public float getLoad5Min() {
+        return load5Min;
+    }
+
+    public SlaveDetails setLoad5Min(float load5Min) {
+        this.load5Min = load5Min;
+        return this;
+    }
+
     public float getFreeMemory() {
-        return 0;
+        return freeMemory;
     }
 
-    @Column(name="Total_Memory")
+    public SlaveDetails setFreeMemory(float freeMemory) {
+        this.freeMemory = freeMemory;
+        return this;
+    }
+
     public float getTotalMemory() {
-        return 0;
+        return totalMemory;
     }
 
-    @Column(name="CPU")
+    public SlaveDetails setTotalMemory(float totalMemory) {
+        this.totalMemory = totalMemory;
+        return this;
+    }
+
     public int getCpu() {
-        return 0;
+        return cpu;
     }
 
-    @Column(name="Allocated_CPU")
-    public float getAllocatedCpu() {
-        return 0;
+    public SlaveDetails setCpu(int cpu) {
+        this.cpu = cpu;
+        return this;
     }
 
-    @Column(name="IP")
-    public String getIpAddr() {
-        return null;
+    public int getAllocatedCpu() {
+        return allocatedCpu;
     }
 
-    @Column(name="Hostname")
-    public String getHostname() {
-        return null;
+    public SlaveDetails setAllocatedCpu(int allocatedCpu) {
+        this.allocatedCpu = allocatedCpu;
+        return this;
+    }
+
+    public String getIp() {
+        return ip;
+    }
+
+    public SlaveDetails setIp(String ip) {
+        this.ip = ip;
+        return this;
+    }
+
+    public String getHostName() {
+        return hostName;
+    }
+
+    public SlaveDetails setHostName(String hostName) {
+        this.hostName = hostName;
+        return this;
     }
 }
+
