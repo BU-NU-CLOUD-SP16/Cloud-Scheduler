@@ -1,6 +1,7 @@
 import novaclient.client as nvclient
 import getpass
 import json
+import argparse
 
 
 def convertDict(servers):
@@ -11,6 +12,7 @@ def convertDict(servers):
         dict['name'] = server.name
         dict['id'] = server.id
         dict['flavor'] = server.flavor
+        dict['status'] = server.status
         dicts.append(dict)
 
     return dicts
@@ -21,6 +23,14 @@ OS_PASSWORD = 'Soumya123'
 OS_TENANT_NAME = "Cloud Scheduler"
 OS_REGION_NAME = "MOC_Kaizen"
 
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--name',type=str)
+
+args = parser.parse_args()
+
+name = args.name
+
 nova = nvclient.Client("2",auth_url=OS_AUTH_URL,
                        username=OS_USERNAME,
                        api_key=OS_PASSWORD,
@@ -28,13 +38,14 @@ nova = nvclient.Client("2",auth_url=OS_AUTH_URL,
                        region_name=OS_REGION_NAME)
 
 
+if name == None:
+    name = "slave"
+
 servers = nova.servers.list()
-slave_servers = filter(lambda server: "slave" in server.name.lower(),servers)
+slave_servers = filter(lambda server: name in server.name.lower(),servers)
 
 slave_dicts = convertDict(slave_servers)
 
 json_data = json.dumps(slave_dicts)
 
-f = open("servers.json","w")
-
-f.write(json_data)
+print json_data

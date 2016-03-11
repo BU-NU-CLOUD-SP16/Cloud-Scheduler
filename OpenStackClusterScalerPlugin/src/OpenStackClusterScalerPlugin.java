@@ -17,6 +17,7 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
     @Override
     public void setup()
     {
+        String output = "";
         try {
             Process p = Runtime.getRuntime().exec("python python/list.py");
 
@@ -33,16 +34,15 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
             }
 
             while ((s = stdInput.readLine()) != null) {
-                System.out.println(s);
+                output += s;
             }
 
             while (p.isAlive());
 
 
-            FileReader fr = new FileReader(new File("servers.json"));
 
             Gson gson = new Gson();
-            JsonArray json = gson.fromJson(fr, JsonArray.class);
+            JsonArray json = gson.fromJson(output, JsonArray.class);
 
             slaves = convertToMesosSlaves(json);
             slaveCount = getLargestSlaveNumber() + 1;
@@ -79,17 +79,49 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
 
             while (p.isAlive());
 
+            String output = "";
+            while(true) {
+                p = Runtime.getRuntime().exec("python python/list.py --name Spark-Slave-" + slaveCount);
 
-            slaveCount++;
+                stdInput = new BufferedReader(new
+                        InputStreamReader(p.getInputStream()));
+
+                stdError = new BufferedReader(new
+                        InputStreamReader(p.getErrorStream()));
+                // read the output from the command
+                // read any errors from the attempted command
+                while ((s = stdError.readLine()) != null) {
+                    System.out.println(s);
+                }
+
+                while ((s = stdInput.readLine()) != null) {
+                    output += s;
+                }
+
+                Gson gson = new Gson();
+                JsonArray json = gson.fromJson(output, JsonArray.class);
+
+
+                if(json.get(0).getAsJsonObject().get("status").getAsString().toLowerCase().equals("active"))
+                {
+
+                    break;
+                }
+                while (p.isAlive());
+                Thread.sleep(1000);
+            }
 
             System.out.println("Created New Node");
 
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
         OpenStackNode newNode = new OpenStackNode(openStackNode.getFlavor());
         newNode.setHostname("Spark-Slave-"+slaveCount);
+        slaveCount++;
         return newNode;
     }
 

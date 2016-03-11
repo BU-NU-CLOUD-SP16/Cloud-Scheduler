@@ -29,3 +29,4 @@ nova = nvclient.Client("2",auth_url=OS_AUTH_URL,
                        region_name=OS_REGION_NAME)
 
 nova.servers.create(name=name,image=image,flavor=flavor,key_name=key_name)
+
