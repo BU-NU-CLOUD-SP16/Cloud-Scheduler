@@ -2,6 +2,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import org.omg.SendingContext.RunTime;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -29,9 +30,9 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
             String s;
             // read the output from the command
             // read any errors from the attempted command
-            while ((s = stdError.readLine()) != null) {
-                System.out.println(s);
-            }
+//            while ((s = stdError.readLine()) != null) {
+//                System.out.println(s);
+//            }
 
             while ((s = stdInput.readLine()) != null) {
                 output += s;
@@ -39,7 +40,7 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
 
             while (p.isAlive());
 
-
+            System.out.println(output);
 
             Gson gson = new Gson();
             JsonArray json = gson.fromJson(output, JsonArray.class);
@@ -58,6 +59,7 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
     public Node createNewNode(Node node)
     {
         OpenStackNode openStackNode = (OpenStackNode) node;
+        MesosSlave slave = new MesosSlave();
         try {
             Process p = Runtime.getRuntime().exec("python python/create.py --name Spark-Slave-"+slaveCount+" --flavor "+openStackNode.getFlavor()+" --image 168274f7-9841-4a59-805b-abc44afbffeb --key-name Sourabh-OSX");
 
@@ -69,18 +71,19 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
             String s;
             // read the output from the command
             // read any errors from the attempted command
-            while ((s = stdError.readLine()) != null) {
-                System.out.println(s);
-            }
+//            while ((s = stdError.readLine()) != null) {
+//                System.out.println(s);
+//            }
 
-            while ((s = stdInput.readLine()) != null) {
-                System.out.println(s);
-            }
+//            while ((s = stdInput.readLine()) != null) {
+//                System.out.println(s);
+//            }
 
             while (p.isAlive());
 
             String output = "";
             while(true) {
+                output = "";
                 p = Runtime.getRuntime().exec("python python/list.py --name Spark-Slave-" + slaveCount);
 
                 stdInput = new BufferedReader(new
@@ -90,14 +93,14 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
                         InputStreamReader(p.getErrorStream()));
                 // read the output from the command
                 // read any errors from the attempted command
-                while ((s = stdError.readLine()) != null) {
-                    System.out.println(s);
-                }
+//                while ((s = stdError.readLine()) != null) {
+//                    System.out.println(s);
+//                }
 
                 while ((s = stdInput.readLine()) != null) {
                     output += s;
                 }
-
+                System.out.println(output);
                 Gson gson = new Gson();
                 JsonArray json = gson.fromJson(output, JsonArray.class);
 
@@ -105,13 +108,39 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
                 if(json.get(0).getAsJsonObject().get("status").getAsString().toLowerCase().equals("active"))
                 {
 
+                    JsonElement obj = json.get(0);
+                    slave.setHostname(obj.getAsJsonObject().get("name").getAsString());
+                    slave.setFlavor(obj.getAsJsonObject().get("flavor").getAsJsonObject().get("id").getAsString());
+                    slave.setNodeId(obj.getAsJsonObject().get("id").getAsString());
+                    slave.setIp(obj.getAsJsonObject().get("ip").getAsString());
+                    slaves.add(slave);
                     break;
                 }
+
                 while (p.isAlive());
+
                 Thread.sleep(1000);
             }
 
             System.out.println("Created New Node");
+
+            System.out.println(slave);
+
+
+
+            Thread.sleep(10000);
+            System.out.println("Editing /etc/hosts");
+            String s1 = "ssh -A ubuntu@129.10.3.91 ssh ubuntu@" + slave.getIp() + " sudo sed -i '1s/^/" + slave.getIp() + " " + slave.getHostname() + "\\n /' /etc/hosts";
+            System.out.println(s1);
+            p = Runtime.getRuntime().exec(s1);
+
+            stdError = new BufferedReader(new
+                    InputStreamReader(p.getErrorStream()));
+            // read the output from the command
+            // read any errors from the attempted command
+                while ((s = stdError.readLine()) != null) {
+                    System.out.println(s);
+                }
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -141,11 +170,23 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
             slave.setHostname(obj.getAsJsonObject().get("name").getAsString());
             slave.setFlavor(obj.getAsJsonObject().get("flavor").getAsJsonObject().get("id").getAsString());
             slave.setNodeId(obj.getAsJsonObject().get("id").getAsString());
+            slave.setIp(obj.getAsJsonObject().get("ip").getAsString());
             slaves.add(slave);
         }
         return slaves;
     }
 
+    private MesosSlave findSlave(String name)
+    {
+        for(MesosSlave slave : slaves)
+        {
+            if(slave.getHostname().equals(name))
+            {
+                return slave;
+            }
+        }
+        return null;
+    }
 
     private int getLargestSlaveNumber()
     {

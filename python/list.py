@@ -13,6 +13,10 @@ def convertDict(servers):
         dict['id'] = server.id
         dict['flavor'] = server.flavor
         dict['status'] = server.status
+        try:
+            dict['ip'] = server.addresses['Mesos-Cluster'][0]['addr']
+        except:
+            ""
         dicts.append(dict)
 
     return dicts
@@ -42,7 +46,11 @@ if name == None:
     name = "slave"
 
 servers = nova.servers.list()
-slave_servers = filter(lambda server: name in server.name.lower(),servers)
+if name != "slave":
+    slave_servers = filter(lambda server: name.lower() == server.name.lower(),servers)
+else:
+    slave_servers = filter(lambda server: name in server.name.lower(),servers)
+
 
 slave_dicts = convertDict(slave_servers)
 
