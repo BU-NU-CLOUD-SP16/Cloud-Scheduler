@@ -92,7 +92,7 @@ public class ClusterElasticityAgent {
             ClassLoader classLoader = ClusterElasticityAgent.class.getClassLoader();
             Class aClass = classLoader.loadClass(argumentList.getDbExecutorPluginMainClass());
             dbExecutor = (DBExecutor) aClass.newInstance();
-            dbExecutor.executeScript(argumentList.getDdlFile());
+//            dbExecutor.executeScript(argumentList.getDdlFile());
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
             System.exit(1);

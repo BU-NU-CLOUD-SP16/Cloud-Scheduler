@@ -5,6 +5,7 @@ import com.google.gson.JsonParser;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -67,7 +68,7 @@ public final class MesosMetric implements ICollectorPluginByTable {
 
     private void runsOnTableRows(List<FrameworkSlaveRelationship> runsOn, List<ITableInfo> lst) {
         for(FrameworkSlaveRelationship fsr: runsOn) {
-            ITableInfo t = new TableInfo("Framework");
+            ITableInfo t = new TableInfo("Runs_On");
             t.addColName("Framework_ID").addColValue(fsr.getFrameworkId())
                     .addColName("Slave_ID").addColValue(fsr.getSlaveId());
             t.setPriority(2);
@@ -84,7 +85,8 @@ public final class MesosMetric implements ICollectorPluginByTable {
                     .addColName("CPU").addColValue(f.getCpu())
                     .addColName("Memory").addColValue(f.getMemory())
                     .addColName("Active").addColValue(f.getActive())
-                    .addColName("Scheduled_Tasks").addColValue(f.getScheduledTasks());
+                    .addColName("Scheduled_Tasks").addColValue(f.getScheduledTasks())
+                    .addColName("TimeStamp").addColValue(new Date().toString());
             t.setPriority(1);
             LOGGER.log(Level.FINE, "[Collector Plugin] framework table row " + t.toString());
             lst.add(t);
@@ -96,12 +98,13 @@ public final class MesosMetric implements ICollectorPluginByTable {
             ITableInfo t = new TableInfo("Slave");
             t.addColName("Slave_ID").addColValue(s.getSlaveId())
                     .addColName("Load_5min").addColValue(s.getLoad5Min())
-                    .addColName("Free_Memory").addColValue(s.getFreeMemory())
+                    .addColName("Free_Memory").addColValue(s.getTotalMemory() - s.getFreeMemory())
                     .addColName("Total_Memory").addColValue(s.getTotalMemory())
                     .addColName("CPU").addColValue(s.getCpu())
                     .addColName("Allocated_CPU").addColValue(s.getAllocatedCpu())
                     .addColName("Hostname").addColValue(s.getHostName())
-                    .addColName("IP").addColValue(s.getIp());
+                    .addColName("IP").addColValue(s.getIp())
+                    .addColName("TimeStamp").addColValue(new Date().toString());
             t.setPriority(0);
             LOGGER.log(Level.FINE, "[Collector Plugin] slave table row " + t.toString());
             lst.add(t);

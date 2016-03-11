@@ -10,9 +10,9 @@ import java.io.File;
 
 public class CommandLineArguments {
 
-    private String mesosMasterIP;
+    private String mesosMasterIP = "129.10.3.91";
 
-    private Integer mesosMasterPort;
+    private Integer mesosMasterPort = 5050;
 
     private File collectorPluginJar;
 
@@ -22,13 +22,13 @@ public class CommandLineArguments {
 
     private File dbExecutorPluginJar;
 
-    private String collectorPluginMainClass;
+    private String collectorPluginMainClass = "MesosMetric";
 
     private String cemanagerPluginMainClass = "MesosElasticityPlugin";
 
-    private String clusterScalerPluginMainClass;
+    private String clusterScalerPluginMainClass = "OpenStackClusterScalerPlugin";
 
-    private String dbExecutorPluginMainClass;
+    private String dbExecutorPluginMainClass = "SQLiteDBExecutor";
 
     private Integer pollInterval;
 

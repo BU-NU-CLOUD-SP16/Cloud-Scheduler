@@ -10,6 +10,10 @@
     <orderEntry type="module" module-name="Collector" exported="" />
     <orderEntry type="module" module-name="Common" exported="" />
     <orderEntry type="module" module-name="Manager" exported="" />
-    <orderEntry type="library" name="lib" level="project" />
+    <orderEntry type="library" name="com.sparkjava:spark-core:2.3" level="project" />
+    <orderEntry type="module" module-name="ColllectorPlugin" />
+    <orderEntry type="module" module-name="MesosElasticityPlugin" />
+    <orderEntry type="module" module-name="OpenStackClusterScalerPlugin" />
+    <orderEntry type="module" module-name="SQLiteDBExecutorPlugin" />
   </component>
 </module>
