@@ -47,6 +47,7 @@ public class ScaleClusterElasticityAgentCommand implements ClusterElasticityAgen
             {
                 continue;
             }
+
             ArrayList<String[]> data = database.executeSelect(query);
             Data dataObject = new Data();
             dataObject.setData(data);

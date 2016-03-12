@@ -11,8 +11,8 @@ public class DBTest {
         String str2 = "SELECT * FROM Framework;";
 //        File f = new File("TestScript.sql");
         try {
-//            obj.executeSelect(str2);
-            obj.executeUpdate(str);
+            obj.executeSelect(str2);
+//            obj.executeUpdate(str);
 //            obj.clearDB();
 //            obj.executeScript(f);
         } catch (Exception e) {
