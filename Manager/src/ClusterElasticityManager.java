@@ -40,7 +40,7 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
             Class databaseExecutorPluginClass = Class.forName(databaseExecutorPluginClassName);
             elasticityPlugin = (ElasticityPlugin) elasticityPluginClass.getConstructors()[0].newInstance(null);
             scalerPlugin = (ClusterScalerPlugin) clusterScalerPluginClass.getConstructors()[0].newInstance(null);
-            database = (DBExecutor) databaseExecutorPluginClass.getConstructors()[0].newInstance(null);
+            database = (DBExecutor) databaseExecutorPluginClass.getConstructors()[1].newInstance(null);
         }
 
         catch(ClassNotFoundException ex)
