@@ -2,9 +2,12 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.jcabi.ssh.SSH;
+import com.jcabi.ssh.Shell;
 import org.omg.SendingContext.RunTime;
 
 import java.io.*;
+import java.net.URL;
 import java.util.ArrayList;
 
 /**
@@ -132,27 +135,35 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
             System.out.println("Creating Script");
             FileWriter fw = new FileWriter("script.sh");
             String s1 = "ssh -o StrictHostKeyChecking=no ubuntu@" + slave.getIp() + " \"sudo sed -i '1s/^/" + slave.getIp() + " " + slave.getHostname() + "\\n /' /etc/hosts\"\n";
-            fw.write(s1);
-            fw.write("echo Done\n");
+            String s2 = "ssh -o StrictHostKeyChecking=no ubuntu@" + slave.getIp() + " './hadoop-2.5.0-cdh5.2.0/bin/hadoop-daemon.sh start datanode &'\n";
+            String s3 = "ssh -o StrictHostKeyChecking=no ubuntu@" + slave.getIp() + " 'mesos slave --master=192.168.0.103:5050 --no-hostname_lookup --quiet &'\n";
+            fw.write(s1+s2+s3);
             fw.close();
-            System.out.println(s1);
-            p = Runtime.getRuntime().exec("scp ./script.sh ubuntu@129.10.3.91:~");
-            while(p.isAlive());
-            SshAgent agent = new SshAgent();
-            String commands[] ={"chmod 777 script.sh","~/script.sh"};
-            agent.execute(commands);
-//            agent.execute("~/script.sh");
-//            p = Runtime.getRuntime().exec("ssh -A ubuntu@129.10.3.91 chmod 777 script.sh");
-//            while(p.isAlive());
-//            p = Runtime.getRuntime().exec("ssh -A ubuntu@129.10.3.91 ~/script.sh");
-            stdError = new BufferedReader(new
+            System.out.println(s1+s2+s3);
+            p = Runtime.getRuntime().exec("python python/setup.py");
+
+
+             stdInput = new BufferedReader(new
+                    InputStreamReader(p.getInputStream()));
+
+             stdError = new BufferedReader(new
                     InputStreamReader(p.getErrorStream()));
+
             // read the output from the command
             // read any errors from the attempted command
-                while ((s = stdError.readLine()) != null) {
-                    System.out.println(s);
-                }
+
+
+            while ((s = stdInput.readLine()) != null) {
+                System.out.println(s);
+            }
+
+            while ((s = stdError.readLine()) != null) {
+                System.out.println(s);
+            }
+
             while(p.isAlive());
+
+
         } catch (IOException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
