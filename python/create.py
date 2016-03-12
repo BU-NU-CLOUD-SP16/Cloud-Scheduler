@@ -28,5 +28,5 @@ nova = nvclient.Client("2",auth_url=OS_AUTH_URL,
                        project_id=OS_TENANT_NAME,
                        region_name=OS_REGION_NAME)
 
-nova.servers.create(name=name,image=image,flavor=flavor,key_name=key_name)
+nova.servers.create(name=name,image=image,flavor=flavor,key_name=key_name,security_groups=["Mesos-Slave","SSH","default","Hadoop"])
 

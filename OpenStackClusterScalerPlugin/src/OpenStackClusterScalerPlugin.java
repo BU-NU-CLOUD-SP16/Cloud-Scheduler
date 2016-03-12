@@ -71,13 +71,13 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
             String s;
             // read the output from the command
             // read any errors from the attempted command
-//            while ((s = stdError.readLine()) != null) {
-//                System.out.println(s);
-//            }
+            while ((s = stdError.readLine()) != null) {
+                System.out.println(s);
+            }
 
-//            while ((s = stdInput.readLine()) != null) {
-//                System.out.println(s);
-//            }
+            while ((s = stdInput.readLine()) != null) {
+                System.out.println(s);
+            }
 
             while (p.isAlive());
 
@@ -129,11 +129,22 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
 
 
             Thread.sleep(10000);
-            System.out.println("Editing /etc/hosts");
-            String s1 = "ssh -A ubuntu@129.10.3.91 ssh ubuntu@" + slave.getIp() + " sudo sed -i '1s/^/" + slave.getIp() + " " + slave.getHostname() + "\\n /' /etc/hosts";
+            System.out.println("Creating Script");
+            FileWriter fw = new FileWriter("script.sh");
+            String s1 = "ssh -o StrictHostKeyChecking=no ubuntu@" + slave.getIp() + " \"sudo sed -i '1s/^/" + slave.getIp() + " " + slave.getHostname() + "\\n /' /etc/hosts\"\n";
+            fw.write(s1);
+            fw.write("echo Done\n");
+            fw.close();
             System.out.println(s1);
-            p = Runtime.getRuntime().exec(s1);
-
+            p = Runtime.getRuntime().exec("scp ./script.sh ubuntu@129.10.3.91:~");
+            while(p.isAlive());
+            SshAgent agent = new SshAgent();
+            String commands[] ={"chmod 777 script.sh","~/script.sh"};
+            agent.execute(commands);
+//            agent.execute("~/script.sh");
+//            p = Runtime.getRuntime().exec("ssh -A ubuntu@129.10.3.91 chmod 777 script.sh");
+//            while(p.isAlive());
+//            p = Runtime.getRuntime().exec("ssh -A ubuntu@129.10.3.91 ~/script.sh");
             stdError = new BufferedReader(new
                     InputStreamReader(p.getErrorStream()));
             // read the output from the command
@@ -141,7 +152,7 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
                 while ((s = stdError.readLine()) != null) {
                     System.out.println(s);
                 }
-
+            while(p.isAlive());
         } catch (IOException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
