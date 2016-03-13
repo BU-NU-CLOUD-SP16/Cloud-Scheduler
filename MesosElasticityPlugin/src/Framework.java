@@ -101,6 +101,10 @@ public class Framework {
         this.scheduled_tasks = scheduled_tasks;
     }
 
+    public Framework() {
+        this.allocated_slaves = new ArrayList<>();
+    }
+
     public void copy(Framework framework)
     {
         this.cpu = framework.getCpu();

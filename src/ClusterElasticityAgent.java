@@ -82,11 +82,6 @@ public class ClusterElasticityAgent {
         collectorThread.start();
         agent.setResourceCollector(collectorPlugin);
 
-        ClusterElasticityManager elasticityManager = new ClusterElasticityManager(argumentList);
-        Thread elasticityManagerThread = new Thread(elasticityManager);
-        elasticityManagerThread.start();
-        agent.setElasticityManager(elasticityManager);
-
         DBExecutor dbExecutor = null;
         try {
             ClassLoader classLoader = ClusterElasticityAgent.class.getClassLoader();
@@ -103,6 +98,16 @@ public class ClusterElasticityAgent {
             System.exit(1);
         }
         agent.setDbHandle(dbExecutor);
+
+        ClusterElasticityManager elasticityManager = new ClusterElasticityManager(argumentList);
+        Thread elasticityManagerThread = new Thread(elasticityManager);
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        elasticityManagerThread.start();
+        agent.setElasticityManager(elasticityManager);
 
         // Route the end-point request-resource
         post("/request-resource", (req, res) -> {
