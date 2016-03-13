@@ -16,7 +16,7 @@
         "memory": 0.3
       },
       "slave": {
-        "load":0.1,
+        "load":0.3,
         "memory":0.7
       }
     }

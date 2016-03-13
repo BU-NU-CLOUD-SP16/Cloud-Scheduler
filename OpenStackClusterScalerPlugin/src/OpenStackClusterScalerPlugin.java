@@ -86,9 +86,9 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
                 {
                     openStackNode.setId(json.get(0).getAsJsonObject().get("id").getAsString());
 
-//                    deleteNode(openStackNode);
+                    deleteNode(openStackNode);
 //                    Thread.sleep(20000);
-                    slaveCount++;
+//                    slaveCount++;
                     createNode(openStackNode);
                     c++;
                     if(c > retry)
@@ -107,15 +107,32 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
 
 
 
-            Thread.sleep(15000);
+//            Thread.sleep(15000);
 
             String s0 = "sudo sed -i '1s/^/nameserver 192.168.0.51\\n /' /etc/resolv.conf";
             String s1 =  "sudo sed -i '1s/^/" + slave.getIp() + " " + slave.getHostname() + "\\n /' /etc/hosts";
             String s2 = "nohup ./hadoop-2.5.0-cdh5.2.0/bin/hadoop-daemon.sh start datanode &>/dev/null &";
             String s3 = "nohup mesos slave --master=master.mesos:5050 --quiet &>/dev/null &";
 
-
             SshProxy proxy = new SshProxy();
+
+            while (true)
+            {
+                try {
+                    proxy.executeCommand(slave.getIp(),"hostname");
+                    System.out.println("Host ready");
+                    break;
+                }
+                catch (Exception e)
+                {
+//                    e.printStackTrace();
+                    proxy.closeSessions();
+//                    System.out.println("Slave not yet ready "+slave.getIp());
+                    Thread.sleep(1000);
+                }
+            }
+
+
             System.out.println(s0);
             System.out.println(s1);
             System.out.println(s2);
@@ -150,14 +167,34 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
         OpenStackNode node1 = (OpenStackNode) node;
         System.out.println("Deleted Node "+node1.getHostname());
         MesosSlave slave = findSlave(node1.getHostname());
+
+        if(slave == null)
+        {
+            return false;
+        }
+
         node1.setId(slave.getNodeId());
         try {
             deleteNode(node1);
+
+
+            while (true)
+            {
+               JsonArray array = listNode(slave.getHostname());
+
+                if(array == null)
+                {
+                    break;
+                }
+            }
+
+            Thread.sleep(6000);
         } catch (IOException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
         return true;
     }
 
@@ -251,6 +288,10 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
             output += s;
         }
         System.out.println(output);
+        if (output.equals("") || output.equals("[]"))
+        {
+            return null;
+        }
         Gson gson = new Gson();
         JsonArray json = gson.fromJson(output, JsonArray.class);
         return json;
