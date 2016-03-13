@@ -89,6 +89,9 @@ public class SQLiteDBExecutor implements DBExecutor {
 
             sql = "Delete from Slave;";
             stmt.executeUpdate(sql);
+
+            sql = "Delete from Runs_On";
+            stmt.executeUpdate(sql);
 //            stmt.close();
 //            c.close();
         } catch ( Exception e ) {
