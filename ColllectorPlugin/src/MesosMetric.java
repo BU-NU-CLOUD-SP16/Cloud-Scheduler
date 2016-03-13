@@ -148,8 +148,8 @@ public final class MesosMetric implements ICollectorPluginByTable {
         JsonObject smObj = slaveMetrics.getAsJsonObject();
         slave.setAllocatedCpu(smObj.get("slave/cpus_used").getAsInt())
                 .setCpu(smObj.get("slave/cpus_total").getAsInt())
-                .setFreeMemory(smObj.get("slave/mem_used").getAsFloat())
-                .setTotalMemory(smObj.get("slave/mem_total").getAsFloat())
+                .setFreeMemory(smObj.get("system/mem_free_bytes").getAsLong())
+                .setTotalMemory(smObj.get("system/mem_total_bytes").getAsLong())
                 .setLoad5Min(smObj.get("system/load_5min").getAsFloat());
     }
 

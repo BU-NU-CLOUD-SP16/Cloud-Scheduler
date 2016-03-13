@@ -9,8 +9,8 @@ public final class SlaveDetails {
 
     private String slaveId;
     private float load5Min;
-    private float freeMemory;
-    private float totalMemory;
+    private long freeMemory;
+    private long totalMemory;
     private int cpu;
     private int allocatedCpu;
     private String ip;
@@ -45,20 +45,20 @@ public final class SlaveDetails {
         return this;
     }
 
-    public float getFreeMemory() {
+    public long getFreeMemory() {
         return freeMemory;
     }
 
-    public SlaveDetails setFreeMemory(float freeMemory) {
+    public SlaveDetails setFreeMemory(long freeMemory) {
         this.freeMemory = freeMemory;
         return this;
     }
 
-    public float getTotalMemory() {
+    public long getTotalMemory() {
         return totalMemory;
     }
 
-    public SlaveDetails setTotalMemory(float totalMemory) {
+    public SlaveDetails setTotalMemory(long totalMemory) {
         this.totalMemory = totalMemory;
         return this;
     }
