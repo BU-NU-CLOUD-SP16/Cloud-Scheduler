@@ -109,15 +109,18 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
 
             Thread.sleep(15000);
 
+            String s0 = "sudo sed -i '1s/^/nameserver 192.168.0.51\\n /' /etc/resolv.conf";
             String s1 =  "sudo sed -i '1s/^/" + slave.getIp() + " " + slave.getHostname() + "\\n /' /etc/hosts";
             String s2 = "nohup ./hadoop-2.5.0-cdh5.2.0/bin/hadoop-daemon.sh start datanode &>/dev/null &";
-            String s3 = "nohup mesos slave --master=192.168.0.103:5050 --no-hostname_lookup --quiet &>/dev/null &";
+            String s3 = "nohup mesos slave --master=master.mesos:5050 --quiet &>/dev/null &";
 
 
             SshProxy proxy = new SshProxy();
+            System.out.println(s0);
             System.out.println(s1);
             System.out.println(s2);
             System.out.println(s3);
+            proxy.executeCommand(slave.getIp(),s0);
             proxy.executeCommand(slave.getIp(),s1);
             proxy.executeCommand(slave.getIp(),s2);
             proxy.executeCommand(slave.getIp(),s3);
