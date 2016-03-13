@@ -52,6 +52,9 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
 
     private long last_time = System.currentTimeMillis();
 
+    private long noScaleUpFilter = 0;
+    private boolean noScaleUpFilterSet = false;
+
     private ArrayList<Framework> frameworks;
     private ArrayList<Slave> slaves;
 
@@ -116,12 +119,32 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
                 s.setFilterTime(s.getFilterTime() - (int) (current_time - last_time));
             }
         }
+
+        if(noScaleUpFilterSet)
+        {
+           noScaleUpFilter = noScaleUpFilter - (current_time - last_time);
+        }
         last_time = current_time;
     }
 
     @Override
     public ArrayList<Node> scaleUp()
     {
+
+        if(noScaleUpFilterSet)
+        {
+            if(noScaleUpFilter <= 0)
+            {
+                noScaleUpFilter = 0;
+                noScaleUpFilterSet = false;
+            }
+
+            else
+            {
+                return new ArrayList<>();
+            }
+        }
+
         ArrayList<Node> nodes = new ArrayList<>();
         float clusterMetrics[] = calculateClusterMetrics();
 
@@ -269,12 +292,15 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
     @Override
     public void notifyNewNodeCreation(Node node)
     {
-        /*OpenStackNode openStackNode = (OpenStackNode) node;
+        OpenStackNode openStackNode = (OpenStackNode) node;
         Slave slave = new Slave();
         slave.setHostname(openStackNode.getHostname());
+        slave.setIp(openStackNode.getIp());
         slave.setFilterTime(SLAVE_NEW_FILTER);
         slave.setFilterSet(true);
-        slaves.add(slave);*/
+        slaves.add(slave);
+        noScaleUpFilter = 300000;
+        noScaleUpFilterSet = true;
     }
 
     private float[] calculateClusterMetrics()
