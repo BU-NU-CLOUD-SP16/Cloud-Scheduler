@@ -75,7 +75,10 @@ public final class CollectorFramewrkCmd implements ClusterElasticityAgentCommand
         Class cls = cpClassInstance.getClass();
         LOGGER.log(Level.FINE, "[Collector Plugin] Processing class " + cls);
         if (ICollectorPluginByTable.class.isAssignableFrom(cls)) {
-            tableLst.addAll(callFetchByTable((ICollectorPluginByTable) cpClassInstance));
+            Collection<? extends ITableInfo> tableEntries = callFetchByTable((ICollectorPluginByTable) cpClassInstance);
+            if (tableEntries != null) {
+                tableLst.addAll(tableEntries);
+            }
         } else if (ICollectorPluginByRow.class.isAssignableFrom(cls)) {
             collectorPluginByRow((ICollectorPluginByRow) cpClassInstance, tableLst);
         } else {

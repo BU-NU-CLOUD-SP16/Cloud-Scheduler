@@ -15,6 +15,15 @@ public final class SlaveDetails {
     private int allocatedCpu;
     private String ip;
     private String hostName;
+    private boolean isReachable = true;
+
+    public boolean isReachable() {
+        return isReachable;
+    }
+
+    public void setReachable(boolean reachable) {
+        isReachable = reachable;
+    }
 
     public String getIpNPort() {
         return ipNPort;

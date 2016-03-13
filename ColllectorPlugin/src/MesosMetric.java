@@ -46,13 +46,18 @@ public final class MesosMetric implements ICollectorPluginByTable {
                 errorMsg = "[Collector Plugin] Retry attempt 1 Failed to execute HTTP request " + httpReq
                         + " .Reason: " + e.getMessage();
                 LOGGER.log(Level.SEVERE, errorMsg);
-                throw new IllegalStateException(errorMsg, e1);
+                // Not throwing any exception as the master must be temporary down and new master will be elected
+                //throw new IllegalStateException(errorMsg, e1);
             }
         }
-        // TODO check if stateSummary is not null
-        parseStateSummary(stateSummary, slaveLst, frameworkDetailsLst, runsOn);
-        populateSlaveUtilization(slaveLst);
-        return convertIntoTableRows(slaveLst, frameworkDetailsLst, runsOn);
+        if (stateSummary!= null) {
+            parseStateSummary(stateSummary, slaveLst, frameworkDetailsLst, runsOn);
+            populateSlaveUtilization(slaveLst);
+            return convertIntoTableRows(slaveLst, frameworkDetailsLst, runsOn);
+        }
+
+        LOGGER.log(Level.SEVERE, "As master could not be reached nothing will be inserted in the db");
+        return null;
     }
 
     private List<ITableInfo> convertIntoTableRows(List<SlaveDetails> slaveLst,
@@ -95,19 +100,21 @@ public final class MesosMetric implements ICollectorPluginByTable {
 
     private void slaveTableRows(List<SlaveDetails> slaveLst, List<ITableInfo> lst) {
         for(SlaveDetails s: slaveLst) {
-            ITableInfo t = new TableInfo("Slave");
-            t.addColName("Slave_ID").addColValue(s.getSlaveId())
-                    .addColName("Load_5min").addColValue(s.getLoad5Min())
-                    .addColName("Free_Memory").addColValue(s.getTotalMemory() - s.getFreeMemory())
-                    .addColName("Total_Memory").addColValue(s.getTotalMemory())
-                    .addColName("CPU").addColValue(s.getCpu())
-                    .addColName("Allocated_CPU").addColValue(s.getAllocatedCpu())
-                    .addColName("Hostname").addColValue(s.getHostName())
-                    .addColName("IP").addColValue(s.getIp())
-                    .addColName("TimeStamp").addColValue(new Date().toString());
-            t.setPriority(0);
-            LOGGER.log(Level.FINE, "[Collector Plugin] slave table row " + t.toString());
-            lst.add(t);
+            if (s.isReachable()) {
+                ITableInfo t = new TableInfo("Slave");
+                t.addColName("Slave_ID").addColValue(s.getSlaveId())
+                        .addColName("Load_5min").addColValue(s.getLoad5Min())
+                        .addColName("Free_Memory").addColValue(s.getTotalMemory() - s.getFreeMemory())
+                        .addColName("Total_Memory").addColValue(s.getTotalMemory())
+                        .addColName("CPU").addColValue(s.getCpu())
+                        .addColName("Allocated_CPU").addColValue(s.getAllocatedCpu())
+                        .addColName("Hostname").addColValue(s.getHostName())
+                        .addColName("IP").addColValue(s.getIp())
+                        .addColName("TimeStamp").addColValue(new Date().toString());
+                t.setPriority(0);
+                LOGGER.log(Level.FINE, "[Collector Plugin] slave table row " + t.toString());
+                lst.add(t);
+            }
         }
     }
 
@@ -135,11 +142,18 @@ public final class MesosMetric implements ICollectorPluginByTable {
                     errorMsg = "[Collector Plugin] Retry attempt 1 Failed to execute HTTP request " + httpReq
                             + " .Reason: " + e.getMessage();
                     LOGGER.log(Level.SEVERE, errorMsg);
-                    throw new IllegalStateException(errorMsg, e1);
+                    //not throwing ann exception as slave must be temporary down
+                    //throw new IllegalStateException(errorMsg, e1);
                 }
             }
-            // TODO check if slaveMetrics is not null
-            parseSlaveMetrics(slave, slaveMetrics);
+            if (slaveMetrics != null) {
+                parseSlaveMetrics(slave, slaveMetrics);
+            }
+            else {
+                slave.setReachable(false);
+                LOGGER.log(Level.SEVERE, "Unreachable slave " + slave.getHostName() +
+                        ". Hence no rows will be inserted for this slave");
+            }
         }
     }
 
