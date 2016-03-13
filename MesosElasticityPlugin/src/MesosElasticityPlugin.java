@@ -221,7 +221,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         ArrayList<Node> toBeDeleted = new ArrayList<>();
         float[] clusterMetrics = calculateClusterMetrics();
 
-        if(slaves.size() == MIN_SLAVES)
+        if(slaves.size() <= MIN_SLAVES)
         {
             return toBeDeleted;
         }
@@ -230,6 +230,12 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         {
             OpenStackNode node = new OpenStackNode("3");
             node.setHostname(slave.getHostname());
+
+            if(slave.getHostname().toLowerCase().equals("spark-slave-1") || slave.getHostname().toLowerCase().equals("spark-slave-2"))
+            {
+                continue;
+            }
+
             if(slave.isFilterSet())
             {
                 if(slave.getFilterTime() > 0)

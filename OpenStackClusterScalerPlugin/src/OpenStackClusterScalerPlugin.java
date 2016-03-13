@@ -63,7 +63,7 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
             createNode(openStackNode);
 
             String output = "";
-            int retry = 4;
+            int retry = 3;
             int c = 0;
             while(true) {
                 output = "";
@@ -87,7 +87,7 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
                     openStackNode.setId(json.get(0).getAsJsonObject().get("id").getAsString());
 
 //                    deleteNode(openStackNode);
-//                    Thread.sleep(10000);
+//                    Thread.sleep(20000);
                     slaveCount++;
                     createNode(openStackNode);
                     c++;
@@ -143,7 +143,18 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
     @Override
     public boolean deleteNode(Node node)
     {
-        System.out.println("Deleted Node");
+
+        OpenStackNode node1 = (OpenStackNode) node;
+        System.out.println("Deleted Node "+node1.getHostname());
+        MesosSlave slave = findSlave(node1.getHostname());
+        node1.setId(slave.getNodeId());
+        try {
+            deleteNode(node1);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         return true;
     }
 
