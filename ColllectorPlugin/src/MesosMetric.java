@@ -73,12 +73,18 @@ public final class MesosMetric implements ICollectorPluginByTable {
 
     private void runsOnTableRows(List<FrameworkSlaveRelationship> runsOn, List<ITableInfo> lst) {
         for(FrameworkSlaveRelationship fsr: runsOn) {
-            ITableInfo t = new TableInfo("Runs_On");
-            t.addColName("Framework_ID").addColValue(fsr.getFrameworkId())
-                    .addColName("Slave_ID").addColValue(fsr.getSlaveId());
-            t.setPriority(2);
-            LOGGER.log(Level.FINE, "[Collector Plugin] runs_on table row " + t.toString());
-            lst.add(t);
+            if (fsr.getSlave().isReachable()) {
+                ITableInfo t = new TableInfo("Runs_On");
+                t.addColName("Framework_ID").addColValue(fsr.getFrameworkId())
+                        .addColName("Slave_ID").addColValue(fsr.getSlaveId());
+                t.setPriority(2);
+                LOGGER.log(Level.FINE, "[Collector Plugin] runs_on table row " + t.toString());
+                lst.add(t);
+            }
+            else {
+                LOGGER.log(Level.SEVERE, "Slave " + fsr.getSlave().getHostName() + " is unreachable, hence no rows for this slave will " +
+                        "be inserted in the Runs_On table for framework " + fsr.getFrameworkId());
+            }
         }
     }
 
@@ -207,7 +213,7 @@ public final class MesosMetric implements ICollectorPluginByTable {
 
             JsonArray fIds = slaveObj.getAsJsonArray("framework_ids");
             for (final JsonElement fid: fIds) {
-                runsOn.add(new FrameworkSlaveRelationship().setFrameworkId(fid.getAsString()).setSlaveId(s.getSlaveId()));
+                runsOn.add(new FrameworkSlaveRelationship().setFrameworkId(fid.getAsString()).setSlaveId(s.getSlaveId()).setSlave(s));
             }
         }
     }

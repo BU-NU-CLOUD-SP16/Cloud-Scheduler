@@ -9,6 +9,17 @@ public final class FrameworkSlaveRelationship {
     private String slaveId;
     private String frameworkId;
 
+    public SlaveDetails getSlave() {
+        return slave;
+    }
+
+    public FrameworkSlaveRelationship setSlave(SlaveDetails slave) {
+        this.slave = slave;
+        return this;
+    }
+
+    private SlaveDetails slave;
+
     public String getSlaveId() {
         return slaveId;
     }
