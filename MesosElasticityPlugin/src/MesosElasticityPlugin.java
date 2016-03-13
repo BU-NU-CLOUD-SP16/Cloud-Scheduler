@@ -1,7 +1,6 @@
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -52,6 +51,9 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
     private double SCALE_DOWN_SLAVE_MEM_THRESHOLD = 0.7;
 
     private long last_time = System.currentTimeMillis();
+
+    private long noScaleUpFilter = 0;
+    private boolean noScaleUpFilterSet = false;
 
     private ArrayList<Framework> frameworks;
     private ArrayList<Slave> slaves;
@@ -117,18 +119,38 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
                 s.setFilterTime(s.getFilterTime() - (int) (current_time - last_time));
             }
         }
+
+        if(noScaleUpFilterSet)
+        {
+           noScaleUpFilter = noScaleUpFilter - (current_time - last_time);
+        }
         last_time = current_time;
     }
 
     @Override
     public ArrayList<Node> scaleUp()
     {
+
+        if(noScaleUpFilterSet)
+        {
+            if(noScaleUpFilter <= 0)
+            {
+                noScaleUpFilter = 0;
+                noScaleUpFilterSet = false;
+            }
+
+            else
+            {
+                return new ArrayList<>();
+            }
+        }
+
         ArrayList<Node> nodes = new ArrayList<>();
         float clusterMetrics[] = calculateClusterMetrics();
 
         if (clusterMetrics[CLUSTER_LOAD] > SCALE_UP_CLUSTER_LOAD_THRESHOLD || clusterMetrics[CLUSTER_FREE_MEM]/clusterMetrics[CLUSTER_TOT_MEM] < SCALE_UP_CLUSTER_MEM_THRESHOLD)
         {
-            nodes.add(new OpenStackNode());
+            nodes.add(new OpenStackNode("3"));
             return nodes;
         }
 
@@ -144,7 +166,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
             {
                 if(framework.getAllocated_slaves().size() == 1)
                 {
-                    nodes.add(new OpenStackNode());
+                    nodes.add(new OpenStackNode("3"));
                     return nodes;
                 }
             }
@@ -157,7 +179,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
 
         if(!freeCPUSPresent && underObservationFrameworks.size() > 0)
         {
-            nodes.add(new OpenStackNode());
+            nodes.add(new OpenStackNode("3"));
             return nodes;
         }
 
@@ -184,7 +206,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
 
             if(createNewNode)
             {
-                nodes.add(new OpenStackNode());
+                nodes.add(new OpenStackNode("3"));
                 return nodes;
             }
         }
@@ -206,8 +228,8 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
 
         for(Slave slave : slaves)
         {
-            OpenStackNode node = new OpenStackNode();
-            node.setIp(slave.getIp());
+            OpenStackNode node = new OpenStackNode("3");
+            node.setHostname(slave.getHostname());
             if(slave.isFilterSet())
             {
                 if(slave.getFilterTime() > 0)
@@ -262,7 +284,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         ArrayList<Node> newNodes = new ArrayList<>();
         for(int i=0;i<newNodesCount;i++)
         {
-            newNodes.add(new OpenStackNode());
+            newNodes.add(new OpenStackNode("3"));
         }
         return newNodes;
     }
@@ -270,12 +292,15 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
     @Override
     public void notifyNewNodeCreation(Node node)
     {
-       /* OpenStackNode openStackNode = (OpenStackNode) node;
+        OpenStackNode openStackNode = (OpenStackNode) node;
         Slave slave = new Slave();
+        slave.setHostname(openStackNode.getHostname());
         slave.setIp(openStackNode.getIp());
         slave.setFilterTime(SLAVE_NEW_FILTER);
         slave.setFilterSet(true);
-        slaves.add(slave);*/
+        slaves.add(slave);
+        noScaleUpFilter = 300000;
+        noScaleUpFilterSet = true;
     }
 
     private float[] calculateClusterMetrics()
@@ -422,7 +447,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         slaves = new ArrayList<>();
         for(Slave newS : newSlaves)
         {
-            Slave existingS = findSlaveWithIP(newS.getIp(),oldSlaves);
+            Slave existingS = findSlaveWithHostname(newS.getHostname(),oldSlaves);
             if(existingS == null)
             {
                 slaves.add(newS);
@@ -469,11 +494,11 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         return null;
     }
 
-    private Slave findSlaveWithIP(String ip, ArrayList<Slave> slaves)
+    private Slave findSlaveWithHostname(String hostname, ArrayList<Slave> slaves)
     {
         for(Slave slave : slaves)
         {
-            if(slave.getIp().equals(ip))
+            if(slave.getHostname().equals(hostname))
             {
                 return slave;
             }

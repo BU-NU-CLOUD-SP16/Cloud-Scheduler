@@ -95,9 +95,8 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 *.db
-*.orig
+servers.json
 python/.idea
-*.json
-*.log
-*.lck
-*.sh
+*.orig
+Collector_Plugin.log
+script.sh
