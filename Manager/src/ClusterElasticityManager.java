@@ -116,7 +116,7 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
     }
 
     private Logger logSetup() {
-        LogManager.getLogManager().reset();
+//        LogManager.getLogManager().reset();
         Logger logger = Logger.getLogger(MANAGER_LOGGER);
         logger.setLevel(Level.FINE);
         FileHandler logFileHandler = null;
