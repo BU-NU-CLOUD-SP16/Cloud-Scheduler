@@ -229,12 +229,8 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         for(Slave slave : slaves)
         {
             OpenStackNode node = new OpenStackNode("3");
-            node.setHostname(slave.getHostname());
+            node.setIp(slave.getHostname());
 
-            if(slave.getHostname().toLowerCase().equals("spark-slave-1") || slave.getHostname().toLowerCase().equals("spark-slave-2"))
-            {
-                continue;
-            }
 
             if(slave.isFilterSet())
             {
@@ -250,12 +246,17 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
                 }
             }
 
+            if(slave.getHostname().toLowerCase().equals("192.168.0.105") || slave.getHostname().toLowerCase().equals("192.168.0.220"))
+            {
+                continue;
+            }
+
             ArrayList<Framework> frameworksOnSlave = slave.getFrameworks_running();
 
             boolean canDelete = true;
             for (Framework f: frameworksOnSlave)
             {
-                if(f.getAllocated_slaves().size() > 1)
+                if(f.getAllocated_slaves().size() == 1)
                 {
                     canDelete = false;
                 }
@@ -270,7 +271,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
 
             if(clusterMetrics[CLUSTER_LOAD] < SCALE_DOWN_CLUSTER_LOAD_THRESHOLD && clusterMetrics[CLUSTER_FREE_MEM]/clusterMetrics[CLUSTER_TOT_MEM] > SCALE_DOWN_CLUSTER_MEM_THRESHOLD)
             {
-                if(slave.getLoad() < 0.1 || slave.getFree_mem()/slave.getTotal_mem() > 0.7)
+                if(slave.getLoad() < SCALE_DOWN_SLAVE_LOAD_THRESHOLD || slave.getFree_mem()/slave.getTotal_mem() > SCALE_DOWN_SLAVE_MEM_THRESHOLD)
                 {
 
                     toBeDeleted.add(node);

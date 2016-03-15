@@ -112,7 +112,7 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
             String s0 = "sudo sed -i '1s/^/nameserver 192.168.0.51\\n /' /etc/resolv.conf";
             String s1 =  "sudo sed -i '1s/^/" + slave.getIp() + " " + slave.getHostname() + "\\n /' /etc/hosts";
             String s2 = "nohup ./hadoop-2.5.0-cdh5.2.0/bin/hadoop-daemon.sh start datanode &>/dev/null &";
-            String s3 = "nohup mesos slave --master=master.mesos:5050 --quiet &>/dev/null &";
+            String s3 = "nohup mesos slave --master=master.mesos:5050 --no-hostname_lookup --quiet &>/dev/null &";
 
             SshProxy proxy = new SshProxy();
 
@@ -165,8 +165,8 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
     {
 
         OpenStackNode node1 = (OpenStackNode) node;
-        System.out.println("Deleted Node "+node1.getHostname());
-        MesosSlave slave = findSlave(node1.getHostname());
+        System.out.println("Deleted Node "+node1.getIp());
+        MesosSlave slave = findSlave(node1.getIp());
 
         if(slave == null)
         {
@@ -213,11 +213,11 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
         return slaves;
     }
 
-    private MesosSlave findSlave(String name)
+    private MesosSlave findSlave(String ip)
     {
         for(MesosSlave slave : slaves)
         {
-            if(slave.getHostname().equals(name))
+            if(slave.getIp().equals(ip))
             {
                 return slave;
             }
