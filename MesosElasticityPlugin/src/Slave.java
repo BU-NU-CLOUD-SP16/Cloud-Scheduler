@@ -114,4 +114,8 @@ public class Slave {
         this.load = slave.getLoad();
         this.allocated_cpu = slave.getAllocated_cpu();
     }
+
+    public Slave() {
+        this.frameworks_running = new ArrayList<>();
+    }
 }

@@ -100,3 +100,4 @@ python/.idea
 *.orig
 Collector_Plugin.log
 script.sh
+*.log

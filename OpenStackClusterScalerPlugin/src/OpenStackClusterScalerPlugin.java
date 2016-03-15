@@ -59,49 +59,16 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
         OpenStackNode openStackNode = (OpenStackNode) node;
         MesosSlave slave = new MesosSlave();
         try {
-            Process p = Runtime.getRuntime().exec("python python/create.py --name Spark-Slave-"+slaveCount+" --flavor "+openStackNode.getFlavor()+" --image 168274f7-9841-4a59-805b-abc44afbffeb --key-name Sourabh-OSX");
 
-            BufferedReader stdInput = new BufferedReader(new
-                    InputStreamReader(p.getInputStream()));
-
-            BufferedReader stdError = new BufferedReader(new
-                    InputStreamReader(p.getErrorStream()));
-            String s;
-            // read the output from the command
-            // read any errors from the attempted command
-            while ((s = stdError.readLine()) != null) {
-                System.out.println(s);
-            }
-
-            while ((s = stdInput.readLine()) != null) {
-                System.out.println(s);
-            }
-
-            while (p.isAlive());
+            createNode(openStackNode);
 
             String output = "";
+            int retry = 3;
+            int c = 0;
             while(true) {
                 output = "";
-                p = Runtime.getRuntime().exec("python python/list.py --name Spark-Slave-" + slaveCount);
 
-                stdInput = new BufferedReader(new
-                        InputStreamReader(p.getInputStream()));
-
-                stdError = new BufferedReader(new
-                        InputStreamReader(p.getErrorStream()));
-                // read the output from the command
-                // read any errors from the attempted command
-//                while ((s = stdError.readLine()) != null) {
-//                    System.out.println(s);
-//                }
-
-                while ((s = stdInput.readLine()) != null) {
-                    output += s;
-                }
-                System.out.println(output);
-                Gson gson = new Gson();
-                JsonArray json = gson.fromJson(output, JsonArray.class);
-
+                JsonArray json = listNode("Spark-Slave-"+slaveCount);
 
                 if(json.get(0).getAsJsonObject().get("status").getAsString().toLowerCase().equals("active"))
                 {
@@ -115,7 +82,21 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
                     break;
                 }
 
-                while (p.isAlive());
+                else if(json.get(0).getAsJsonObject().get("status").getAsString().toLowerCase().equals("error"))
+                {
+                    openStackNode.setId(json.get(0).getAsJsonObject().get("id").getAsString());
+
+                    deleteNode(openStackNode);
+//                    Thread.sleep(20000);
+//                    slaveCount++;
+                    createNode(openStackNode);
+                    c++;
+                    if(c > retry)
+                    {
+                        System.exit(0);
+                    }
+                }
+
 
                 Thread.sleep(1000);
             }
@@ -126,17 +107,37 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
 
 
 
-            Thread.sleep(15000);
+//            Thread.sleep(15000);
 
+            String s0 = "sudo sed -i '1s/^/nameserver 192.168.0.51\\n /' /etc/resolv.conf";
             String s1 =  "sudo sed -i '1s/^/" + slave.getIp() + " " + slave.getHostname() + "\\n /' /etc/hosts";
             String s2 = "nohup ./hadoop-2.5.0-cdh5.2.0/bin/hadoop-daemon.sh start datanode &>/dev/null &";
-            String s3 = "nohup mesos slave --master=192.168.0.103:5050 --no-hostname_lookup --quiet &>/dev/null &";
-
+            String s3 = "nohup mesos slave --master=master.mesos:5050 --quiet &>/dev/null &";
 
             SshProxy proxy = new SshProxy();
+
+            while (true)
+            {
+                try {
+                    proxy.executeCommand(slave.getIp(),"hostname");
+                    System.out.println("Host ready");
+                    break;
+                }
+                catch (Exception e)
+                {
+//                    e.printStackTrace();
+                    proxy.closeSessions();
+//                    System.out.println("Slave not yet ready "+slave.getIp());
+                    Thread.sleep(1000);
+                }
+            }
+
+
+            System.out.println(s0);
             System.out.println(s1);
             System.out.println(s2);
             System.out.println(s3);
+            proxy.executeCommand(slave.getIp(),s0);
             proxy.executeCommand(slave.getIp(),s1);
             proxy.executeCommand(slave.getIp(),s2);
             proxy.executeCommand(slave.getIp(),s3);
@@ -162,7 +163,38 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
     @Override
     public boolean deleteNode(Node node)
     {
-        System.out.println("Deleted Node");
+
+        OpenStackNode node1 = (OpenStackNode) node;
+        System.out.println("Deleted Node "+node1.getHostname());
+        MesosSlave slave = findSlave(node1.getHostname());
+
+        if(slave == null)
+        {
+            return false;
+        }
+
+        node1.setId(slave.getNodeId());
+        try {
+            deleteNode(node1);
+
+
+            while (true)
+            {
+               JsonArray array = listNode(slave.getHostname());
+
+                if(array == null)
+                {
+                    break;
+                }
+            }
+
+            Thread.sleep(6000);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         return true;
     }
 
@@ -212,6 +244,63 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
         }
 
         return max;
+    }
+
+    private void createNode(OpenStackNode openStackNode) throws IOException, InterruptedException {
+        Process p = Runtime.getRuntime().exec("python python/create.py --name Spark-Slave-"+slaveCount+" --flavor "+openStackNode.getFlavor()+" --image 168274f7-9841-4a59-805b-abc44afbffeb --key-name Sourabh-OSX");
+
+        BufferedReader stdInput = new BufferedReader(new
+                InputStreamReader(p.getInputStream()));
+
+        BufferedReader stdError = new BufferedReader(new
+                InputStreamReader(p.getErrorStream()));
+        String s;
+        // read the output from the command
+        // read any errors from the attempted command
+        while ((s = stdError.readLine()) != null) {
+            System.out.println(s);
+        }
+
+        while ((s = stdInput.readLine()) != null) {
+            System.out.println(s);
+        }
+
+        p.waitFor();
+    }
+
+    private JsonArray listNode(String name) throws IOException {
+       Process  p = Runtime.getRuntime().exec("python python/list.py --name "+name);
+
+        BufferedReader stdInput = new BufferedReader(new
+                InputStreamReader(p.getInputStream()));
+
+        BufferedReader stdError = new BufferedReader(new
+                InputStreamReader(p.getErrorStream()));
+        String s;
+        String output = "";
+        // read the output from the command
+        // read any errors from the attempted command
+//                while ((s = stdError.readLine()) != null) {
+//                    System.out.println(s);
+//                }
+
+        while ((s = stdInput.readLine()) != null) {
+            output += s;
+        }
+        System.out.println(output);
+        if (output.equals("") || output.equals("[]"))
+        {
+            return null;
+        }
+        Gson gson = new Gson();
+        JsonArray json = gson.fromJson(output, JsonArray.class);
+        return json;
+    }
+
+    private void deleteNode(OpenStackNode node) throws IOException, InterruptedException {
+        Process p = Runtime.getRuntime().exec("python python/delete.py --id "+node.getId());
+
+        p.waitFor();
     }
 
 }

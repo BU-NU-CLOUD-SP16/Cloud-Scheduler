@@ -7,6 +7,10 @@ import java.io.InputStream;
  */
 public class SshProxy {
 
+    private Session session;
+    private Session secondSession;
+    private Channel channel;
+
     public void executeCommand(String final_host, String command) throws Exception{
 
 
@@ -18,18 +22,19 @@ public class SshProxy {
 
         JSch jsch=new JSch();
         jsch.addIdentity(private_key);
-        Session session=jsch.getSession(user, host, port);
+        session=jsch.getSession(user, host, port);
         session.setConfig("StrictHostKeyChecking", "no");
+        session.setConfig("UserKnownHostsFile","/dev/null");
         session.setPortForwardingL(2233, final_host, 22);
         session.connect();
         Channel ch = session.openChannel("direct-tcpip");
 
 
-        Session secondSession = jsch.getSession(user, "localhost", 2233);
+        secondSession = jsch.getSession(user, "localhost", 2233);
         secondSession.setConfig("StrictHostKeyChecking", "no");
-
+        secondSession.setConfig("UserKnownHostsFile","/dev/null");
         secondSession.connect(); // now we're connected to the secondary system
-        Channel channel=secondSession.openChannel("exec");
+        channel =secondSession.openChannel("exec");
         ((ChannelExec)channel).setCommand(command);
 
         channel.setInputStream(null);
@@ -48,6 +53,16 @@ public class SshProxy {
 
         channel.disconnect();
 
+        secondSession.disconnect();
+        session.disconnect();
+    }
+
+    public  void closeSessions()
+    {
+        if(channel != null)
+        {
+            channel.disconnect();
+        }
         secondSession.disconnect();
         session.disconnect();
     }

@@ -5,7 +5,7 @@ import argparse
 
 OS_AUTH_URL = "https://keystone.kaizen.massopencloud.org:5000/v2.0"
 OS_USERNAME = "bollapragada.s@husky.neu.edu"
-OS_PASSWORD = getpass.getpass()
+OS_PASSWORD = 'Soumya123'
 OS_TENANT_NAME = "Cloud Scheduler"
 OS_REGION_NAME = "MOC_Kaizen"
 
