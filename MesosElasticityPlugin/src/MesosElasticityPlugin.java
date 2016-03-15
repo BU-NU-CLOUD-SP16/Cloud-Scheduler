@@ -271,7 +271,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
 
             if(clusterMetrics[CLUSTER_LOAD] < SCALE_DOWN_CLUSTER_LOAD_THRESHOLD && clusterMetrics[CLUSTER_FREE_MEM]/clusterMetrics[CLUSTER_TOT_MEM] > SCALE_DOWN_CLUSTER_MEM_THRESHOLD)
             {
-                if(slave.getLoad() < SCALE_DOWN_SLAVE_LOAD_THRESHOLD || slave.getFree_mem()/slave.getTotal_mem() > SCALE_DOWN_SLAVE_MEM_THRESHOLD)
+                if(slave.getLoad()/slave.getCpu() < SCALE_DOWN_SLAVE_LOAD_THRESHOLD || slave.getFree_mem()/slave.getTotal_mem() > SCALE_DOWN_SLAVE_MEM_THRESHOLD)
                 {
 
                     toBeDeleted.add(node);

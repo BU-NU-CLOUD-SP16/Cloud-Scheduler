@@ -165,13 +165,14 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
     {
 
         OpenStackNode node1 = (OpenStackNode) node;
-        System.out.println("Deleted Node "+node1.getIp());
+
         MesosSlave slave = findSlave(node1.getIp());
 
         if(slave == null)
         {
             return false;
         }
+
 
         node1.setId(slave.getNodeId());
         try {
@@ -194,7 +195,7 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
+        System.out.println("Deleted Node "+node1.getIp());
         return true;
     }
 
