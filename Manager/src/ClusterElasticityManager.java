@@ -1,6 +1,7 @@
 import java.io.File;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Timer;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.*;
 
 /**
@@ -9,6 +10,9 @@ import java.util.logging.*;
 public class ClusterElasticityManager implements ClusterElasticityManagerFramework {
 
     private static final String MANAGER_LOGGER = "Cluster Elasticity Manager";
+    private static final String SCALE_DOWN_METHOD = "scaleDown";
+    private static final String SCALE_UP_METHOD = "scaleUp";
+    private static final String SETUP_METHOD = "fetch";
 
     // The poll interval which is an int that tells the frequency at which the polling should take place
     // The Plugin's class name which is a string
@@ -23,24 +27,32 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
     // Instance to database API
     private DBExecutor database;
 
-    private LinkedBlockingQueue<ClusterElasticityAgentCommand> workerQueue;
+    private String[] setupDataQueries;
+
 
     private File logDir;
     private Logger logger;
+
+
     public ClusterElasticityManager(CommandLineArguments arguments) {
         this.pollInterval = arguments.getPollInterval();
         this.elasticityPluginClassName = arguments.getCemanagerPluginMainClass();
         this.clusterScalerPluginClassName = arguments.getClusterScalerPluginMainClass();
         this.databaseExecutorPluginClassName = arguments.getDbExecutorPluginMainClass();
         this.logDir = new File(arguments.getLogDir());
-        workerQueue = new LinkedBlockingQueue<>();
 
         logger = logSetup();
+
+        logger.config("Elasticity Plugin Class Name = "+elasticityPluginClassName);
+        logger.config("Cluster Scaler Plugin Class Name = "+clusterScalerPluginClassName);
+        logger.config("Database Executor Plugin Class Name = "+databaseExecutorPluginClassName);
+
+        createInstances();
+        processAnnotations();
     }
 
 
-    @Override
-    public void run() {
+    private void createInstances() {
         logger.info("Started Cluster Elasticity Manager");
         try
         {
@@ -70,53 +82,42 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
         {
             logger.severe(ex.toString());
         }
-
-
-        new Timer().scheduleAtFixedRate(new ClusterElasticityAgentTimerTask(this, new ScaleClusterElasticityAgentCommand(elasticityPlugin,scalerPlugin,database)),0,pollInterval);
-        logger.info("Scale Commands Scheduled to be added to queue every "+pollInterval+"ms");
-
-        while(true)
-        {
-            try {
-                ClusterElasticityAgentCommand command = workerQueue.take();
-                logger.fine("Got a "+command.getClass()+" "+command.toString());
-                command.execute();
-                logger.fine("Executed command "+command.toString());
-            } catch (InterruptedException e) {
-                logger.severe(e.toString());
-            }
-        }
     }
 
 
     @Override
     public void notifyResourceScaling(String parameters) throws ClusterElasticityAgentException {
-        try {
-            workerQueue.put(new RequestResourcesClusterElasticityAgentCommand(elasticityPlugin,scalerPlugin,parameters));
-            logger.fine("Adding RequestResourcesClusterElasticityAgentCommand to worker queue with parameters "+parameters);
-        } catch (InterruptedException e) {
-            logger.severe(e.toString());
-        } catch (Exception e) {
-            logger.severe(e.toString());
-            throw new ClusterElasticityAgentException("Failed to Queue HTTP Request for scaling resource!!");
+        ArrayList<Node> newNodes = elasticityPlugin.requestResources(parameters);
+        for(Node newNode : newNodes)
+        {
+            scalerPlugin.createNewNode(newNode);
         }
     }
 
     @Override
-    public void notifyTimerExpiry(ClusterElasticityAgentCommand workerCommand) throws ClusterElasticityAgentException {
-        try {
-            workerQueue.put(workerCommand);
-            logger.fine("Adding "+workerCommand.getClass()+" to worker queue");
-        } catch (InterruptedException e) {
-            logger.severe(e.toString());
-        } catch (Exception e) {
-            logger.severe(e.toString());
-            throw new ClusterElasticityAgentException("Failed to Queue HTTP Request for scaling resource!!");
+    public void notifyTimerExpiry() throws ClusterElasticityAgentException {
+        elasticityPlugin.fetch(fetchData(setupDataQueries));
+
+        ArrayList<Node> newNodes = elasticityPlugin.scaleUp();
+
+        scalerPlugin.setup();
+
+        if(newNodes != null) {
+            for (Node newNode : newNodes) {
+                Node node = scalerPlugin.createNewNode(newNode);
+                elasticityPlugin.notifyNewNodeCreation(node);
+            }
+        }
+
+        ArrayList<Node> shouldBeDeletedNodes = elasticityPlugin.scaleDown();
+        if(shouldBeDeletedNodes != null) {
+            for (Node nodeToBeDeleted : shouldBeDeletedNodes) {
+                scalerPlugin.deleteNode(nodeToBeDeleted);
+            }
         }
     }
 
     private Logger logSetup() {
-//        LogManager.getLogManager().reset();
         Logger logger = Logger.getLogger(MANAGER_LOGGER);
         logger.setLevel(Level.FINE);
         FileHandler logFileHandler = null;
@@ -129,7 +130,8 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
             consoleHandler.setFilter(new Filter() {
                 @Override
                 public boolean isLoggable(LogRecord record) {
-                    return record.getLevel().toString().toLowerCase().equals("info") || record.getLevel().toString().toLowerCase().equals("severe");
+                    return record.getLevel().toString().toLowerCase().equals("info") || record.getLevel().toString().toLowerCase().equals("severe") ||
+                            record.getLevel().toString().toLowerCase().equals("config");
                 }
             });
             logger.addHandler(logFileHandler);
@@ -139,5 +141,40 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
             System.err.print("[Manager] Could not create log file at " + logDir.getAbsolutePath());
         }
         return logger;
+    }
+
+    private void processAnnotations()
+    {
+        Method[] methods = elasticityPlugin.getClass().getDeclaredMethods();
+
+        for(Method method : methods)
+        {
+
+            if(method.getName().equals(SETUP_METHOD))
+            {
+                DataQuery dataQuery = method.getAnnotation(DataQuery.class);
+                setupDataQueries = dataQuery.queries();
+            }
+
+        }
+    }
+
+    private ArrayList<Data> fetchData(String[] queries)
+    {
+        ArrayList<Data> datas = new ArrayList<>();
+        for(String query : queries)
+        {
+            if(query.equals(""))
+            {
+                continue;
+            }
+
+            ArrayList<String[]> data = database.executeSelect(query);
+            Data dataObject = new Data();
+            dataObject.setData(data);
+            dataObject.setQuery(query);
+            datas.add(dataObject);
+        }
+        return datas;
     }
 }

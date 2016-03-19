@@ -8,7 +8,7 @@ public class ClusterElasticityAgent {
 
     private CommandLineArguments arguments;
     private ClusterElasticityManager elasticityManager;
-    private CollectorPluginFrameworkImpl resourceCollector;
+    private Collector resourceCollector;
     private DBExecutor dbHandle;
 
     public ClusterElasticityAgent() {
@@ -30,11 +30,11 @@ public class ClusterElasticityAgent {
         this.elasticityManager = elasticityManager;
     }
 
-    public CollectorPluginFrameworkImpl getResourceCollector() {
+    public Collector getResourceCollector() {
         return resourceCollector;
     }
 
-    public void setResourceCollector(CollectorPluginFrameworkImpl resourceCollector) {
+    public void setResourceCollector(Collector resourceCollector) {
         this.resourceCollector = resourceCollector;
     }
 
@@ -77,11 +77,6 @@ public class ClusterElasticityAgent {
         ModuleLoader.testLoadedModule(argumentList.getCollectorPluginMainClass().toString(), "printHello");
         ModuleLoader.testLoadedModule(argumentList.getCemanagerPluginMainClass().toString(), "printWorld");*/
 
-        CollectorPluginFrameworkImpl collectorPlugin = new CollectorPluginFrameworkImpl(argumentList);
-        Thread collectorThread = new Thread(collectorPlugin);
-        collectorThread.start();
-        agent.setResourceCollector(collectorPlugin);
-
         DBExecutor dbExecutor = null;
         try {
             ClassLoader classLoader = ClusterElasticityAgent.class.getClassLoader();
@@ -99,14 +94,10 @@ public class ClusterElasticityAgent {
         }
         agent.setDbHandle(dbExecutor);
 
+        Collector collectorPlugin = new Collector(argumentList);
+        agent.setResourceCollector(collectorPlugin);
+
         ClusterElasticityManager elasticityManager = new ClusterElasticityManager(argumentList);
-        Thread elasticityManagerThread = new Thread(elasticityManager);
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        elasticityManagerThread.start();
         agent.setElasticityManager(elasticityManager);
 
         // Route the end-point request-resource
@@ -128,9 +119,15 @@ public class ClusterElasticityAgent {
 
         while(true){
             try {
-                Thread.sleep(5000);
+
+                collectorPlugin.notifyTimerExpiry();
+                elasticityManager.notifyTimerExpiry();
+
+                Thread.sleep(argumentList.getPollInterval());
             } catch(InterruptedException ex) {
                 Thread.currentThread().interrupt();
+            } catch (ClusterElasticityAgentException e) {
+                e.printStackTrace();
             }
         }
 

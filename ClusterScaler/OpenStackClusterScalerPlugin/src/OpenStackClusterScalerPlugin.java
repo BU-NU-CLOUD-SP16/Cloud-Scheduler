@@ -10,6 +10,11 @@ import java.util.ArrayList;
  */
 public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
 
+    private static final String OPENSTACK_CLIENT_PATH = "ClusterScaler/OpenStackClusterScalerPlugin/OpenStackClient";
+    private static final String LIST_FILE_NAME = "list.py";
+    private static  final String CREATE_FILE_NAME = "create.py";
+    private static final String DELETE_FILE_NAME = "delete.py";
+
     private ArrayList<MesosSlave> slaves;
     private int slaveCount = 0;
 
@@ -18,25 +23,18 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
     {
         String output = "";
         try {
-            Process p = Runtime.getRuntime().exec("python python/list.py");
+            Process p = Runtime.getRuntime().exec("python "+OPENSTACK_CLIENT_PATH+File.separator+LIST_FILE_NAME);
 
             BufferedReader stdInput = new BufferedReader(new
                     InputStreamReader(p.getInputStream()));
 
-            BufferedReader stdError = new BufferedReader(new
-                    InputStreamReader(p.getErrorStream()));
             String s;
-            // read the output from the command
-            // read any errors from the attempted command
-//            while ((s = stdError.readLine()) != null) {
-//                System.out.println(s);
-//            }
 
             while ((s = stdInput.readLine()) != null) {
                 output += s;
             }
 
-            while (p.isAlive());
+            p.waitFor();
 
             System.out.println(output);
 
@@ -48,6 +46,8 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
             System.out.println("OpenStack Setup Done");
 
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
@@ -87,8 +87,6 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
                     openStackNode.setId(json.get(0).getAsJsonObject().get("id").getAsString());
 
                     deleteNode(openStackNode);
-//                    Thread.sleep(20000);
-//                    slaveCount++;
                     createNode(openStackNode);
                     c++;
                     if(c > retry)
@@ -248,7 +246,7 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
     }
 
     private void createNode(OpenStackNode openStackNode) throws IOException, InterruptedException {
-        Process p = Runtime.getRuntime().exec("python python/create.py --name Spark-Slave-"+slaveCount+" --flavor "+openStackNode.getFlavor()+" --image 168274f7-9841-4a59-805b-abc44afbffeb --key-name Sourabh-OSX");
+        Process p = Runtime.getRuntime().exec("python "+OPENSTACK_CLIENT_PATH+File.separator+CREATE_FILE_NAME+" --name Spark-Slave-"+slaveCount+" --flavor "+openStackNode.getFlavor()+" --image 168274f7-9841-4a59-805b-abc44afbffeb --key-name Sourabh-OSX");
 
         BufferedReader stdInput = new BufferedReader(new
                 InputStreamReader(p.getInputStream()));
@@ -270,7 +268,7 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
     }
 
     private JsonArray listNode(String name) throws IOException {
-       Process  p = Runtime.getRuntime().exec("python python/list.py --name "+name);
+       Process  p = Runtime.getRuntime().exec("python "+OPENSTACK_CLIENT_PATH+File.separator+LIST_FILE_NAME+" --name "+name);
 
         BufferedReader stdInput = new BufferedReader(new
                 InputStreamReader(p.getInputStream()));
@@ -299,7 +297,7 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
     }
 
     private void deleteNode(OpenStackNode node) throws IOException, InterruptedException {
-        Process p = Runtime.getRuntime().exec("python python/delete.py --id "+node.getId());
+        Process p = Runtime.getRuntime().exec("python "+OPENSTACK_CLIENT_PATH+File.separator+DELETE_FILE_NAME+" --id "+node.getId());
 
         p.waitFor();
     }

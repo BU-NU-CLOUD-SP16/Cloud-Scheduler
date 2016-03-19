@@ -19,6 +19,10 @@ public class Slave {
 
     private ArrayList<Framework> frameworks_running;
 
+    public Slave() {
+        this.frameworks_running = new ArrayList<>();
+    }
+
     public int getFilterTime() {
         return filterTime;
     }
@@ -115,7 +119,4 @@ public class Slave {
         this.allocated_cpu = slave.getAllocated_cpu();
     }
 
-    public Slave() {
-        this.frameworks_running = new ArrayList<>();
-    }
 }

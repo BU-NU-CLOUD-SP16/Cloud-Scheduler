@@ -3,17 +3,20 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Cloud-Scheduler.iml" filepath="$PROJECT_DIR$/Cloud-Scheduler.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ClusterScaler/ClusterScaler.iml" filepath="$PROJECT_DIR$/ClusterScaler/ClusterScaler.iml" />
       <module fileurl="file://$PROJECT_DIR$/Collector/Collector.iml" filepath="$PROJECT_DIR$/Collector/Collector.iml" />
-      <module fileurl="file://$PROJECT_DIR$/ColllectorPlugin/ColllectorPlugin.iml" filepath="$PROJECT_DIR$/ColllectorPlugin/ColllectorPlugin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/MesosCollectorPlugin/CollectorPlugin.iml" filepath="$PROJECT_DIR$/MesosCollectorPlugin/CollectorPlugin.iml" />
       <module fileurl="file://$PROJECT_DIR$/Common/Common.iml" filepath="$PROJECT_DIR$/Common/Common.iml" />
       <module fileurl="file://$PROJECT_DIR$/Database/Database.iml" filepath="$PROJECT_DIR$/Database/Database.iml" />
       <module fileurl="file://$PROJECT_DIR$/Demo/Demo.iml" filepath="$PROJECT_DIR$/Demo/Demo.iml" />
       <module fileurl="file://$PROJECT_DIR$/Manager/Manager.iml" filepath="$PROJECT_DIR$/Manager/Manager.iml" />
-      <module fileurl="file://$PROJECT_DIR$/MesosElasticityPlugin/MesosElasticityPlugin.iml" filepath="$PROJECT_DIR$/MesosElasticityPlugin/MesosElasticityPlugin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Mesos/Mesos.iml" filepath="$PROJECT_DIR$/Mesos/Mesos.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Mesos/MesosCollectorPlugin/MesosCollectorPlugin.iml" filepath="$PROJECT_DIR$/Mesos/MesosCollectorPlugin/MesosCollectorPlugin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Mesos/MesosElasticityPlugin/MesosElasticityPlugin.iml" filepath="$PROJECT_DIR$/Mesos/MesosElasticityPlugin/MesosElasticityPlugin.iml" />
       <module fileurl="file://$PROJECT_DIR$/Node/Node.iml" filepath="$PROJECT_DIR$/Node/Node.iml" />
-      <module fileurl="file://$PROJECT_DIR$/OpenStackClusterScalerPlugin/OpenStackClusterScalerPlugin.iml" filepath="$PROJECT_DIR$/OpenStackClusterScalerPlugin/OpenStackClusterScalerPlugin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ClusterScaler/OpenStackClusterScalerPlugin/OpenStackClusterScalerPlugin.iml" filepath="$PROJECT_DIR$/ClusterScaler/OpenStackClusterScalerPlugin/OpenStackClusterScalerPlugin.iml" />
       <module fileurl="file://$PROJECT_DIR$/Plugin/Plugin.iml" filepath="$PROJECT_DIR$/Plugin/Plugin.iml" />
-      <module fileurl="file://$PROJECT_DIR$/SQLiteDBExecutorPlugin/SQLiteDBExecutorPlugin.iml" filepath="$PROJECT_DIR$/SQLiteDBExecutorPlugin/SQLiteDBExecutorPlugin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Database/SQLiteDBExecutorPlugin/SQLiteDBExecutorPlugin.iml" filepath="$PROJECT_DIR$/Database/SQLiteDBExecutorPlugin/SQLiteDBExecutorPlugin.iml" />
       <module fileurl="file://$PROJECT_DIR$/Utilities/Utilities.iml" filepath="$PROJECT_DIR$/Utilities/Utilities.iml" />
     </modules>
   </component>

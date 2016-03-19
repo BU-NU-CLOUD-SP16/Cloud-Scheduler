@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,7 +16,7 @@ import java.util.logging.Logger;
 
 public final class MesosMetric implements ICollectorPluginByTable {
 
-    private final static Logger LOGGER = Logger.getLogger(CollectorPluginFrameworkImpl.COLLECTOR_LOGGER_NAME);
+    private final static Logger LOGGER = Logger.getLogger(Collector.COLLECTOR_LOGGER_NAME);
 
     @Override
     public List<ITableInfo> fetch(List<Data> data, String masterAddr) {

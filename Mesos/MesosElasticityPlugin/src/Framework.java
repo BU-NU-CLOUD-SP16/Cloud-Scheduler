@@ -13,6 +13,11 @@ public class Framework {
     private boolean scheduled_tasks;
     private int filterTime;
     private boolean filterSet;
+    private ArrayList<Slave> allocated_slaves;
+
+    public Framework() {
+        this.allocated_slaves = new ArrayList<>();
+    }
 
     public int getFilterTime() {
         return filterTime;
@@ -34,24 +39,9 @@ public class Framework {
         return allocated_slaves;
     }
 
-    @Override
-    public String toString() {
-        return "Framework{" +
-                "id='" + id + '\'' +
-                ", name='" + name + '\'' +
-                ", cpu=" + cpu +
-                ", memory=" + memory +
-                ", active=" + active +
-                ", scheduled_tasks=" + scheduled_tasks +
-                ", allocated_slaves=" + allocated_slaves +
-                '}';
-    }
-
     public void setAllocated_slaves(ArrayList<Slave> allocated_slaves) {
         this.allocated_slaves = allocated_slaves;
     }
-
-    private ArrayList<Slave> allocated_slaves;
 
     public String getId() {
         return id;
@@ -101,9 +91,6 @@ public class Framework {
         this.scheduled_tasks = scheduled_tasks;
     }
 
-    public Framework() {
-        this.allocated_slaves = new ArrayList<>();
-    }
 
     public void copy(Framework framework)
     {
@@ -111,5 +98,18 @@ public class Framework {
         this.memory = framework.getMemory();
         this.active = framework.isActive();
         this.scheduled_tasks = framework.isScheduled_tasks();
+    }
+
+    @Override
+    public String toString() {
+        return "Framework{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", cpu=" + cpu +
+                ", memory=" + memory +
+                ", active=" + active +
+                ", scheduled_tasks=" + scheduled_tasks +
+                ", allocated_slaves=" + allocated_slaves +
+                '}';
     }
 }

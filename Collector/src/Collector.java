@@ -1,58 +1,98 @@
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.text.MessageFormat;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
 /**
- * Created by kovit on 3/9/2016.
+ * Created by Kovit on 3/8/2016.
  */
-public final class CollectorFramewrkCmd implements ClusterElasticityAgentCommand {
-    private final static Logger LOGGER = Logger.getLogger(CollectorPluginFrameworkImpl.COLLECTOR_LOGGER_NAME);
-    private DBExecutor dbExecutor;
-    private List<Object> collectorPluginCls;
-    private String masterAddr;
+
+
+// TODO: self code review
+// TODO : testing
+// -----------------------------------------------------------------
+// TODO: java doc
+// TODO: package structure
+// TODO: constants
+// TODO: checking if method @DataQuery tag
+// TODO: support bulk insert
+// TODO: implementing cache
+
+public final class Collector implements ClusterElasticityAgentFramework {
+
     private static final String INSERT_SQL_STMT = "INSERT INTO {0} ({1}) VALUES ({2})";
+    public final static String COLLECTOR_LOGGER_NAME = "CollectorFramework";
+    private final static Logger LOGGER = Logger.getLogger(COLLECTOR_LOGGER_NAME);
+    private final String masterIpAddress;
 
-    public CollectorFramewrkCmd(DBExecutor dbExec, List<Object> cPluginClass, String masterAddr) {
-        this.dbExecutor = dbExec;
-        this.collectorPluginCls = cPluginClass;
-        this.masterAddr = masterAddr;
+    private int pollInterval;
+    private String databasePluginClassName;
+    private String collectorPluginClassName;
+    private List<Object> collectorPluginClasses;
+
+    private DBExecutor database;
+
+
+    private String logDir;
+
+    public Collector(CommandLineArguments argumentList) {
+        masterIpAddress = argumentList.getMesosMasterIP() + ":" + argumentList.getMesosMasterPort();
+        databasePluginClassName = argumentList.getDbExecutorPluginMainClass();
+        collectorPluginClassName = argumentList.getCollectorPluginMainClass();
+        pollInterval = argumentList.getPollInterval();
+        logDir = argumentList.getLogDir();
+        logSetup();
+        createInstances();
     }
 
-    private List<Data> processQueryAnnotation(Method mthd) {
-        if (mthd.isAnnotationPresent(DataQuery.class)) {
-            LOGGER.log(Level.FINE, "@DataQuery annotation found");
-            DataQuery dataQuery = mthd.getAnnotation(DataQuery.class);
-            String[] queries = dataQuery.queries();
-            List<Data> result = executeQueries(queries);
-            return result;
+    public void createInstances() {
+        try
+        {
+            Class databaseExecutorPluginClass = Class.forName(databasePluginClassName);
+            database = (DBExecutor) databaseExecutorPluginClass.getConstructor().newInstance();
+            collectorPluginClasses = getCPluginClsIntances(collectorPluginClassName);
         }
-        LOGGER.log(Level.FINE, "@DataQuery annotation not found");
-        return null;
+
+        catch (ClassNotFoundException ex)
+        {
+
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
     }
 
-    private List<Data> executeQueries(String[] queries) {
-        List<Data> resultLst = new ArrayList<>();
-        for (String query : queries) {
-            if (!query.isEmpty()) {
-                List<String[]> data = dbExecutor.executeSelect(query);
-                LOGGER.log(Level.FINE, "Query [" + query + "] executed successfully. Returned " + data.size() + " rows");
-                Data dataObject = new Data();
-                dataObject.setData(data);
-                dataObject.setQuery(query);
-                resultLst.add(dataObject);
+
+
+    private List<Object> getCPluginClsIntances(String collectorPluginMainClass) {
+        String[] classNamesLst = collectorPluginMainClass.split(",");
+        List<Object> classInstance = new ArrayList<>(classNamesLst.length);
+        try {
+            for (String className : classNamesLst) {
+                classInstance.add(Class.forName(className).getConstructor().newInstance());
+                LOGGER.log(Level.FINE, "Instance of class " + className + " created successfully");
             }
         }
-        return resultLst;
+        catch(Exception ex) {
+            String errorMsg = "[Collector Framework] Failed to create instances of collector plugin classes " + ex.getMessage();
+            LOGGER.log(Level.SEVERE, errorMsg);
+            throw new IllegalStateException(errorMsg, ex);
+        }
+        return classInstance;
     }
 
     @Override
-    public void execute() {
+    public void notifyTimerExpiry() throws ClusterElasticityAgentException {
         List<ITableInfo> tableLst = new ArrayList<>();
-        for (Object cpClassInstance : collectorPluginCls) {
+        for (Object cpClassInstance : collectorPluginClasses) {
             processCollectorPluginClass(cpClassInstance, tableLst);
         }
 
@@ -63,11 +103,27 @@ public final class CollectorFramewrkCmd implements ClusterElasticityAgentCommand
             }
         });
 
-        dbExecutor.clearDB();
+        database.clearDB();
         for (ITableInfo tInfo : tableLst) {
             String query = query(tInfo);
             LOGGER.log(Level.FINE, "[Collector Framework] Executing query " + query);
-            dbExecutor.executeUpdate(query);
+            database.executeUpdate(query);
+        }
+    }
+
+    private void logSetup() {
+        LogManager.getLogManager().reset();
+        Logger logger = Logger.getLogger(COLLECTOR_LOGGER_NAME);
+        logger.setLevel(Level.FINE);
+        FileHandler logFileHandler = null;
+        try {
+            logFileHandler = new FileHandler(logDir + File.separator + "Collector_Plugin.log");
+            SimpleFormatter formatterTxt = new SimpleFormatter();
+            logFileHandler.setFormatter(formatterTxt);
+            logger.addHandler(logFileHandler);
+        }
+        catch (Exception e) {
+            System.err.print("[Collector Framework] Could not create log file at " + logDir);
         }
     }
 
@@ -100,7 +156,7 @@ public final class CollectorFramewrkCmd implements ClusterElasticityAgentCommand
         }
         List<Data> results = processQueryAnnotation(fetchMthd);
         try {
-            return (List<ITableInfo>) fetchMthd.invoke(cpClassInstance, results, masterAddr);
+            return (List<ITableInfo>) fetchMthd.invoke(cpClassInstance, results, masterIpAddress);
         } catch (Exception e) {
             String errorMsg = "[CollectorFramework] Failed to invoke method [fetch] on class " +
                     cls.getName() + ". Reason:" + e.getMessage();
@@ -199,7 +255,7 @@ public final class CollectorFramewrkCmd implements ClusterElasticityAgentCommand
         int numOfIterations = 0;
         try {
             LOGGER.log(Level.FINE, "[CollectorFramework] Invoking method " + fetchMthd.getName());
-            numOfIterations = (int) fetchMthd.invoke(cls, results, masterAddr);
+            numOfIterations = (int) fetchMthd.invoke(cls, results, masterIpAddress);
         } catch (Exception e) {
             String errorMsg = "[CollectorFramework] Failed to invoke method [fetch] on class " +
                     cls.getName() + ". Reason:" + e.getMessage();
@@ -211,5 +267,32 @@ public final class CollectorFramewrkCmd implements ClusterElasticityAgentCommand
 
     public String query(ITableInfo info) {
         return MessageFormat.format(INSERT_SQL_STMT, info.getTableName(), info.colNameToString(), info.colValueToString());
+    }
+
+    private List<Data> processQueryAnnotation(Method mthd) {
+        if (mthd.isAnnotationPresent(DataQuery.class)) {
+            LOGGER.log(Level.FINE, "@DataQuery annotation found");
+            DataQuery dataQuery = mthd.getAnnotation(DataQuery.class);
+            String[] queries = dataQuery.queries();
+            List<Data> result = executeQueries(queries);
+            return result;
+        }
+        LOGGER.log(Level.FINE, "@DataQuery annotation not found");
+        return null;
+    }
+
+    private List<Data> executeQueries(String[] queries) {
+        List<Data> resultLst = new ArrayList<>();
+        for (String query : queries) {
+            if (!query.isEmpty()) {
+                List<String[]> data = database.executeSelect(query);
+                LOGGER.log(Level.FINE, "Query [" + query + "] executed successfully. Returned " + data.size() + " rows");
+                Data dataObject = new Data();
+                dataObject.setData(data);
+                dataObject.setQuery(query);
+                resultLst.add(dataObject);
+            }
+        }
+        return resultLst;
     }
 }
