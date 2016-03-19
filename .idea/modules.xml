@@ -5,7 +5,6 @@
       <module fileurl="file://$PROJECT_DIR$/Cloud-Scheduler.iml" filepath="$PROJECT_DIR$/Cloud-Scheduler.iml" />
       <module fileurl="file://$PROJECT_DIR$/ClusterScaler/ClusterScaler.iml" filepath="$PROJECT_DIR$/ClusterScaler/ClusterScaler.iml" />
       <module fileurl="file://$PROJECT_DIR$/Collector/Collector.iml" filepath="$PROJECT_DIR$/Collector/Collector.iml" />
-      <module fileurl="file://$PROJECT_DIR$/MesosCollectorPlugin/CollectorPlugin.iml" filepath="$PROJECT_DIR$/MesosCollectorPlugin/CollectorPlugin.iml" />
       <module fileurl="file://$PROJECT_DIR$/Common/Common.iml" filepath="$PROJECT_DIR$/Common/Common.iml" />
       <module fileurl="file://$PROJECT_DIR$/Database/Database.iml" filepath="$PROJECT_DIR$/Database/Database.iml" />
       <module fileurl="file://$PROJECT_DIR$/Demo/Demo.iml" filepath="$PROJECT_DIR$/Demo/Demo.iml" />
