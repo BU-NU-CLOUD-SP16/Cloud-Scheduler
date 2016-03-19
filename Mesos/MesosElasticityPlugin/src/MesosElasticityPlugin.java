@@ -1,11 +1,15 @@
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import jdk.nashorn.internal.objects.Global;
+import sun.util.logging.PlatformLogger;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Created by chemistry_sourabh on 3/2/16.
@@ -58,10 +62,13 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
     private ArrayList<Framework> frameworks;
     private ArrayList<Slave> slaves;
 
+    private Logger logger;
+
     public MesosElasticityPlugin()
     {
         frameworks = new ArrayList<>();
         slaves = new ArrayList<>();
+        logger = GlobalLogger.globalLogger;
     }
 
 
@@ -71,6 +78,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
     @Override
     public void fetch(ArrayList<Data> data)
     {
+        logger.log(Level.FINER,"Entering fetch",GlobalLogger.MANAGER_LOG_ID);
         long current_time = System.currentTimeMillis();
         Data slaveData = data.get(0);
         Data frameworkData = data.get(1);
@@ -91,7 +99,10 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
             SCALE_DOWN_SLAVE_LOAD_THRESHOLD = obj.get("thresholds").getAsJsonObject().get("scale_down").getAsJsonObject().get("slave").getAsJsonObject().get("load").getAsDouble();
             SCALE_DOWN_SLAVE_MEM_THRESHOLD = obj.get("thresholds").getAsJsonObject().get("scale_down").getAsJsonObject().get("slave").getAsJsonObject().get("memory").getAsDouble();
 
-
+            logger.log(Level.INFO,"Cluster Scale Up = "+SCALE_UP_CLUSTER_LOAD_THRESHOLD+" "+SCALE_UP_CLUSTER_MEM_THRESHOLD,GlobalLogger.MANAGER_LOG_ID);
+            logger.log(Level.INFO,"Slave Scale Up = "+SCALE_UP_SLAVE_LOAD_THRESHOLD+" "+SCALE_UP_SLAVE_MEM_THRESHOLD,GlobalLogger.MANAGER_LOG_ID);
+            logger.log(Level.INFO,"Cluster Scale Down = "+SCALE_DOWN_CLUSTER_LOAD_THRESHOLD+" "+SCALE_DOWN_CLUSTER_MEM_THRESHOLD,GlobalLogger.MANAGER_LOG_ID);
+            logger.log(Level.INFO,"Slave Scale Down = "+SCALE_DOWN_SLAVE_LOAD_THRESHOLD+" "+SCALE_DOWN_SLAVE_MEM_THRESHOLD,GlobalLogger.MANAGER_LOG_ID);
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -125,12 +136,14 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
            noScaleUpFilter = noScaleUpFilter - (current_time - last_time);
         }
         last_time = current_time;
+        logger.log(Level.FINER,"Exiting fetch",GlobalLogger.MANAGER_LOG_ID);
     }
 
     @Override
     public ArrayList<Node> scaleUp()
     {
 
+        logger.log(Level.FINER,"Entering Scale Up",GlobalLogger.MANAGER_LOG_ID);
         if(noScaleUpFilterSet)
         {
             if(noScaleUpFilter <= 0)
@@ -141,6 +154,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
 
             else
             {
+                logger.log(Level.FINE,"In No Scale Up Mode",GlobalLogger.MANAGER_LOG_ID);
                 return new ArrayList<>();
             }
         }
@@ -148,14 +162,21 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         ArrayList<Node> nodes = new ArrayList<>();
         float clusterMetrics[] = calculateClusterMetrics();
 
+        logger.log(Level.INFO,"Cluster Metrics "+Arrays.toString(clusterMetrics),GlobalLogger.MANAGER_LOG_ID);
+
         if (clusterMetrics[CLUSTER_LOAD] > SCALE_UP_CLUSTER_LOAD_THRESHOLD || clusterMetrics[CLUSTER_FREE_MEM]/clusterMetrics[CLUSTER_TOT_MEM] < SCALE_UP_CLUSTER_MEM_THRESHOLD)
         {
             nodes.add(new OpenStackNode("3"));
+            if(clusterMetrics[CLUSTER_LOAD] > SCALE_UP_CLUSTER_LOAD_THRESHOLD)
+            {
+                logger.log(Level.INFO,"Creating New Node since Cluster Load Threshold was crossed",GlobalLogger.MANAGER_LOG_ID);
+            }
+            else
+            {
+                logger.log(Level.INFO,"Creating New Node since Cluster Memory Threshold was crossed",GlobalLogger.MANAGER_LOG_ID);
+            }
             return nodes;
         }
-
-        System.out.println(Arrays.toString(clusterMetrics));
-
 
         ArrayList<Slave> slavesWithResourceCrunch = findSlavesWithResourceCrunch();
 
@@ -167,6 +188,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
                 if(framework.getAllocated_slaves().size() == 1)
                 {
                     nodes.add(new OpenStackNode("3"));
+                    
                     return nodes;
                 }
             }
