@@ -1,4 +1,3 @@
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -24,8 +23,7 @@ import java.util.logging.*;
 public final class Collector implements ClusterElasticityAgentFramework {
 
     private static final String INSERT_SQL_STMT = "INSERT INTO {0} ({1}) VALUES ({2})";
-    public final static String COLLECTOR_LOGGER_NAME = "CollectorFramework";
-    private final static Logger LOGGER = Logger.getLogger(COLLECTOR_LOGGER_NAME);
+    private Logger logger = GlobalLogger.globalLogger;
     private final String masterIpAddress;
 
     private int pollInterval;
@@ -44,7 +42,6 @@ public final class Collector implements ClusterElasticityAgentFramework {
         collectorPluginClassName = argumentList.getCollectorPluginMainClass();
         pollInterval = argumentList.getPollInterval();
         logDir = argumentList.getLogDir();
-        logSetup();
         createInstances();
     }
 
@@ -78,12 +75,12 @@ public final class Collector implements ClusterElasticityAgentFramework {
         try {
             for (String className : classNamesLst) {
                 classInstance.add(Class.forName(className).getConstructor().newInstance());
-                LOGGER.log(Level.FINE, "Instance of class " + className + " created successfully");
+                logger.log(Level.FINE, "Instance of class " + className + " created successfully",Constants.COLLECTOR_LOG_ID);
             }
         }
         catch(Exception ex) {
             String errorMsg = "[Collector Framework] Failed to create instances of collector plugin classes " + ex.getMessage();
-            LOGGER.log(Level.SEVERE, errorMsg);
+            logger.log(Level.SEVERE, errorMsg,Constants.COLLECTOR_LOG_ID);
             throw new IllegalStateException(errorMsg, ex);
         }
         return classInstance;
@@ -106,30 +103,14 @@ public final class Collector implements ClusterElasticityAgentFramework {
         database.clearDB();
         for (ITableInfo tInfo : tableLst) {
             String query = query(tInfo);
-            LOGGER.log(Level.FINE, "[Collector Framework] Executing query " + query);
+            logger.log(Level.FINE, "[Collector Framework] Executing query " + query,Constants.COLLECTOR_LOG_ID);
             database.executeUpdate(query);
-        }
-    }
-
-    private void logSetup() {
-        LogManager.getLogManager().reset();
-        Logger logger = Logger.getLogger(COLLECTOR_LOGGER_NAME);
-        logger.setLevel(Level.FINE);
-        FileHandler logFileHandler = null;
-        try {
-            logFileHandler = new FileHandler(logDir + File.separator + "Collector_Plugin.log");
-            SimpleFormatter formatterTxt = new SimpleFormatter();
-            logFileHandler.setFormatter(formatterTxt);
-            logger.addHandler(logFileHandler);
-        }
-        catch (Exception e) {
-            System.err.print("[Collector Framework] Could not create log file at " + logDir);
         }
     }
 
     private void processCollectorPluginClass(Object cpClassInstance, List<ITableInfo> tableLst) {
         Class cls = cpClassInstance.getClass();
-        LOGGER.log(Level.FINE, "[Collector Plugin] Processing class " + cls);
+        logger.log(Level.FINE, "[Collector Plugin] Processing class " + cls,Constants.COLLECTOR_LOG_ID);
         if (ICollectorPluginByTable.class.isAssignableFrom(cls)) {
             Collection<? extends ITableInfo> tableEntries = callFetchByTable((ICollectorPluginByTable) cpClassInstance);
             if (tableEntries != null) {
@@ -138,8 +119,8 @@ public final class Collector implements ClusterElasticityAgentFramework {
         } else if (ICollectorPluginByRow.class.isAssignableFrom(cls)) {
             collectorPluginByRow((ICollectorPluginByRow) cpClassInstance, tableLst);
         } else {
-            LOGGER.log(Level.WARNING, "[Collector Plugin] " + cls.getName() + " should only implement " +
-                    "ICollectorPluginByRow or ICollectorPluginByTable. Ignoring this class");
+            logger.log(Level.WARNING, "[Collector Plugin] " + cls.getName() + " should only implement " +
+                    "ICollectorPluginByRow or ICollectorPluginByTable. Ignoring this class",Constants.COLLECTOR_LOG_ID);
         }
     }
 
@@ -151,7 +132,7 @@ public final class Collector implements ClusterElasticityAgentFramework {
         } catch (NoSuchMethodException e) {
             String errorMsg = "[CollectorFramework] Failed to get method [fetch] on class " +
                     cls.getName() + ". Reason:" + e.getMessage();
-            LOGGER.log(Level.SEVERE, errorMsg);
+            logger.log(Level.SEVERE, errorMsg,Constants.COLLECTOR_LOG_ID);
             throw new IllegalStateException(errorMsg, e);
         }
         List<Data> results = processQueryAnnotation(fetchMthd);
@@ -160,7 +141,7 @@ public final class Collector implements ClusterElasticityAgentFramework {
         } catch (Exception e) {
             String errorMsg = "[CollectorFramework] Failed to invoke method [fetch] on class " +
                     cls.getName() + ". Reason:" + e.getMessage();
-            LOGGER.log(Level.SEVERE, errorMsg);
+            logger.log(Level.SEVERE, errorMsg,Constants.COLLECTOR_LOG_ID);
             throw new IllegalStateException(errorMsg, e);
         }
     }
@@ -168,74 +149,74 @@ public final class Collector implements ClusterElasticityAgentFramework {
     private void collectorPluginByRow(ICollectorPluginByRow cpClassInstance, List<ITableInfo> tableLst) {
         Class cls = cpClassInstance.getClass();
         if (cls.isAnnotationPresent(Table.class)) {
-            LOGGER.log(Level.FINE, "[Collector Framework] Table annotation found");
+            logger.log(Level.FINE, "[Collector Framework] Table annotation found",Constants.COLLECTOR_LOG_ID);
             ITableInfo tInfo;
             String tableName = ((Table) cls.getAnnotation(Table.class)).name();
             int numOfIter = callFetch(cls);
-            LOGGER.log(Level.FINE, "[Collector Framework] Number of Iterations " + numOfIter);
+            logger.log(Level.FINE, "[Collector Framework] Number of Iterations " + numOfIter,Constants.COLLECTOR_LOG_ID);
             if (numOfIter > 0) {
                 for (int iter = 0; iter <numOfIter; iter++) {
                     tInfo = new TableInfo(tableName);
                     processClassMethods(tInfo, cpClassInstance);
                     if (tInfo.isTableValid()) {
-                        LOGGER.log(Level.FINE, "[Collector Framework] Valid table " + tableName);
+                        logger.log(Level.FINE, "[Collector Framework] Valid table " + tableName,Constants.COLLECTOR_LOG_ID);
                         tInfo.setPriority(((Table) cls.getAnnotation(Table.class)).priority());
                         tableLst.add(tInfo);
                     }
                     else {
-                        LOGGER.log(Level.WARNING, "[Collector Framework] Invalid table " + tableName
-                                + " No further processing of this table");
+                        logger.log(Level.WARNING, "[Collector Framework] Invalid table " + tableName
+                                + " No further processing of this table",Constants.COLLECTOR_LOG_ID);
                     }
                 }
             }
             else {
-                LOGGER.log(Level.WARNING, "[Collector Framework] Number of iterations is 0, hence ignoring table");
+                logger.log(Level.WARNING, "[Collector Framework] Number of iterations is 0, hence ignoring table",Constants.COLLECTOR_LOG_ID);
             }
         }
         else {
-            LOGGER.log(Level.WARNING, "[Collector Framework] No @Table annotation was found in class " + cls.getName());
+            logger.log(Level.WARNING, "[Collector Framework] No @Table annotation was found in class " + cls.getName(),Constants.COLLECTOR_LOG_ID);
         }
     }
 
     private void processClassMethods(ITableInfo tInfo, ICollectorPluginByRow cpClassInstance) {
         Class cls = cpClassInstance.getClass();
         for (Method m : cls.getMethods()) {
-            LOGGER.log(Level.FINE, "[Collector Framework] Processing method " + m.getName());
+            logger.log(Level.FINE, "[Collector Framework] Processing method " + m.getName(),Constants.COLLECTOR_LOG_ID);
             if (m.isAnnotationPresent(Column.class)) {
-                LOGGER.log(Level.FINE, "[Collector Framework] Column annotation found");
+                logger.log(Level.FINE, "[Collector Framework] Column annotation found",Constants.COLLECTOR_LOG_ID);
                 String name = ((Column) m.getAnnotation(Column.class)).name();
                 Type returnType = m.getReturnType();
                 if (returnType.equals(Integer.TYPE) || returnType.equals(Float.TYPE) ||
                         returnType.equals(Double.TYPE) || returnType.equals(Short.TYPE)) {
-                    LOGGER.log(Level.FINE, "[Collector Framework] Numeric return type");
+                    logger.log(Level.FINE, "[Collector Framework] Numeric return type",Constants.COLLECTOR_LOG_ID);
                     tInfo.addColName(name);
                     invokeMethod(false, tInfo, cpClassInstance, m);
                 }
                 else if (returnType.equals(String.class)) {
-                    LOGGER.log(Level.FINE, "[Collector Framework] String return type");
+                    logger.log(Level.FINE, "[Collector Framework] String return type",Constants.COLLECTOR_LOG_ID);
                     tInfo.addColName(name);
                     invokeMethod(true, tInfo, cpClassInstance, m);
                 }
                 else {
-                    LOGGER.log(Level.WARNING, "[Collector Framework] Invalid return type. Ignoring method. Return type should be " +
-                            "String or numeric primitive");
+                    logger.log(Level.WARNING, "[Collector Framework] Invalid return type. Ignoring method. Return type should be " +
+                            "String or numeric primitive",Constants.COLLECTOR_LOG_ID);
                 }
             }
             else {
-                LOGGER.log(Level.WARNING, "[Collector Framework] Ignoring method as @Column annotation not found");
+                logger.log(Level.WARNING, "[Collector Framework] Ignoring method as @Column annotation not found",Constants.COLLECTOR_LOG_ID);
             }
         }
     }
 
     private void invokeMethod(boolean isString, ITableInfo tInfo, ICollectorPluginByRow cpClassInstance, Method mthd) {
         try {
-            LOGGER.log(Level.FINE, "[CollectorFramework] Invoking method " + mthd.getName());
+            logger.log(Level.FINE, "[CollectorFramework] Invoking method " + mthd.getName(),Constants.COLLECTOR_LOG_ID);
             tInfo.addColValue(String.valueOf(mthd.invoke(cpClassInstance)), isString);
         }
         catch (Exception e) {
             String errorMsg = "[CollectorFramework] Failed to invoke method " + mthd.getName() + " on class " +
                     cpClassInstance.getClass().getName() + ". Reason:" + e.getMessage();
-            LOGGER.log(Level.SEVERE, errorMsg);
+            logger.log(Level.SEVERE, errorMsg,Constants.COLLECTOR_LOG_ID);
             throw new IllegalStateException(errorMsg, e);
         }
     }
@@ -244,22 +225,22 @@ public final class Collector implements ClusterElasticityAgentFramework {
         Method fetchMthd = null;
         try {
             fetchMthd = cls.getMethod("fetch", List.class, String.class);
-            LOGGER.log(Level.FINE, "[CollectorFramework] retrieved method " + fetchMthd.getName());
+            logger.log(Level.FINE, "[CollectorFramework] retrieved method " + fetchMthd.getName(),Constants.COLLECTOR_LOG_ID);
         } catch (NoSuchMethodException e) {
             String errorMsg = "[CollectorFramework] Failed to get method [fetch] on class " +
                     cls.getName() + ". Reason:" + e.getMessage();
-            LOGGER.log(Level.SEVERE, errorMsg);
+            logger.log(Level.SEVERE, errorMsg,Constants.COLLECTOR_LOG_ID);
             throw new IllegalStateException(errorMsg, e);
         }
         List<Data> results = processQueryAnnotation(fetchMthd);
         int numOfIterations = 0;
         try {
-            LOGGER.log(Level.FINE, "[CollectorFramework] Invoking method " + fetchMthd.getName());
+            logger.log(Level.FINE, "[CollectorFramework] Invoking method " + fetchMthd.getName(),Constants.COLLECTOR_LOG_ID);
             numOfIterations = (int) fetchMthd.invoke(cls, results, masterIpAddress);
         } catch (Exception e) {
             String errorMsg = "[CollectorFramework] Failed to invoke method [fetch] on class " +
                     cls.getName() + ". Reason:" + e.getMessage();
-            LOGGER.log(Level.SEVERE, errorMsg);
+            logger.log(Level.SEVERE, errorMsg,Constants.COLLECTOR_LOG_ID);
             throw new IllegalStateException(errorMsg, e);
         }
         return numOfIterations;
@@ -271,13 +252,13 @@ public final class Collector implements ClusterElasticityAgentFramework {
 
     private List<Data> processQueryAnnotation(Method mthd) {
         if (mthd.isAnnotationPresent(DataQuery.class)) {
-            LOGGER.log(Level.FINE, "@DataQuery annotation found");
+            logger.log(Level.FINE, "@DataQuery annotation found",Constants.COLLECTOR_LOG_ID);
             DataQuery dataQuery = mthd.getAnnotation(DataQuery.class);
             String[] queries = dataQuery.queries();
             List<Data> result = executeQueries(queries);
             return result;
         }
-        LOGGER.log(Level.FINE, "@DataQuery annotation not found");
+        logger.log(Level.FINE, "@DataQuery annotation not found",Constants.COLLECTOR_LOG_ID);
         return null;
     }
 
@@ -286,7 +267,7 @@ public final class Collector implements ClusterElasticityAgentFramework {
         for (String query : queries) {
             if (!query.isEmpty()) {
                 List<String[]> data = database.executeSelect(query);
-                LOGGER.log(Level.FINE, "Query [" + query + "] executed successfully. Returned " + data.size() + " rows");
+                logger.log(Level.FINE, "Query [" + query + "] executed successfully. Returned " + data.size() + " rows",Constants.COLLECTOR_LOG_ID);
                 Data dataObject = new Data();
                 dataObject.setData(data);
                 dataObject.setQuery(query);

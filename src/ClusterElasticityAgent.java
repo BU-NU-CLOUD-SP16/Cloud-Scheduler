@@ -2,6 +2,9 @@
  * Created by Praveen on 3/2/2016.
  */
 
+import java.io.File;
+import java.util.logging.*;
+
 import static spark.Spark.*;
 
 public class ClusterElasticityAgent {
@@ -11,7 +14,16 @@ public class ClusterElasticityAgent {
     private Collector resourceCollector;
     private DBExecutor dbHandle;
 
+    public static Logger logger;
+
     public ClusterElasticityAgent() {
+
+    }
+
+    public void setupLogger()
+    {
+        logger = createLogger();
+        GlobalLogger.globalLogger = logger;
     }
 
     public CommandLineArguments getArguments() {
@@ -58,7 +70,8 @@ public class ClusterElasticityAgent {
             System.exit(1);
         }
         agent.setArguments(argumentList);
-
+        agent.setupLogger();
+        logger.log(Level.INFO,"Cluster Elasticity Agent Started",Constants.MAIN_LOG_ID);
         /*
         try {
             ModuleLoader.addFile(argumentList.getCollectorPluginJar());
@@ -67,15 +80,13 @@ public class ClusterElasticityAgent {
 
             if(argumentList.getDbExecutorPluginJar().isFile())
                 ModuleLoader.addFile(argumentList.getDbExecutorPluginJar());
-
+            logger.log(Level.INFO,"Loaded all Modules",Constants.MAIN_LOG_ID);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE,"Not able to load modules "+e,Constants.MAIN_LOG_ID);
             System.exit(1);
         }*/
 
-        /*// Test
-        ModuleLoader.testLoadedModule(argumentList.getCollectorPluginMainClass().toString(), "printHello");
-        ModuleLoader.testLoadedModule(argumentList.getCemanagerPluginMainClass().toString(), "printWorld");*/
+
 
         DBExecutor dbExecutor = null;
         try {
@@ -83,23 +94,32 @@ public class ClusterElasticityAgent {
             Class aClass = classLoader.loadClass(argumentList.getDbExecutorPluginMainClass());
             dbExecutor = (DBExecutor) aClass.newInstance();
 //            dbExecutor.executeScript(argumentList.getDdlFile());
+            logger.log(Level.INFO,"Executed DDL Script Successfully",Constants.MAIN_LOG_ID);
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE,"Given Database class not found",Constants.MAIN_LOG_ID);
             System.exit(1);
         } catch (InstantiationException e) {
+            logger.log(Level.SEVERE,"Not able to create database instance",Constants.MAIN_LOG_ID);
             System.exit(1);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE,"Some Exception "+e,Constants.MAIN_LOG_ID);
             System.exit(1);
         }
         agent.setDbHandle(dbExecutor);
 
+
         Collector collectorPlugin = new Collector(argumentList);
         agent.setResourceCollector(collectorPlugin);
+
+        logger.log(Level.FINE,"Created Collector Object",Constants.MAIN_LOG_ID);
 
         ClusterElasticityManager elasticityManager = new ClusterElasticityManager(argumentList);
         agent.setElasticityManager(elasticityManager);
 
+        logger.log(Level.FINE,"Created Elasticity Manager Object",Constants.MAIN_LOG_ID);
+
+
+        logger.log(Level.FINE,"Started HTTP Endpoint",Constants.MAIN_LOG_ID);
         // Route the end-point request-resource
         post("/request-resource", (req, res) -> {
             String responseString = "";
@@ -108,8 +128,9 @@ public class ClusterElasticityAgent {
                 agent.getElasticityManager().notifyResourceScaling("");
                 res.status(200);
                 res.body("Success");
+                logger.log(Level.FINE,"Processed Request Successfully",Constants.MAIN_LOG_ID);
             }catch(ClusterElasticityAgentException e){
-                e.printStackTrace();
+                logger.log(Level.SEVERE,"Some Exception "+e,Constants.MAIN_LOG_ID);
                 res.status(400);
                 res.body("Failure");
             }
@@ -117,11 +138,14 @@ public class ClusterElasticityAgent {
             return res.body();
         });
 
+        logger.log(Level.INFO,"Starting Collector - Manager Cycle",Constants.MAIN_LOG_ID);
         while(true){
             try {
 
                 collectorPlugin.notifyTimerExpiry();
+                logger.log(Level.FINE,"Collector finished timer expiry",Constants.MAIN_LOG_ID);
                 elasticityManager.notifyTimerExpiry();
+                logger.log(Level.FINE,"Manager finished timer expiry",Constants.MAIN_LOG_ID);
 
                 Thread.sleep(argumentList.getPollInterval());
             } catch(InterruptedException ex) {
@@ -131,5 +155,38 @@ public class ClusterElasticityAgent {
             }
         }
 
+    }
+
+    private Logger createLogger()
+    {
+        LogManager.getLogManager().reset();
+        Logger logger = Logger.getLogger(Constants.LOGGER_NAME);
+        logger.setLevel(Level.FINEST);
+        try {
+            FileHandler managerFileHandler = new FileHandler(arguments.getLogDir() + File.separator + Constants.MANAGER_LOG_NAME);
+            FileHandler collectorFileHandler = new FileHandler(arguments.getLogDir()+ File.separator + Constants.COLLECTOR_LOG_NAME);
+            FileHandler centralFileHandler = new FileHandler(arguments.getLogDir() + File.separator + Constants.CENTRAL_LOG_NAME);
+            FileHandler mainFileHandler = new FileHandler(arguments.getLogDir() + File.separator + Constants.MAIN_LOG_NAME);
+            ConsoleHandler consoleHandler = new ConsoleHandler();
+            managerFileHandler.setFormatter(new SimpleFormatter());
+            managerFileHandler.setFilter(record -> record.getParameters()[0].equals(Constants.MANAGER_LOG_ID));
+            collectorFileHandler.setFormatter(new SimpleFormatter());
+            collectorFileHandler.setFilter(record -> record.getParameters()[0].equals(Constants.COLLECTOR_LOG_ID));
+            centralFileHandler.setFormatter(new SimpleFormatter());
+            mainFileHandler.setFilter(record -> record.getParameters()[0].equals(Constants.MAIN_LOG_ID));
+            mainFileHandler.setFormatter(new SimpleFormatter());
+            consoleHandler.setFormatter(new SimpleFormatter());
+            consoleHandler.setFilter(record -> record.getLevel().toString().toLowerCase().equals("info") || record.getLevel().toString().toLowerCase().equals("severe") || record.getLevel().toString().toLowerCase().equals("config"));
+            logger.addHandler(managerFileHandler);
+            logger.addHandler(collectorFileHandler);
+            logger.addHandler(centralFileHandler);
+            logger.addHandler(mainFileHandler);
+            logger.addHandler(consoleHandler);
+        }
+        catch (Exception e) {
+            System.err.print("Not able to create logger ");
+            e.printStackTrace();
+        }
+        return logger;
     }
 }
