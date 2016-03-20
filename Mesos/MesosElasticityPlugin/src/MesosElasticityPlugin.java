@@ -45,6 +45,8 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
     private static final int SLAVE_NEW_FILTER = 300000;
 
     private static final int MIN_SLAVES = 2;
+
+    private static final  String NO_DELETE_SLAVES[] = {"192.168.0.105","192.168.0.220"};
     private double SCALE_UP_CLUSTER_LOAD_THRESHOLD = 0.85;
     private double SCALE_UP_CLUSTER_MEM_THRESHOLD = 0.1;
     private double SCALE_UP_SLAVE_LOAD_THRESHOLD = 0.85;
@@ -180,28 +182,35 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
 
         ArrayList<Slave> slavesWithResourceCrunch = findSlavesWithResourceCrunch();
 
-        for(Slave slave : slavesWithResourceCrunch)
+//        for(Slave slave : slavesWithResourceCrunch)
+//        {
+//            ArrayList<Framework> frameworksOnSlave = slave.getFrameworks_running();
+//            for(Framework framework : frameworksOnSlave)
+//            {
+//                if(framework.getAllocated_slaves().size() == 1)
+//                {
+//                    nodes.add(new OpenStackNode("3"));
+//
+//                    return nodes;
+//                }
+//            }
+//        }
+
+        if(slavesWithResourceCrunch.size() > 0)
         {
-            ArrayList<Framework> frameworksOnSlave = slave.getFrameworks_running();
-            for(Framework framework : frameworksOnSlave)
-            {
-                if(framework.getAllocated_slaves().size() == 1)
-                {
-                    nodes.add(new OpenStackNode("3"));
-                    
-                    return nodes;
-                }
-            }
+            nodes.add(new OpenStackNode("3"));
+            logger.log(Level.INFO,"Creating new node as resource crunch was detected on a slave",GlobalLogger.MANAGER_LOG_ID);
+            return nodes;
         }
 
         ArrayList<Framework> underObservationFrameworks = findActiveFrameworksWithNoResources();
         boolean freeCPUSPresent = isFreeCPUPresent();
 
-        System.out.println(underObservationFrameworks);
 
         if(!freeCPUSPresent && underObservationFrameworks.size() > 0)
         {
             nodes.add(new OpenStackNode("3"));
+            logger.log(Level.INFO,"Creating new node as an active frame no free cpu",GlobalLogger.MANAGER_LOG_ID);
             return nodes;
         }
 
@@ -229,10 +238,11 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
             if(createNewNode)
             {
                 nodes.add(new OpenStackNode("3"));
+                logger.log(Level.INFO,"Creating new node as an active framework has no resources",GlobalLogger.MANAGER_LOG_ID);
                 return nodes;
             }
         }
-        System.out.println(last_time);
+
         return nodes;
     }
 
@@ -245,6 +255,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
 
         if(slaves.size() <= MIN_SLAVES)
         {
+            logger.log(Level.FINE,"Skipping since Min number of slaves are present");
             return toBeDeleted;
         }
 
@@ -268,8 +279,9 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
                 }
             }
 
-            if(slave.getHostname().toLowerCase().equals("192.168.0.105") || slave.getHostname().toLowerCase().equals("192.168.0.220"))
+            if(Arrays.binarySearch(NO_DELETE_SLAVES,slave.getHostname().toLowerCase()) < 0)
             {
+                logger.log(Level.FINE,"Skipping Slave since it should not be deleted",GlobalLogger.MANAGER_LOG_ID);
                 continue;
             }
 
@@ -286,6 +298,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
 
             if(!canDelete)
             {
+                logger.log(Level.FINE,"Skipping as only one framework is running",GlobalLogger.MANAGER_LOG_ID);
                 continue;
             }
 
@@ -296,6 +309,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
                 if(slave.getLoad()/slave.getCpu() < SCALE_DOWN_SLAVE_LOAD_THRESHOLD || slave.getFree_mem()/slave.getTotal_mem() > SCALE_DOWN_SLAVE_MEM_THRESHOLD)
                 {
 
+                    logger.log(Level.INFO,"Deleting Node "+slave.getHostname(),GlobalLogger.MANAGER_LOG_ID);
                     toBeDeleted.add(node);
                     continue;
                 }
@@ -367,6 +381,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         {
             if(framework.getCpu() == 0 && framework.isActive() && framework.getMemory() == 0)
             {
+                logger.log(Level.FINE,"Found "+framework.getId()+" has no resources",GlobalLogger.MANAGER_LOG_ID);
                 frameworks.add(framework);
             }
         }
@@ -555,6 +570,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         {
             if(slave.getLoad()/slave.getCpu() > SCALE_UP_CLUSTER_LOAD_THRESHOLD || slave.getFree_mem()/slave.getTotal_mem() < SCALE_UP_CLUSTER_MEM_THRESHOLD)
             {
+                logger.log(Level.FINE,"Resource Crunch Detected in "+slave.getHostname(),GlobalLogger.MANAGER_LOG_ID);
                 slaves.add(slave);
             }
         }
