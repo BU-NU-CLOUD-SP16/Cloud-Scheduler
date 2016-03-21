@@ -23,17 +23,18 @@ def convertDict(servers):
 
 OS_AUTH_URL = "https://keystone.kaizen.massopencloud.org:5000/v2.0"
 OS_USERNAME = "bollapragada.s@husky.neu.edu"
-OS_PASSWORD = 'Soumya123'
 OS_TENANT_NAME = "Cloud Scheduler"
 OS_REGION_NAME = "MOC_Kaizen"
 
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--name',type=str)
+parser.add_argument('--password',type=str)
 
 args = parser.parse_args()
 
 name = args.name
+OS_PASSWORD = args.password
 
 nova = nvclient.Client("2",auth_url=OS_AUTH_URL,
                        username=OS_USERNAME,

@@ -46,7 +46,7 @@ public class CommandLineArguments {
 
         pollInterval = DEFAULT_INTERVAL;
         dbExecutorPluginJar = null;
-        dbExecutorPluginMainClass = new String(DEFAULT_DB_EXECUTOR);
+        dbExecutorPluginMainClass = DEFAULT_DB_EXECUTOR;
     }
 
     public String getLogDir() {

@@ -255,7 +255,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
 
         if(slaves.size() <= MIN_SLAVES)
         {
-            logger.log(Level.FINE,"Skipping since Min number of slaves are present");
+            logger.log(Level.FINE,"Skipping since Min number of slaves are present",GlobalLogger.MANAGER_LOG_ID);
             return toBeDeleted;
         }
 
@@ -333,9 +333,47 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
     }
 
     @Override
-    public void notifyNewNodeCreation(Node node)
-    {
+    public void notifyNewNodeCreation(Node node)  {
         OpenStackNode openStackNode = (OpenStackNode) node;
+
+        String s0 = "sudo sed -i '1s/^/nameserver 192.168.0.51\\n /' /etc/resolv.conf";
+        String s1 =  "sudo sed -i '1s/^/" + openStackNode.getIp() + " " + openStackNode.getHostname() + "\\n /' /etc/hosts";
+        String s2 = "nohup ./hadoop-2.5.0-cdh5.2.0/bin/hadoop-daemon.sh start datanode &>/dev/null &";
+        String s3 = "nohup mesos slave --master=master.mesos:5050 --no-hostname_lookup --quiet &>/dev/null &";
+
+        SshProxy proxy = new SshProxy();
+
+        while (true)
+        {
+            try {
+                proxy.executeCommand(openStackNode.getIp(),"hostname");
+                logger.log(Level.INFO,"New Node Ready",GlobalLogger.MANAGER_LOG_ID);
+                break;
+            }
+            catch (Exception e)
+            {
+                proxy.closeSessions();
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        }
+
+
+
+        try {
+            proxy.executeCommand(openStackNode.getIp(),s0);
+            proxy.executeCommand(openStackNode.getIp(),s1);
+            proxy.executeCommand(openStackNode.getIp(),s2);
+            proxy.executeCommand(openStackNode.getIp(),s3);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        logger.log(Level.INFO,"Finished Connecting Node to Mesos",GlobalLogger.MANAGER_LOG_ID);
+
         Slave slave = new Slave();
         slave.setHostname(openStackNode.getHostname());
         slave.setIp(openStackNode.getIp());
