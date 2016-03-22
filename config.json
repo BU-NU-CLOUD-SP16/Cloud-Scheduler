@@ -1,0 +1,13 @@
+{
+  "Manager-Plugin": "out/artifacts/MesosElastocityPlugin_jar/MesosElasticityPlugin.jar",
+  "Collector-Plugin": "out/artifacts/MesosCollectorPlugin_jar/MesosCollectorPlugin.jar",
+  "Cluster-Scaler-Plugin": "out/artifacts/OpenStackClusterScalerPlugin_jar/OpenStackClusterScalerPlugin.jar",
+  "DB-Executor-Plugin": "out/artifacts/SQLiteDBExecutorPlugin_jar/SQLiteDBExecutorPlugin_jar",
+  "DDL-Script": "Create.sql",
+  "Poll-Interval": "5000",
+
+  "Mesos-Master-Ip": "129.10.3.91",
+  "Mesos-Master-Port": "5050",
+  "thresholds": { "scale_up": {"cluster":{"load":0.85, "memory":0.1}, "slave":{"load":0.85, "memory":0.1}}, "scale_down": {"cluster": {"load": 0.8, "memory": 0.3}, "slave": {"load":0.3, "memory":0.7}}}
+
+}

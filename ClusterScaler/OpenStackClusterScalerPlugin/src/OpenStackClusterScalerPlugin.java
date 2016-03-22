@@ -47,7 +47,8 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
             }
 
             else {
-                password = Arrays.toString(console.readPassword("Enter password:"));
+                password = new String(console.readPassword("Enter password:"));
+                logger.log(Level.FINE,"password = "+password,GlobalLogger.MANAGER_LOG_ID);
             }
         }
 

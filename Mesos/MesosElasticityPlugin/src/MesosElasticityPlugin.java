@@ -46,7 +46,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
 
     private static final int MIN_SLAVES = 2;
 
-    private static final  String NO_DELETE_SLAVES[] = {"192.168.0.105","192.168.0.220"};
+    private static final String NO_DELETE_SLAVES[] = {"192.168.0.105","192.168.0.220"};
     private double SCALE_UP_CLUSTER_LOAD_THRESHOLD = 0.85;
     private double SCALE_UP_CLUSTER_MEM_THRESHOLD = 0.1;
     private double SCALE_UP_SLAVE_LOAD_THRESHOLD = 0.85;

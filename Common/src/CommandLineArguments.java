@@ -2,45 +2,49 @@
  * Created by Praveen on 3/2/2016.
  */
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.CmdLineException;
+
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.lang.*;
 import java.io.File;
+import java.util.Map;
+import java.util.Set;
 
 public class CommandLineArguments {
 
-    private String mesosMasterIP = "129.10.3.91";
+    private static final Integer NULL_PORT = 0;
+    private static final Integer DEFAULT_INTERVAL = 5000;
+    private static final String DEFAULT_DB_EXECUTOR = "SQLiteDBExecutor";
 
-    private Integer mesosMasterPort = 5050;
+    private static final String MANAGER_PLUGIN = "Manager-Plugin";
+    private static final String COLLECTOR_PLUGIN = "Collector-Plugin";
+    private static final String CLUSTER_SCALER_PLUGIN = "Cluster-Scaler-Plugin";
+    private static final String DB_EXECUTOR_PLUGIN = "DB-Executor-Plugin";
+    private static final String DDL_SCRIPT = "DDL-Script";
+    private static final String POLL_INTERVAL = "Poll-Interval";
+    private static final String LOG = "Log";
 
     private File collectorPluginJar;
-
     private File cemanagerPluginJar;
-
     private File clusterScalerPluginJar;
-
     private File dbExecutorPluginJar;
-
     private String collectorPluginMainClass = "MesosMetric";
-
     private String cemanagerPluginMainClass = "MesosElasticityPlugin";
-
     private String clusterScalerPluginMainClass = "OpenStackClusterScalerPlugin";
-
     private String dbExecutorPluginMainClass = "SQLiteDBExecutor";
-
     private Integer pollInterval;
-
     private File ddlFile;
-
     private String logDir = System.getProperty("user.dir");
 
-    private static final Integer NULL_PORT = 0;
 
-    private static final Integer DEFAULT_INTERVAL = 5000;
-
-    private static final String DEFAULT_DB_EXECUTOR = "SQLiteDBExecutor";
+    private String configFile;
+    private  Config config;
 
     public CommandLineArguments() {
 
@@ -49,11 +53,56 @@ public class CommandLineArguments {
         dbExecutorPluginMainClass = DEFAULT_DB_EXECUTOR;
     }
 
+    public String getConfigFile() {
+        return configFile;
+    }
+
+    @Option(name = "-config", usage = "Specifies location of config.json")
+    public void setConfigFile(String configFile) {
+        File file = new File(configFile);
+        Gson gson = new Gson();
+        try {
+
+            JsonObject obj = gson.fromJson(new FileReader(file),JsonObject.class);
+            cemanagerPluginJar = new File(obj.get(MANAGER_PLUGIN).getAsString());
+            obj.remove(MANAGER_PLUGIN);
+            collectorPluginJar = new File(obj.get(COLLECTOR_PLUGIN).getAsString());
+            clusterScalerPluginJar = new File(obj.get(CLUSTER_SCALER_PLUGIN).getAsString());
+            dbExecutorPluginJar = new File(obj.get(DB_EXECUTOR_PLUGIN).getAsString());
+            ddlFile = new File(obj.get(DDL_SCRIPT).getAsString());
+            pollInterval = obj.get(POLL_INTERVAL).getAsInt();
+            if(obj.has(LOG)) {
+                logDir = obj.get(LOG).getAsString();
+                obj.remove(LOG);
+            }
+
+            obj.remove(MANAGER_PLUGIN);
+            obj.remove(COLLECTOR_PLUGIN);
+            obj.remove(CLUSTER_SCALER_PLUGIN);
+            obj.remove(DB_EXECUTOR_PLUGIN);
+            obj.remove(DDL_SCRIPT);
+            obj.remove(POLL_INTERVAL);
+
+            Set<Map.Entry<String,JsonElement>> members = obj.entrySet();
+
+            config = new Config();
+
+            for(Map.Entry<String,JsonElement> member : members)
+            {
+                config.addValueForKey(member.getKey(),member.getKey());
+            }
+
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        this.configFile = configFile;
+    }
+
     public String getLogDir() {
         return logDir;
     }
 
-    @Option(name="-log-dir",usage="sets log directory")
     public void setLogDir(String logDir) {
         File dir = new File(logDir);
         if (!dir.exists()) {
@@ -66,7 +115,6 @@ public class CommandLineArguments {
         return clusterScalerPluginJar;
     }
 
-    @Option(name="-cluster-scaler-plugin",usage="sets cluster scaler plugin jar file name")
     public void setClusterScalerPluginJar(File clusterScalerPluginJar) throws ClusterElasticityAgentException {
         if(clusterScalerPluginJar.exists())
             this.clusterScalerPluginJar = clusterScalerPluginJar;
@@ -78,7 +126,6 @@ public class CommandLineArguments {
         return dbExecutorPluginJar;
     }
 
-    @Option(name="-db-executor-plugin",usage="sets db executor plugin jar file name")
     public void setDbExecutorPluginJar(File dbExecutorPluginJar) throws ClusterElasticityAgentException {
         if(dbExecutorPluginJar.exists())
             this.dbExecutorPluginJar = dbExecutorPluginJar;
@@ -90,7 +137,6 @@ public class CommandLineArguments {
         return clusterScalerPluginMainClass;
     }
 
-    @Option(name="-cluster-scaler-mainclass",usage="sets cluster scaler main class name")
     public void setClusterScalerPluginMainClass(String clusterScalerPluginMainClass) {
         this.clusterScalerPluginMainClass = clusterScalerPluginMainClass;
     }
@@ -99,7 +145,6 @@ public class CommandLineArguments {
         return dbExecutorPluginMainClass;
     }
 
-    @Option(name="-db-executor-mainclass",usage="sets db executor main class name")
     public void setDbExecutorPluginMainClass(String dbExecutorPluginMainClass) {
         this.dbExecutorPluginMainClass = dbExecutorPluginMainClass;
     }
@@ -108,7 +153,6 @@ public class CommandLineArguments {
         return pollInterval;
     }
 
-    @Option(name="-poll-interval",usage="Sets Polling Interval in milli seconds")
     public void setPollInterval(Integer pollInterval) {
         this.pollInterval = pollInterval;
     }
@@ -117,7 +161,6 @@ public class CommandLineArguments {
         return ddlFile;
     }
 
-    @Option(name="-db-schema",usage="sets DB Schema File")
     public void setDdlFile(File ddlFile) throws ClusterElasticityAgentException {
         if(ddlFile.exists())
             this.ddlFile = ddlFile;
@@ -125,37 +168,10 @@ public class CommandLineArguments {
             throw new ClusterElasticityAgentException("DB Schema File doesn't exist");
     }
 
-    public String getMesosMasterIP() {
-        return mesosMasterIP;
-    }
-
-    @Option(name="-mesos-master-ip",usage="sets mesos master ip")
-    public void setMesosMasterIP(String mesosMasterIP) throws ClusterElasticityAgentException {
-        if(mesosMasterIP.matches("^\\d+\\.\\d+\\.\\d+\\.\\d+$")){
-            this.mesosMasterIP = mesosMasterIP;
-        }
-        else{
-            throw new ClusterElasticityAgentException("Wrong Mesos Master IP Format!!");
-        }
-    }
-
-    public Integer getMesosMasterPort() {
-        return mesosMasterPort;
-    }
-
-    @Option(name="-mesos-master-port",usage="sets mesos master port")
-    public void setMesosMasterPort(Integer mesosMasterPort) throws ClusterElasticityAgentException {
-        if(mesosMasterPort > NULL_PORT)
-            this.mesosMasterPort = mesosMasterPort;
-        else
-            throw new ClusterElasticityAgentException("Invalid Port specified!!");
-    }
-
     public File getCollectorPluginJar() {
         return collectorPluginJar;
     }
 
-    @Option(name="-collector-plugin",usage="sets collector plugin jar name")
     public void setCollectorPluginJar(File collectorPluginJar) throws ClusterElasticityAgentException {
         if(collectorPluginJar.exists())
             this.collectorPluginJar = collectorPluginJar;
@@ -167,7 +183,6 @@ public class CommandLineArguments {
         return cemanagerPluginJar;
     }
 
-    @Option(name="-cemanager-plugin",usage="sets CEManager plugin jar name")
     public void setCemanagerPluginJar(File cemanagerPluginJar) throws ClusterElasticityAgentException {
         if(cemanagerPluginJar.exists())
             this.cemanagerPluginJar = cemanagerPluginJar;
@@ -179,7 +194,6 @@ public class CommandLineArguments {
         return collectorPluginMainClass;
     }
 
-    @Option(name="-collector-mainclass",usage="sets Collector plugin main class")
     public void setCollectorPluginMainClass(String collectorPluginMainClass) {
         this.collectorPluginMainClass = collectorPluginMainClass;
     }
@@ -188,7 +202,6 @@ public class CommandLineArguments {
         return cemanagerPluginMainClass;
     }
 
-    @Option(name="-cemanager-mainclass",usage="sets CEManager plugin main class")
     public void setCemanagerPluginMainClass(String cemanagerPluginMainClass) {
         this.cemanagerPluginMainClass = cemanagerPluginMainClass;
     }

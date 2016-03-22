@@ -9,11 +9,8 @@
       <element id="module-output" name="Database" />
       <element id="module-output" name="SQLiteDBExecutorPlugin" />
       <element id="module-output" name="Manager" />
-      <element id="module-output" name="MesosElasticityPlugin" />
       <element id="module-output" name="Node" />
-      <element id="module-output" name="OpenStackClusterScalerPlugin" />
       <element id="module-output" name="Utilities" />
-      <element id="module-output" name="MesosCollectorPlugin" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/spark-core-2.3.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/slf4j-api-1.7.12.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/slf4j-simple-1.7.12.jar" path-in-jar="/" />

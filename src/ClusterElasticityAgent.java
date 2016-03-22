@@ -72,19 +72,22 @@ public class ClusterElasticityAgent {
         agent.setArguments(argumentList);
         agent.setupLogger();
         logger.log(Level.INFO,"Cluster Elasticity Agent Started",Constants.MAIN_LOG_ID);
-        /*
-        try {
-            ModuleLoader.addFile(argumentList.getCollectorPluginJar());
-            ModuleLoader.addFile(argumentList.getCemanagerPluginJar());
-            ModuleLoader.addFile(argumentList.getClusterScalerPluginJar());
 
-            if(argumentList.getDbExecutorPluginJar().isFile())
+        try {
+            if(argumentList.getCollectorPluginJar() != null)
+                ModuleLoader.addFile(argumentList.getCollectorPluginJar());
+            if(argumentList.getCemanagerPluginJar() != null)
+                ModuleLoader.addFile(argumentList.getCemanagerPluginJar());
+            if(argumentList.getClusterScalerPluginJar() != null)
+                ModuleLoader.addFile(argumentList.getClusterScalerPluginJar());
+
+            if(argumentList.getDbExecutorPluginJar() != null)
                 ModuleLoader.addFile(argumentList.getDbExecutorPluginJar());
             logger.log(Level.INFO,"Loaded all Modules",Constants.MAIN_LOG_ID);
         } catch (Exception e) {
             logger.log(Level.SEVERE,"Not able to load modules "+e,Constants.MAIN_LOG_ID);
             System.exit(1);
-        }*/
+        }
 
 
 
@@ -93,7 +96,8 @@ public class ClusterElasticityAgent {
             ClassLoader classLoader = ClusterElasticityAgent.class.getClassLoader();
             Class aClass = classLoader.loadClass(argumentList.getDbExecutorPluginMainClass());
             dbExecutor = (DBExecutor) aClass.newInstance();
-//            dbExecutor.executeScript(argumentList.getDdlFile());
+            if(argumentList.getDdlFile() != null)
+                dbExecutor.executeScript(argumentList.getDdlFile());
             logger.log(Level.INFO,"Executed DDL Script Successfully",Constants.MAIN_LOG_ID);
         } catch (ClassNotFoundException e) {
             logger.log(Level.SEVERE,"Given Database class not found",Constants.MAIN_LOG_ID);

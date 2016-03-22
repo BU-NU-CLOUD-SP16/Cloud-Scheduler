@@ -1,3 +1,4 @@
+import java.io.FileWriter;
 import java.sql.*;
 
 public class SQLiteJDBC
@@ -9,6 +10,10 @@ public class SQLiteJDBC
         try {
             Class.forName("org.sqlite.JDBC");
             c = DriverManager.getConnection("jdbc:sqlite:cloudScheduler.db");
+
+
+            FileWriter fw = new FileWriter("Create.sql");
+
 
             System.out.println("Opened database successfully");
             stmt = c.createStatement();
@@ -28,9 +33,11 @@ public class SQLiteJDBC
                     "TimeStamp TIMESTAMP NOT NULL);";
             stmt.executeUpdate(sql);
 
+            fw.write(sql+"\n");
+
             sql = "CREATE UNIQUE INDEX Framework_Framework_ID_uindex ON Framework (Framework_ID);";
             stmt.executeUpdate(sql);
-
+            fw.write(sql+"\n");
             sql = "CREATE TABLE Slave" +
                     "(Slave_ID TEXT NOT NULL," +
                     "Load_5min REAL," +
@@ -42,17 +49,18 @@ public class SQLiteJDBC
                     "Hostname TEXT," +
                     "TimeStamp TIMESTAMP NOT NULL);";
             stmt.executeUpdate(sql);
-
+            fw.write(sql+"\n");
             sql = "CREATE UNIQUE INDEX Slave_Slave_ID_uindex ON Slave (Slave_ID);";
             stmt.executeUpdate(sql);
-
+            fw.write(sql+"\n");
             sql = "CREATE TABLE Runs_On" +
                     "(Framework_ID TEXT," +
                     "Slave_ID TEXT," +
                     "FOREIGN KEY (Slave_ID) REFERENCES Slave (Slave_ID) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED," +
                     "FOREIGN KEY (Framework_ID) REFERENCES Framework (Framework_ID) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED);";
             stmt.executeUpdate(sql);
-
+            fw.write(sql+"\n");
+            fw.close();
             stmt.close();
             c.close();
         } catch ( Exception e ) {
