@@ -11,8 +11,9 @@ public class SshProxy {
     private Session secondSession;
     private Channel channel;
 
-    public void executeCommand(String final_host, String command) throws Exception{
+    public int executeCommand(String final_host, String command) throws Exception{
 
+        int exitStatus = 1;
 
         String host="129.10.3.91"; // First level target
         String user="ubuntu";
@@ -45,7 +46,7 @@ public class SshProxy {
 
         while (true) {
             if(channel.isClosed()){
-                System.out.println("exit-status: "+channel.getExitStatus());
+                exitStatus = 0;
                 break;
             }
         }
@@ -55,6 +56,8 @@ public class SshProxy {
 
         secondSession.disconnect();
         session.disconnect();
+
+        return exitStatus;
     }
 
     public  void closeSessions()

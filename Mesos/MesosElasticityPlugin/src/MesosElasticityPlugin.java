@@ -369,10 +369,14 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
 
 
         try {
-            proxy.executeCommand(openStackNode.getIp(),s0);
-            proxy.executeCommand(openStackNode.getIp(),s1);
-            proxy.executeCommand(openStackNode.getIp(),s2);
-            proxy.executeCommand(openStackNode.getIp(),s3);
+            int exit = proxy.executeCommand(openStackNode.getIp(),s0);
+            logger.log(Level.INFO,"Executed "+s0+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
+            exit = proxy.executeCommand(openStackNode.getIp(),s1);
+            logger.log(Level.INFO,"Executed "+s1+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
+            exit = proxy.executeCommand(openStackNode.getIp(),s2);
+            logger.log(Level.INFO,"Executed "+s2+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
+            exit = proxy.executeCommand(openStackNode.getIp(),s3);
+            logger.log(Level.INFO,"Executed "+s3+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
         } catch (Exception e) {
             e.printStackTrace();
         }
