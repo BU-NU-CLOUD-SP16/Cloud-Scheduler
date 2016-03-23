@@ -65,11 +65,11 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
             Class databaseExecutorPluginClass = Class.forName(databaseExecutorPluginClassName);
             logger.log(Level.FINE,"Got Class of Database Executor Plugin = "+databaseExecutorPluginClassName,Constants.MANAGER_LOG_ID);
 
-            elasticityPlugin = (ElasticityPlugin) elasticityPluginClass.getConstructors()[0].newInstance(null);
+            elasticityPlugin = (ElasticityPlugin) elasticityPluginClass.getConstructor().newInstance();
             logger.log(Level.FINE,"Created Instance of "+elasticityPluginClassName,Constants.MANAGER_LOG_ID);
-            scalerPlugin = (ClusterScalerPlugin) clusterScalerPluginClass.getConstructors()[0].newInstance(null);
+            scalerPlugin = (ClusterScalerPlugin) clusterScalerPluginClass.getConstructor().newInstance();
             logger.log(Level.FINE,"Created Instance of "+clusterScalerPluginClassName,Constants.MANAGER_LOG_ID);
-            database = (DBExecutor) databaseExecutorPluginClass.getConstructors()[1].newInstance(null);
+            database = (DBExecutor) databaseExecutorPluginClass.getConstructor().newInstance();
             logger.log(Level.FINE,"Created Instance of "+databaseExecutorPluginClassName,Constants.MANAGER_LOG_ID);
         }
 
