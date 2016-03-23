@@ -1,4 +1,6 @@
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import jdk.nashorn.internal.objects.Global;
 import sun.util.logging.PlatformLogger;
@@ -10,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.StreamHandler;
 
 /**
  * Created by chemistry_sourabh on 3/2/16.
@@ -46,7 +49,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
 
     private static final int MIN_SLAVES = 2;
 
-    private static final String NO_DELETE_SLAVES[] = {"192.168.0.105","192.168.0.220"};
+    private ArrayList<String> NO_DELETE_SLAVES;
     private double SCALE_UP_CLUSTER_LOAD_THRESHOLD = 0.85;
     private double SCALE_UP_CLUSTER_MEM_THRESHOLD = 0.1;
     private double SCALE_UP_SLAVE_LOAD_THRESHOLD = 0.85;
@@ -65,6 +68,8 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
     private ArrayList<Slave> slaves;
 
     private Logger logger;
+
+    private String newNodeFlavor;
 
     public MesosElasticityPlugin()
     {
@@ -85,6 +90,17 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         Data slaveData = data.get(0);
         Data frameworkData = data.get(1);
         Data runsOnData = data.get(2);
+
+        JsonArray json = new Gson().fromJson(config.getValueForKey("No-Delete-Slaves"),JsonArray.class);
+
+        NO_DELETE_SLAVES = new ArrayList<String>();
+
+        for (JsonElement  element : json)
+        {
+            NO_DELETE_SLAVES.add(element.getAsString());
+        }
+
+        newNodeFlavor = config.getValueForKey("New-Node-Flavor");
 
         SCALE_UP_CLUSTER_LOAD_THRESHOLD = Float.parseFloat(config.getValueForKey("Scale-Up-Cluster-Load"));
         SCALE_UP_CLUSTER_MEM_THRESHOLD = Float.parseFloat(config.getValueForKey("Scale-Up-Cluster-Memory"));
@@ -157,7 +173,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
 
         if (clusterMetrics[CLUSTER_LOAD] > SCALE_UP_CLUSTER_LOAD_THRESHOLD || clusterMetrics[CLUSTER_FREE_MEM]/clusterMetrics[CLUSTER_TOT_MEM] < SCALE_UP_CLUSTER_MEM_THRESHOLD)
         {
-            nodes.add(new OpenStackNode("3"));
+            nodes.add(new OpenStackNode(newNodeFlavor));
             if(clusterMetrics[CLUSTER_LOAD] > SCALE_UP_CLUSTER_LOAD_THRESHOLD)
             {
                 logger.log(Level.INFO,"Creating New Node since Cluster Load Threshold was crossed",GlobalLogger.MANAGER_LOG_ID);
@@ -187,7 +203,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
 
         if(slavesWithResourceCrunch.size() > 0)
         {
-            nodes.add(new OpenStackNode("3"));
+            nodes.add(new OpenStackNode(newNodeFlavor));
             logger.log(Level.INFO,"Creating new node as resource crunch was detected on a slave",GlobalLogger.MANAGER_LOG_ID);
             return nodes;
         }
@@ -198,7 +214,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
 
         if(!freeCPUSPresent && underObservationFrameworks.size() > 0)
         {
-            nodes.add(new OpenStackNode("3"));
+            nodes.add(new OpenStackNode(newNodeFlavor));
             logger.log(Level.INFO,"Creating new node as an active frame no free cpu",GlobalLogger.MANAGER_LOG_ID);
             return nodes;
         }
@@ -226,7 +242,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
 
             if(createNewNode)
             {
-                nodes.add(new OpenStackNode("3"));
+                nodes.add(new OpenStackNode(newNodeFlavor));
                 logger.log(Level.INFO,"Creating new node as an active framework has no resources",GlobalLogger.MANAGER_LOG_ID);
                 return nodes;
             }
@@ -250,7 +266,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
 
         for(Slave slave : slaves)
         {
-            OpenStackNode node = new OpenStackNode("3");
+            OpenStackNode node = new OpenStackNode(newNodeFlavor);
             node.setIp(slave.getHostname());
 
 
@@ -268,7 +284,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
                 }
             }
 
-            if(Arrays.binarySearch(NO_DELETE_SLAVES,slave.getHostname().toLowerCase()) < 0)
+            if(NO_DELETE_SLAVES.contains(slave.getHostname().toLowerCase()))
             {
                 logger.log(Level.FINE,"Skipping Slave since it should not be deleted",GlobalLogger.MANAGER_LOG_ID);
                 continue;
@@ -316,7 +332,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         ArrayList<Node> newNodes = new ArrayList<>();
         for(int i=0;i<newNodesCount;i++)
         {
-            newNodes.add(new OpenStackNode("3"));
+            newNodes.add(new OpenStackNode(newNodeFlavor));
         }
         return newNodes;
     }

@@ -103,7 +103,11 @@ public class CommandLineArguments {
 
             for(Map.Entry<String,JsonElement> member : members)
             {
-                config.addValueForKey(member.getKey(),member.getValue().getAsString());
+                try {
+                    config.addValueForKey(member.getKey(),member.getValue().getAsString());
+                } catch (IllegalStateException e) {
+                    config.addValueForKey(member.getKey(),member.getValue().getAsJsonArray().toString());
+                }
             }
 
 
@@ -160,7 +164,11 @@ public class CommandLineArguments {
 
             for(Map.Entry<String,JsonElement> member : members)
             {
-                config.addValueForKey(member.getKey(),member.getValue().getAsString());
+                try {
+                    config.addValueForKey(member.getKey(),member.getValue().getAsString());
+                } catch (IllegalStateException e) {
+                    config.addValueForKey(member.getKey(),member.getValue().getAsJsonArray().toString());
+                }
             }
 
 

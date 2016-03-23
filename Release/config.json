@@ -11,8 +11,10 @@
   "Poll-Interval": "5000",
 
   "OpenStack-Client-Path": "./Release/OpenStackClient",
-  "Username": "bollapragada.s@husky.neu.edu",
-  "Password": "Soumya123",
+  "No-Delete-Slaves": ["192.168.0.105","192.168.0.220"],
+  "New-Node-Flavor": "3",
+  "Username": "Your username",
+  "Password": "Your password",
   "Mesos-Master-Ip": "129.10.3.91",
   "Mesos-Master-Port": "5050",
   "Scale-Up-Cluster-Load": 0.85,
