@@ -22,6 +22,8 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
     private String username;
     private String password;
 
+    private String keyname;
+
     private String openStackClientPath;
 
     private Logger logger = GlobalLogger.globalLogger;
@@ -32,6 +34,7 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
         logger.log(Level.FINER,"Entering setup()",GlobalLogger.MANAGER_LOG_ID);
         String output = "";
 
+        keyname = config.getValueForKey("Key-Name");
 
         String user = config.getValueForKey("Username");
         String pass = config.getValueForKey("Password");
@@ -261,7 +264,7 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
     }
 
     private void createNode(OpenStackNode openStackNode) throws IOException, InterruptedException {
-        Process p = Runtime.getRuntime().exec("python "+ openStackClientPath +File.separator+CREATE_FILE_NAME+" --password "+password+" --username "+username+" --name Spark-Slave-"+slaveCount+" --flavor "+openStackNode.getFlavor()+" --image 168274f7-9841-4a59-805b-abc44afbffeb --key-name Sourabh-OSX");
+        Process p = Runtime.getRuntime().exec("python "+ openStackClientPath +File.separator+CREATE_FILE_NAME+" --password "+password+" --username "+username+" --name Spark-Slave-"+slaveCount+" --flavor "+openStackNode.getFlavor()+" --image 168274f7-9841-4a59-805b-abc44afbffeb --key-name "+keyname);
 
         BufferedReader stdInput = new BufferedReader(new
                 InputStreamReader(p.getInputStream()));

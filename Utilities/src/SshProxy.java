@@ -7,9 +7,15 @@ import java.io.InputStream;
  */
 public class SshProxy {
 
+    private  String privateKey;
+
     private Session session;
     private Session secondSession;
     private Channel channel;
+
+    public SshProxy(String privateKey) {
+        this.privateKey = privateKey;
+    }
 
     public int executeCommand(String final_host, String command) throws Exception{
 
@@ -19,10 +25,8 @@ public class SshProxy {
         String user="ubuntu";
         int port=22;
 
-        String private_key = "/Users/chemistry_sourabh/.ssh/id_rsa";
-
         JSch jsch=new JSch();
-        jsch.addIdentity(private_key);
+        jsch.addIdentity(privateKey);
         session=jsch.getSession(user, host, port);
         session.setConfig("StrictHostKeyChecking", "no");
         session.setConfig("UserKnownHostsFile","/dev/null");
