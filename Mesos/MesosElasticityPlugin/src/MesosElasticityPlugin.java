@@ -78,7 +78,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
     // Will be called at beginning of each command
     @DataQuery(queries = {"select * from slave","select * from framework","select * from runs_on"})
     @Override
-    public void fetch(ArrayList<Data> data)
+    public void fetch(ArrayList<Data> data,Config config)
     {
         logger.log(Level.FINER,"Entering fetch",GlobalLogger.MANAGER_LOG_ID);
         long current_time = System.currentTimeMillis();
@@ -86,30 +86,19 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         Data frameworkData = data.get(1);
         Data runsOnData = data.get(2);
 
-        try {
-            FileReader fr = new FileReader(new File("thresholds.json"));
+        SCALE_UP_CLUSTER_LOAD_THRESHOLD = Float.parseFloat(config.getValueForKey("Scale-Up-Cluster-Load"));
+        SCALE_UP_CLUSTER_MEM_THRESHOLD = Float.parseFloat(config.getValueForKey("Scale-Up-Cluster-Memory"));
+        SCALE_UP_SLAVE_LOAD_THRESHOLD = Float.parseFloat(config.getValueForKey("Scale-Up-Slave-Load"));
+        SCALE_UP_SLAVE_MEM_THRESHOLD = Float.parseFloat(config.getValueForKey("Scale-Up-Slave-Memory"));
+        SCALE_DOWN_CLUSTER_LOAD_THRESHOLD = Float.parseFloat(config.getValueForKey("Scale-Down-Cluster-Load"));
+        SCALE_DOWN_CLUSTER_MEM_THRESHOLD = Float.parseFloat(config.getValueForKey("Scale-Down-Cluster-Memory"));
+        SCALE_DOWN_SLAVE_LOAD_THRESHOLD = Float.parseFloat(config.getValueForKey("Scale-Down-Slave-Load"));
+        SCALE_DOWN_SLAVE_MEM_THRESHOLD = Float.parseFloat(config.getValueForKey("Scale-Down-Cluster-Memory"));
 
-            Gson gson = new Gson();
-            JsonObject obj = gson.fromJson(fr, JsonObject.class);
-
-            SCALE_UP_CLUSTER_LOAD_THRESHOLD = obj.get("thresholds").getAsJsonObject().get("scale_up").getAsJsonObject().get("cluster").getAsJsonObject().get("load").getAsDouble();
-            SCALE_UP_CLUSTER_MEM_THRESHOLD = obj.get("thresholds").getAsJsonObject().get("scale_up").getAsJsonObject().get("cluster").getAsJsonObject().get("memory").getAsDouble();
-            SCALE_UP_SLAVE_LOAD_THRESHOLD = obj.get("thresholds").getAsJsonObject().get("scale_up").getAsJsonObject().get("slave").getAsJsonObject().get("load").getAsDouble();
-            SCALE_UP_SLAVE_MEM_THRESHOLD = obj.get("thresholds").getAsJsonObject().get("scale_up").getAsJsonObject().get("slave").getAsJsonObject().get("memory").getAsDouble();
-            SCALE_DOWN_CLUSTER_LOAD_THRESHOLD = obj.get("thresholds").getAsJsonObject().get("scale_down").getAsJsonObject().get("cluster").getAsJsonObject().get("load").getAsDouble();
-            SCALE_DOWN_CLUSTER_MEM_THRESHOLD = obj.get("thresholds").getAsJsonObject().get("scale_down").getAsJsonObject().get("cluster").getAsJsonObject().get("memory").getAsDouble();
-            SCALE_DOWN_SLAVE_LOAD_THRESHOLD = obj.get("thresholds").getAsJsonObject().get("scale_down").getAsJsonObject().get("slave").getAsJsonObject().get("load").getAsDouble();
-            SCALE_DOWN_SLAVE_MEM_THRESHOLD = obj.get("thresholds").getAsJsonObject().get("scale_down").getAsJsonObject().get("slave").getAsJsonObject().get("memory").getAsDouble();
-
-            logger.log(Level.INFO,"Cluster Scale Up = "+SCALE_UP_CLUSTER_LOAD_THRESHOLD+" "+SCALE_UP_CLUSTER_MEM_THRESHOLD,GlobalLogger.MANAGER_LOG_ID);
-            logger.log(Level.INFO,"Slave Scale Up = "+SCALE_UP_SLAVE_LOAD_THRESHOLD+" "+SCALE_UP_SLAVE_MEM_THRESHOLD,GlobalLogger.MANAGER_LOG_ID);
-            logger.log(Level.INFO,"Cluster Scale Down = "+SCALE_DOWN_CLUSTER_LOAD_THRESHOLD+" "+SCALE_DOWN_CLUSTER_MEM_THRESHOLD,GlobalLogger.MANAGER_LOG_ID);
-            logger.log(Level.INFO,"Slave Scale Down = "+SCALE_DOWN_SLAVE_LOAD_THRESHOLD+" "+SCALE_DOWN_SLAVE_MEM_THRESHOLD,GlobalLogger.MANAGER_LOG_ID);
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-
+        logger.log(Level.INFO,"Cluster Scale Up = "+SCALE_UP_CLUSTER_LOAD_THRESHOLD+" "+SCALE_UP_CLUSTER_MEM_THRESHOLD,GlobalLogger.MANAGER_LOG_ID);
+        logger.log(Level.INFO,"Slave Scale Up = "+SCALE_UP_SLAVE_LOAD_THRESHOLD+" "+SCALE_UP_SLAVE_MEM_THRESHOLD,GlobalLogger.MANAGER_LOG_ID);
+        logger.log(Level.INFO,"Cluster Scale Down = "+SCALE_DOWN_CLUSTER_LOAD_THRESHOLD+" "+SCALE_DOWN_CLUSTER_MEM_THRESHOLD,GlobalLogger.MANAGER_LOG_ID);
+        logger.log(Level.INFO,"Slave Scale Down = "+SCALE_DOWN_SLAVE_LOAD_THRESHOLD+" "+SCALE_DOWN_SLAVE_MEM_THRESHOLD,GlobalLogger.MANAGER_LOG_ID);
 
         ArrayList<Framework> newFrameworks = convertToFrameworkObjects(frameworkData);
         ArrayList<Slave> newSlaves = convertToSlaveObjects(slaveData);

@@ -16,7 +16,6 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
 
     // The poll interval which is an int that tells the frequency at which the polling should take place
     // The Plugin's class name which is a string
-    private int pollInterval;
     private String elasticityPluginClassName;
     private String clusterScalerPluginClassName;
     private String databaseExecutorPluginClassName;
@@ -29,20 +28,18 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
 
     private String[] setupDataQueries;
 
-
-    private File logDir;
     private Logger logger = GlobalLogger.globalLogger;
 
+    private  Config config;
 
     public ClusterElasticityManager(CommandLineArguments arguments) {
 
         logger.log(Level.FINER,"Entering ClusterElasticityManager Constructor",Constants.MANAGER_LOG_ID);
 
-        this.pollInterval = arguments.getPollInterval();
         this.elasticityPluginClassName = arguments.getCemanagerPluginMainClass();
         this.clusterScalerPluginClassName = arguments.getClusterScalerPluginMainClass();
         this.databaseExecutorPluginClassName = arguments.getDbExecutorPluginMainClass();
-        this.logDir = new File(arguments.getLogDir());
+        this.config = arguments.getConfig();
 
         logger.log(Level.CONFIG,"Elasticity Plugin Class Name = "+elasticityPluginClassName,Constants.MANAGER_LOG_ID);
         logger.log(Level.CONFIG,"Cluster Scaler Plugin Class Name = "+clusterScalerPluginClassName,Constants.MANAGER_LOG_ID);
@@ -107,13 +104,13 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
     @Override
     public void notifyTimerExpiry() throws ClusterElasticityAgentException {
         logger.log(Level.FINER,"Entering notifyTimerExpiry",Constants.MANAGER_LOG_ID);
-        elasticityPlugin.fetch(fetchData(setupDataQueries));
+        elasticityPlugin.fetch(fetchData(setupDataQueries),config);
         logger.log(Level.FINE,"Executed Fetch on plugin",Constants.MANAGER_LOG_ID);
 
         ArrayList<Node> newNodes = elasticityPlugin.scaleUp();
         logger.log(Level.FINE,"Executed ScaleUp on plugin",Constants.MANAGER_LOG_ID);
 
-        scalerPlugin.setup();
+        scalerPlugin.setup(config);
         logger.log(Level.FINE,"Executed Setup on plugin",Constants.MANAGER_LOG_ID);
 
         if(newNodes != null) {

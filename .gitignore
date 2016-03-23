@@ -101,3 +101,10 @@ python/.idea
 Collector_Plugin.log
 script.sh
 *.log
+Release/Cluster_Elasticity_Agent/jars/Cloud-Scheduler.jar
+Release/MesosCollectorPlugin.jar
+Release/MesosElasticityPlugin.jar
+Release/OpenStackClusterScalerPlugin.jar
+Release/SQLiteDBExecutorPlugin.jar
+OpenStackClient/.idea
+Release/OpenStackClient/.idea

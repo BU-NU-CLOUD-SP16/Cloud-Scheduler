@@ -26,22 +26,16 @@ public final class Collector implements ClusterElasticityAgentFramework {
     private Logger logger = GlobalLogger.globalLogger;
     private final String masterIpAddress;
 
-    private int pollInterval;
     private String databasePluginClassName;
     private String collectorPluginClassName;
     private List<Object> collectorPluginClasses;
 
     private DBExecutor database;
 
-
-    private String logDir;
-
     public Collector(CommandLineArguments argumentList) {
-        masterIpAddress = argumentList.getMesosMasterIP() + ":" + argumentList.getMesosMasterPort();
+        masterIpAddress = argumentList.getConfig().getValueForKey("Mesos-Master-Ip") + ":" + argumentList.getConfig().getValueForKey("Mesos-Master-Port");
         databasePluginClassName = argumentList.getDbExecutorPluginMainClass();
         collectorPluginClassName = argumentList.getCollectorPluginMainClass();
-        pollInterval = argumentList.getPollInterval();
-        logDir = argumentList.getLogDir();
         createInstances();
     }
 

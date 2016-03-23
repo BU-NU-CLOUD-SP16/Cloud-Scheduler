@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
   <artifact type="jar" name="SQLiteDBExecutorPlugin:jar">
-    <output-path>$PROJECT_DIR$/out/artifacts/SQLiteDBExecutorPlugin_jar</output-path>
+    <output-path>$PROJECT_DIR$/Release</output-path>
     <root id="archive" name="SQLiteDBExecutorPlugin.jar">
       <element id="module-output" name="SQLiteDBExecutorPlugin" />
       <element id="module-output" name="Plugin" />

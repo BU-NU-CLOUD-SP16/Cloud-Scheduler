@@ -1,0 +1,27 @@
+{
+  "Manager-Plugin": "./Release/MesosElasticityPlugin.jar",
+  "Collector-Plugin": "./Release/MesosCollectorPlugin.jar",
+  "Cluster-Scaler-Plugin": "./Release/OpenStackClusterScalerPlugin.jar",
+  "DB-Executor-Plugin": "./Release/SQLiteDBExecutorPlugin_jar",
+  "Manager-Main": "MesosElasticityPlugin",
+  "Collector-Main": "MesosMetric",
+  "Database-Main": "SQLiteDBExecutor",
+  "Cluster-Scaler-Main": "OpenStackClusterScalerPlugin",
+  "DDL-Script": "./Release/Create.sql",
+  "Poll-Interval": "5000",
+
+  "OpenStack-Client-Path": "./Release/OpenStackClient",
+  "Username": "bollapragada.s@husky.neu.edu",
+  "Password": "Soumya123",
+  "Mesos-Master-Ip": "129.10.3.91",
+  "Mesos-Master-Port": "5050",
+  "Scale-Up-Cluster-Load": 0.85,
+  "Scale-Down-Cluster-Load": 0.8,
+  "Scale-Up-Cluster-Memory": 0.1,
+  "Scale-Down-Cluster-Memory": 0.3,
+  "Scale-Up-Slave-Load": 0.85,
+  "Scale-Down-Slave-Load": 0.3,
+  "Scale-Up-Slave-Memory": 0.1,
+  "Scale-Down-Slave-Memory": 0.7
+
+}

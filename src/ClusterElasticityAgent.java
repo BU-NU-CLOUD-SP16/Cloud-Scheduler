@@ -145,7 +145,9 @@ public class ClusterElasticityAgent {
         logger.log(Level.INFO,"Starting Collector - Manager Cycle",Constants.MAIN_LOG_ID);
         while(true){
             try {
-
+                argumentList.updateConfig();
+                logger.log(Level.FINE,"Updated Config file",Constants.MAIN_LOG_ID);
+                logger.log(Level.FINE,""+argumentList.getConfig(),Constants.MAIN_LOG_ID);
                 collectorPlugin.notifyTimerExpiry();
                 logger.log(Level.FINE,"Collector finished timer expiry",Constants.MAIN_LOG_ID);
                 elasticityManager.notifyTimerExpiry();
@@ -185,7 +187,8 @@ public class ClusterElasticityAgent {
             logger.addHandler(collectorFileHandler);
             logger.addHandler(centralFileHandler);
             logger.addHandler(mainFileHandler);
-            logger.addHandler(consoleHandler);
+            if(arguments.isVerbose())
+                logger.addHandler(consoleHandler);
         }
         catch (Exception e) {
             System.err.print("Not able to create logger ");

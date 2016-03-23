@@ -20,4 +20,16 @@ public class Config {
     {
         return configData.get(key);
     }
+
+    public void clear()
+    {
+        configData.clear();
+    }
+
+    @Override
+    public String toString() {
+        return "Config{" +
+                "configData=" + configData +
+                '}';
+    }
 }

@@ -26,6 +26,10 @@ public class CommandLineArguments {
     private static final String COLLECTOR_PLUGIN = "Collector-Plugin";
     private static final String CLUSTER_SCALER_PLUGIN = "Cluster-Scaler-Plugin";
     private static final String DB_EXECUTOR_PLUGIN = "DB-Executor-Plugin";
+    private static final String MANAGER_MAIN = "Manager-Main";
+    private static final String COLLECTOR_MAIN = "Collector-Main";
+    private static final String DATABASE_MAIN = "Database-Main";
+    private static final String CLUSTER_SCALER_MAIN = "Cluster-Scaler-Main";
     private static final String DDL_SCRIPT = "DDL-Script";
     private static final String POLL_INTERVAL = "Poll-Interval";
     private static final String LOG = "Log";
@@ -34,13 +38,14 @@ public class CommandLineArguments {
     private File cemanagerPluginJar;
     private File clusterScalerPluginJar;
     private File dbExecutorPluginJar;
-    private String collectorPluginMainClass = "MesosMetric";
-    private String cemanagerPluginMainClass = "MesosElasticityPlugin";
-    private String clusterScalerPluginMainClass = "OpenStackClusterScalerPlugin";
-    private String dbExecutorPluginMainClass = "SQLiteDBExecutor";
+    private String collectorPluginMainClass;
+    private String cemanagerPluginMainClass;
+    private String clusterScalerPluginMainClass;
+    private String dbExecutorPluginMainClass;
     private Integer pollInterval;
     private File ddlFile;
     private String logDir = System.getProperty("user.dir");
+    private boolean verbose = false;
 
 
     private String configFile;
@@ -53,11 +58,69 @@ public class CommandLineArguments {
         dbExecutorPluginMainClass = DEFAULT_DB_EXECUTOR;
     }
 
+
+    public Config getConfig() {
+        return config;
+    }
+
+    public void updateConfig()
+    {
+        File file = new File(configFile);
+        Gson gson = new Gson();
+        try {
+
+            JsonObject obj = gson.fromJson(new FileReader(file),JsonObject.class);
+            cemanagerPluginJar = new File(obj.get(MANAGER_PLUGIN).getAsString());
+            obj.remove(MANAGER_PLUGIN);
+            collectorPluginJar = new File(obj.get(COLLECTOR_PLUGIN).getAsString());
+            clusterScalerPluginJar = new File(obj.get(CLUSTER_SCALER_PLUGIN).getAsString());
+            dbExecutorPluginJar = new File(obj.get(DB_EXECUTOR_PLUGIN).getAsString());
+            ddlFile = new File(obj.get(DDL_SCRIPT).getAsString());
+            pollInterval = obj.get(POLL_INTERVAL).getAsInt();
+            collectorPluginMainClass = obj.get(COLLECTOR_MAIN).getAsString();
+            dbExecutorPluginMainClass = obj.get(DATABASE_MAIN).getAsString();
+            cemanagerPluginMainClass = obj.get(MANAGER_MAIN).getAsString();
+            clusterScalerPluginMainClass = obj.get(CLUSTER_SCALER_MAIN).getAsString();
+            if(obj.has(LOG)) {
+                logDir = obj.get(LOG).getAsString();
+                obj.remove(LOG);
+            }
+
+            obj.remove(MANAGER_PLUGIN);
+            obj.remove(COLLECTOR_PLUGIN);
+            obj.remove(CLUSTER_SCALER_PLUGIN);
+            obj.remove(DB_EXECUTOR_PLUGIN);
+            obj.remove(DDL_SCRIPT);
+            obj.remove(POLL_INTERVAL);
+            obj.remove(MANAGER_MAIN);
+            obj.remove(COLLECTOR_MAIN);
+            obj.remove(CLUSTER_SCALER_MAIN);
+            obj.remove(DATABASE_MAIN);
+
+            Set<Map.Entry<String,JsonElement>> members = obj.entrySet();
+
+           config.clear();
+
+            for(Map.Entry<String,JsonElement> member : members)
+            {
+                config.addValueForKey(member.getKey(),member.getValue().getAsString());
+            }
+
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void setConfig(Config config) {
+        this.config = config;
+    }
+
     public String getConfigFile() {
         return configFile;
     }
 
-    @Option(name = "-config", usage = "Specifies location of config.json")
+    @Option(name = "-config", usage = "Specifies location of config.json", required = true)
     public void setConfigFile(String configFile) {
         File file = new File(configFile);
         Gson gson = new Gson();
@@ -71,6 +134,10 @@ public class CommandLineArguments {
             dbExecutorPluginJar = new File(obj.get(DB_EXECUTOR_PLUGIN).getAsString());
             ddlFile = new File(obj.get(DDL_SCRIPT).getAsString());
             pollInterval = obj.get(POLL_INTERVAL).getAsInt();
+            collectorPluginMainClass = obj.get(COLLECTOR_MAIN).getAsString();
+            dbExecutorPluginMainClass = obj.get(DATABASE_MAIN).getAsString();
+            cemanagerPluginMainClass = obj.get(MANAGER_MAIN).getAsString();
+            clusterScalerPluginMainClass = obj.get(CLUSTER_SCALER_MAIN).getAsString();
             if(obj.has(LOG)) {
                 logDir = obj.get(LOG).getAsString();
                 obj.remove(LOG);
@@ -82,6 +149,10 @@ public class CommandLineArguments {
             obj.remove(DB_EXECUTOR_PLUGIN);
             obj.remove(DDL_SCRIPT);
             obj.remove(POLL_INTERVAL);
+            obj.remove(MANAGER_MAIN);
+            obj.remove(COLLECTOR_MAIN);
+            obj.remove(CLUSTER_SCALER_MAIN);
+            obj.remove(DATABASE_MAIN);
 
             Set<Map.Entry<String,JsonElement>> members = obj.entrySet();
 
@@ -89,7 +160,7 @@ public class CommandLineArguments {
 
             for(Map.Entry<String,JsonElement> member : members)
             {
-                config.addValueForKey(member.getKey(),member.getKey());
+                config.addValueForKey(member.getKey(),member.getValue().getAsString());
             }
 
 
@@ -97,6 +168,15 @@ public class CommandLineArguments {
             e.printStackTrace();
         }
         this.configFile = configFile;
+    }
+
+    public boolean isVerbose() {
+        return verbose;
+    }
+
+    @Option(name = "-v",usage = "turn on verbose scripting")
+    public void setVerbose(boolean verbose) {
+        this.verbose = verbose;
     }
 
     public String getLogDir() {

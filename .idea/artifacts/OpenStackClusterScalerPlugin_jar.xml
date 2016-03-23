@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
   <artifact type="jar" name="OpenStackClusterScalerPlugin:jar">
-    <output-path>$PROJECT_DIR$/out/artifacts/OpenStackClusterScalerPlugin_jar</output-path>
+    <output-path>$PROJECT_DIR$/Release</output-path>
     <root id="archive" name="OpenStackClusterScalerPlugin.jar">
       <element id="module-output" name="OpenStackClusterScalerPlugin" />
       <element id="module-output" name="Plugin" />

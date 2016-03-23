@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
   <artifact type="jar" name="MesosCollectorPlugin:jar">
-    <output-path>$PROJECT_DIR$/out/artifacts/MesosCollectorPlugin_jar</output-path>
+    <output-path>$PROJECT_DIR$/Release</output-path>
     <root id="archive" name="MesosCollectorPlugin.jar">
       <element id="module-output" name="MesosCollectorPlugin" />
       <element id="module-output" name="Collector" />

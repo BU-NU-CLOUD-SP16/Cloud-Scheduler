@@ -5,5 +5,5 @@ public interface ClusterScalerPlugin {
 
     public Node createNewNode(Node node);
     public boolean deleteNode(Node node);
-    public void setup();
+    public void setup(Config config);
 }
