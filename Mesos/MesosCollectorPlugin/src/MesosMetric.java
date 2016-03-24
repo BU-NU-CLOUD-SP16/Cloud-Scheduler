@@ -109,7 +109,7 @@ public final class MesosMetric implements ICollectorPluginByTable {
                 ITableInfo t = new TableInfo("Slave");
                 t.addColName("Slave_ID").addColValue(s.getSlaveId())
                         .addColName("Load_5min").addColValue(s.getLoad5Min())
-                        .addColName("Free_Memory").addColValue(s.getTotalMemory() - s.getFreeMemory())
+                        .addColName("Free_Memory").addColValue(s.getFreeMemory())
                         .addColName("Total_Memory").addColValue(s.getTotalMemory())
                         .addColName("CPU").addColValue(s.getCpu())
                         .addColName("Allocated_CPU").addColValue(s.getAllocatedCpu())
