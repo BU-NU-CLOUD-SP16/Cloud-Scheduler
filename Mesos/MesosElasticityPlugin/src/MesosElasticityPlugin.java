@@ -70,6 +70,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
     private Logger logger;
 
     private String newNodeFlavor;
+    private String privateKey;
 
     public MesosElasticityPlugin()
     {
@@ -91,6 +92,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         Data frameworkData = data.get(1);
         Data runsOnData = data.get(2);
 
+        privateKey = config.getValueForKey("SSH-Private-Key");
         JsonArray json = new Gson().fromJson(config.getValueForKey("No-Delete-Slaves"),JsonArray.class);
 
         NO_DELETE_SLAVES = new ArrayList<String>();
@@ -346,7 +348,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         String s2 = "nohup ./hadoop-2.5.0-cdh5.2.0/bin/hadoop-daemon.sh start datanode &>/dev/null &";
         String s3 = "nohup mesos slave --master=master.mesos:5050 --no-hostname_lookup --quiet &>/dev/null &";
 
-        SshProxy proxy = new SshProxy();
+        SshProxy proxy = new SshProxy(privateKey);
 
         while (true)
         {
