@@ -128,7 +128,7 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
             while(true) {
                 output = "";
 
-                JsonArray json = listNode("Spark-Slave-"+slaveCount);
+                JsonArray json = listNode("Spark-Slave-"+slaveCount+".cloud");
 
                 if(json.get(0).getAsJsonObject().get("status").getAsString().toLowerCase().equals("active"))
                 {
@@ -245,7 +245,7 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
     private int getLargestSlaveNumber()
     {
         String firstHost = slaves.get(0).getHostname();
-        int max = Integer.parseInt(""+firstHost.charAt(firstHost.length() - 1));
+        int max = Integer.parseInt(""+firstHost.charAt(firstHost.length() - 7));
 
         ArrayList<MesosSlave> slaves1 = new ArrayList<>(slaves);
         slaves1.remove(0);
@@ -253,7 +253,7 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
         for(MesosSlave slave : slaves1)
         {
             String hostname = slave.getHostname();
-            int num = Integer.parseInt(""+hostname.charAt(hostname.length() - 1));
+            int num = Integer.parseInt(""+hostname.charAt(hostname.length() - 7));
             if(num > max)
             {
                 max = num;
@@ -264,7 +264,7 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
     }
 
     private void createNode(OpenStackNode openStackNode) throws IOException, InterruptedException {
-        Process p = Runtime.getRuntime().exec("python "+ openStackClientPath +File.separator+CREATE_FILE_NAME+" --password "+password+" --username "+username+" --name Spark-Slave-"+slaveCount+" --flavor "+openStackNode.getFlavor()+" --image 168274f7-9841-4a59-805b-abc44afbffeb --key-name "+keyname);
+        Process p = Runtime.getRuntime().exec("python "+ openStackClientPath +File.separator+CREATE_FILE_NAME+" --password "+password+" --username "+username+" --name Spark-Slave-"+slaveCount+".cloud --flavor "+openStackNode.getFlavor()+" --image 168274f7-9841-4a59-805b-abc44afbffeb --key-name "+keyname);
 
         BufferedReader stdInput = new BufferedReader(new
                 InputStreamReader(p.getInputStream()));

@@ -346,7 +346,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         String s0 = "sudo sed -i '1s/^/nameserver 192.168.0.51\\n /' /etc/resolv.conf";
         String s1 =  "sudo sed -i '1s/^/" + openStackNode.getIp() + " " + openStackNode.getHostname() + "\\n /' /etc/hosts";
         String s2 = "nohup ./hadoop-2.5.0-cdh5.2.0/bin/hadoop-daemon.sh start datanode &>/dev/null &";
-        String s3 = "nohup mesos slave --master=master.mesos:5050 --no-hostname_lookup --quiet &>/dev/null &";
+        String s3 = "nohup mesos slave --master=spark-master.cloud:5050 --quiet &>/dev/null &";
 
         SshProxy proxy = new SshProxy(privateKey);
 
@@ -373,8 +373,8 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         try {
             int exit = proxy.executeCommand(openStackNode.getIp(),s0);
             logger.log(Level.INFO,"Executed "+s0+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
-            exit = proxy.executeCommand(openStackNode.getIp(),s1);
-            logger.log(Level.INFO,"Executed "+s1+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
+//            exit = proxy.executeCommand(openStackNode.getIp(),s1);
+//            logger.log(Level.INFO,"Executed "+s1+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
             exit = proxy.executeCommand(openStackNode.getIp(),s2);
             logger.log(Level.INFO,"Executed "+s2+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
             exit = proxy.executeCommand(openStackNode.getIp(),s3);
