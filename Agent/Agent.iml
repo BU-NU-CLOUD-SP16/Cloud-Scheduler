@@ -1,10 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="JAVA_MODULE" version="4">
-  <component name="FacetManager">
-    <facet type="Python" name="Python">
-      <configuration sdkName="" />
-    </facet>
-  </component>
   <component name="NewModuleRootManager" inherit-compiler-output="true">
     <exclude-output />
     <content url="file://$MODULE_DIR$">
@@ -12,11 +7,15 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="Collector" exported="" />
-    <orderEntry type="module" module-name="Common" exported="" />
-    <orderEntry type="module" module-name="Manager" exported="" />
-    <orderEntry type="library" name="com.sparkjava:spark-core:2.3" level="project" />
+    <orderEntry type="module" module-name="ClusterScaler" />
+    <orderEntry type="module" module-name="Collector" />
+    <orderEntry type="module" module-name="Common" />
+    <orderEntry type="module" module-name="Database" />
+    <orderEntry type="module" module-name="Manager" />
+    <orderEntry type="module" module-name="Plugin" />
     <orderEntry type="module" module-name="SQLiteDBExecutorPlugin" />
+    <orderEntry type="module" module-name="Utilities" />
     <orderEntry type="library" name="com.google.code.gson:gson:2.6.2" level="project" />
+    <orderEntry type="library" name="com.sparkjava:spark-core:2.3" level="project" />
   </component>
 </module>

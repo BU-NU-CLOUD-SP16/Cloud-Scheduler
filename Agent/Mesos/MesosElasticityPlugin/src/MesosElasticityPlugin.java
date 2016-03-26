@@ -1,18 +1,11 @@
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import jdk.nashorn.internal.objects.Global;
-import sun.util.logging.PlatformLogger;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.logging.StreamHandler;
 
 /**
  * Created by chemistry_sourabh on 3/2/16.
