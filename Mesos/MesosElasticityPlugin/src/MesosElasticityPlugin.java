@@ -71,6 +71,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
 
     private String newNodeFlavor;
     private String privateKey;
+    private String hdfsIp;
 
     public MesosElasticityPlugin()
     {
@@ -93,6 +94,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         Data runsOnData = data.get(2);
 
         privateKey = config.getValueForKey("SSH-Private-Key");
+        hdfsIp = config.getValueForKey("Mesos-HDFS-Master");
         JsonArray json = new Gson().fromJson(config.getValueForKey("No-Delete-Slaves"),JsonArray.class);
 
         NO_DELETE_SLAVES = new ArrayList<String>();
@@ -217,7 +219,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         if(!freeCPUSPresent && underObservationFrameworks.size() > 0)
         {
             nodes.add(new OpenStackNode(newNodeFlavor));
-            logger.log(Level.INFO,"Creating new node as an active frame no free cpu",GlobalLogger.MANAGER_LOG_ID);
+            logger.log(Level.INFO,"Creating new node as an active framework has no free cpu",GlobalLogger.MANAGER_LOG_ID);
             return nodes;
         }
 
@@ -343,8 +345,10 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
     public void notifyNewNodeCreation(Node node)  {
         OpenStackNode openStackNode = (OpenStackNode) node;
 
+        String s4 = "sudo hostname "+ openStackNode.getHostname();
         String s0 = "sudo sed -i '1s/^/nameserver 192.168.0.51\\n /' /etc/resolv.conf";
-        String s1 =  "sudo sed -i '1s/^/" + openStackNode.getIp() + " " + openStackNode.getHostname() + "\\n /' /etc/hosts";
+//        String s1 =  "sudo sed -i '1s/^/" + openStackNode.getIp() + " " + openStackNode.getHostname() + "\\n /' /etc/hosts";
+        String s1 = "sudo sed -i '1s/^/"+hdfsIp+" mesos-hdfs-master\\n /' /etc/hosts";
         String s2 = "nohup ./hadoop-2.5.0-cdh5.2.0/bin/hadoop-daemon.sh start datanode &>/dev/null &";
         String s3 = "nohup mesos slave --master=spark-master.cloud:5050 --quiet &>/dev/null &";
 
@@ -371,10 +375,12 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
 
 
         try {
-            int exit = proxy.executeCommand(openStackNode.getIp(),s0);
+            int exit = proxy.executeCommand(openStackNode.getIp(),s4);
+            logger.log(Level.INFO,"Executed "+s4+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
+            exit = proxy.executeCommand(openStackNode.getIp(),s0);
             logger.log(Level.INFO,"Executed "+s0+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
-//            exit = proxy.executeCommand(openStackNode.getIp(),s1);
-//            logger.log(Level.INFO,"Executed "+s1+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
+            exit = proxy.executeCommand(openStackNode.getIp(),s1);
+            logger.log(Level.INFO,"Executed "+s1+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
             exit = proxy.executeCommand(openStackNode.getIp(),s2);
             logger.log(Level.INFO,"Executed "+s2+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
             exit = proxy.executeCommand(openStackNode.getIp(),s3);
@@ -410,7 +416,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
             tot_free_mem +=  slave.getFree_mem();
             tot_tot_mem +=  slave.getTotal_mem();
             tot_cpu +=  slave.getCpu();
-            tot_allocated_cpu += slave.getAllocated_cpu() * slave.getCpu();
+            tot_allocated_cpu += slave.getAllocated_cpu();
         }
 
 

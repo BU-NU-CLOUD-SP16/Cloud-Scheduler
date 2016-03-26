@@ -218,6 +218,12 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
     private ArrayList<MesosSlave> convertToMesosSlaves(JsonArray array)
     {
         ArrayList<MesosSlave> slaves = new ArrayList<>();
+
+        if(array == null)
+        {
+            return slaves;
+        }
+
         for(JsonElement obj : array)
         {
             MesosSlave slave = new MesosSlave();
@@ -244,7 +250,13 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
 
     private int getLargestSlaveNumber()
     {
-        String firstHost = slaves.get(0).getHostname();
+        String firstHost = null;
+        try {
+            firstHost = slaves.get(0).getHostname();
+        } catch (IndexOutOfBoundsException e) {
+            return 0;
+        }
+
         int max = Integer.parseInt(""+firstHost.charAt(firstHost.length() - 7));
 
         ArrayList<MesosSlave> slaves1 = new ArrayList<>(slaves);
@@ -264,7 +276,7 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
     }
 
     private void createNode(OpenStackNode openStackNode) throws IOException, InterruptedException {
-        Process p = Runtime.getRuntime().exec("python "+ openStackClientPath +File.separator+CREATE_FILE_NAME+" --password "+password+" --username "+username+" --name Spark-Slave-"+slaveCount+".cloud --flavor "+openStackNode.getFlavor()+" --image 168274f7-9841-4a59-805b-abc44afbffeb --key-name "+keyname);
+        Process p = Runtime.getRuntime().exec("python "+ openStackClientPath +File.separator+CREATE_FILE_NAME+" --password "+password+" --username "+username+" --name Spark-Slave-"+slaveCount+".cloud --flavor "+openStackNode.getFlavor()+" --image 07057787-f9e8-41d4-945d-98181c825faa --key-name "+keyname);
 
         BufferedReader stdInput = new BufferedReader(new
                 InputStreamReader(p.getInputStream()));

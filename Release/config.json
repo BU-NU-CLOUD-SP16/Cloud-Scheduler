@@ -10,9 +10,10 @@
   "DDL-Script": "./Release/Create.sql",
   "Poll-Interval": "5000",
 
+  "Mesos-HDFS-Master": "192.168.0.103",
   "SSH-Private-Key": "/Users/chemistry_sourabh/.ssh/id_rsa",
   "OpenStack-Client-Path": "./Release/OpenStackClient",
-  "No-Delete-Slaves": ["192.168.0.243","192.168.0.244"],
+  "No-Delete-Slaves": ["spark-slave-1.cloud","spark-slave-2.cloud"],
   "New-Node-Flavor": "4",
   "Key-Name": "Sourabh-OSX",
   "Username": "Enter here",
