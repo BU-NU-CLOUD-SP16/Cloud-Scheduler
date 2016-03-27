@@ -6,11 +6,11 @@ import java.util.ArrayList;
 public class Slave {
 
     private String id;
-    private float load;
-    private float free_mem;
-    private float total_mem;
+    private double load;
+    private double free_mem;
+    private double total_mem;
     private int cpu;
-    private float allocated_cpu;
+    private double allocated_cpu;
     private String ip;
     private String hostname;
 
@@ -47,27 +47,27 @@ public class Slave {
         this.id = id;
     }
 
-    public float getLoad() {
+    public double getLoad() {
         return load;
     }
 
-    public void setLoad(float load) {
+    public void setLoad(double load) {
         this.load = load;
     }
 
-    public float getFree_mem() {
+    public double getFree_mem() {
         return free_mem;
     }
 
-    public void setFree_mem(float free_mem) {
+    public void setFree_mem(double free_mem) {
         this.free_mem = free_mem;
     }
 
-    public float getTotal_mem() {
+    public double getTotal_mem() {
         return total_mem;
     }
 
-    public void setTotal_mem(float total_mem) {
+    public void setTotal_mem(double total_mem) {
         this.total_mem = total_mem;
     }
 
@@ -79,11 +79,11 @@ public class Slave {
         this.cpu = cpu;
     }
 
-    public float getAllocated_cpu() {
+    public double getAllocated_cpu() {
         return allocated_cpu;
     }
 
-    public void setAllocated_cpu(float allocated_cpu) {
+    public void setAllocated_cpu(double allocated_cpu) {
         this.allocated_cpu = allocated_cpu;
     }
 

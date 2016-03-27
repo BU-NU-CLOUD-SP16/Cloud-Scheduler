@@ -23,6 +23,7 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
     private String password;
 
     private String keyname;
+    private String imageName;
 
     private String openStackClientPath;
 
@@ -35,6 +36,7 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
         String output = "";
 
         keyname = config.getValueForKey("Key-Name");
+        imageName = config.getValueForKey("Image-Name");
 
         String user = config.getValueForKey("Username");
         String pass = config.getValueForKey("Password");
@@ -276,7 +278,7 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
     }
 
     private void createNode(OpenStackNode openStackNode) throws IOException, InterruptedException {
-        Process p = Runtime.getRuntime().exec("python "+ openStackClientPath +File.separator+CREATE_FILE_NAME+" --password "+password+" --username "+username+" --name Spark-Slave-"+slaveCount+".cloud --flavor "+openStackNode.getFlavor()+" --image 07057787-f9e8-41d4-945d-98181c825faa --key-name "+keyname);
+        Process p = Runtime.getRuntime().exec("python "+ openStackClientPath +File.separator+CREATE_FILE_NAME+" --password "+password+" --username "+username+" --name Spark-Slave-"+slaveCount+".cloud --flavor "+openStackNode.getFlavor()+" --image "+imageName+" --key-name "+keyname);
 
         BufferedReader stdInput = new BufferedReader(new
                 InputStreamReader(p.getInputStream()));

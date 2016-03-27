@@ -108,3 +108,4 @@ Release/OpenStackClusterScalerPlugin.jar
 Release/SQLiteDBExecutorPlugin.jar
 OpenStackClient/.idea
 Release/OpenStackClient/.idea
+*.jar
