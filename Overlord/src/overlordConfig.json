@@ -1,0 +1,13 @@
+{
+  "agentPolicyList" :
+  [
+    {
+      "ceAgentID" : 1,
+      "ceAgentPriority" : 1
+    },
+    {
+      "ceAgentID" : 2,
+      "ceAgentPriority" : 2
+    }
+  ]
+}
