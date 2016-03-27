@@ -164,7 +164,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         }
 
         ArrayList<Node> nodes = new ArrayList<>();
-        float clusterMetrics[] = calculateClusterMetrics();
+        double clusterMetrics[] = calculateClusterMetrics();
 
         logger.log(Level.INFO,"Cluster Metrics "+Arrays.toString(clusterMetrics),GlobalLogger.MANAGER_LOG_ID);
 
@@ -253,7 +253,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
     public ArrayList<Node> scaleDown()
     {
         ArrayList<Node> toBeDeleted = new ArrayList<>();
-        float[] clusterMetrics = calculateClusterMetrics();
+        double[] clusterMetrics = calculateClusterMetrics();
 
         if(slaves.size() <= MIN_SLAVES)
         {
@@ -394,14 +394,14 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         noScaleUpFilterSet = true;
     }
 
-    private float[] calculateClusterMetrics()
+    private double[] calculateClusterMetrics()
     {
 
-        float tot_load = 0;
-        float tot_free_mem = 0;
-        float tot_tot_mem = 0;
-        float tot_cpu = 0;
-        float tot_allocated_cpu = 0;
+        double tot_load = 0;
+        double tot_free_mem = 0;
+        double tot_tot_mem = 0;
+        double tot_cpu = 0;
+        double tot_allocated_cpu = 0;
 
         for(Slave slave : slaves)
         {
@@ -417,7 +417,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
 
         tot_load = tot_load/slaves.size();
 
-        float metrics[] = {tot_load,tot_free_mem,tot_tot_mem,tot_cpu,tot_allocated_cpu};
+        double metrics[] = {tot_load,(double) tot_free_mem,(double) tot_tot_mem,tot_cpu,tot_allocated_cpu};
 
         return metrics;
     }
@@ -493,9 +493,9 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
             s.setId(row[SLAVE_SID]);
             s.setLoad(Float.parseFloat(row[SLAVE_LOAD]));
             s.setCpu(Integer.parseInt(row[SLAVE_CPU]));
-            s.setAllocated_cpu(Float.parseFloat(row[SLAVE_ALLOCATED_CPU]));
-            s.setFree_mem(Float.parseFloat(row[SLAVE_FREE_MEM]));
-            s.setTotal_mem(Float.parseFloat(row[SLAVE_TOTAL_MEM]));
+            s.setAllocated_cpu(Double.parseDouble(row[SLAVE_ALLOCATED_CPU]));
+            s.setFree_mem(Double.parseDouble(row[SLAVE_FREE_MEM]));
+            s.setTotal_mem(Double.parseDouble(row[SLAVE_TOTAL_MEM]));
             s.setIp(row[SLAVE_IP]);
             s.setHostname(row[SLAVE_HOSTNAME]);
             slaves.add(s);

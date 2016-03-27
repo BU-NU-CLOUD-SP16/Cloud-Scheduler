@@ -51,6 +51,12 @@ public class TableInfo implements ITableInfo{
     }
 
     @Override
+    public ITableInfo addColValue(long val) {
+        colValue.add(""+val);
+        return this;
+    }
+
+    @Override
     public ITableInfo addColValue(int val) {
         colValue.add(String.valueOf(val));
         return this;
