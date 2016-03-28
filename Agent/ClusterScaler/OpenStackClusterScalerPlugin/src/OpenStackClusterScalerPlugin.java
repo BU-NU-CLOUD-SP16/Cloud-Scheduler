@@ -185,7 +185,7 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
     {
 
         OpenStackNode node1 = (OpenStackNode) node;
-        logger.log(Level.INFO,"Deleting node with IP "+node1.getIp());
+        logger.log(Level.INFO,"Deleting node with IP "+node1.getIp(),GlobalLogger.MANAGER_LOG_ID);
         MesosSlave slave = findSlave(node1.getIp());
 
         if(slave == null)

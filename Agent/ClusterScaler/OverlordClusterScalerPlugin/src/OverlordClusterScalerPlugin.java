@@ -24,6 +24,8 @@ public class OverlordClusterScalerPlugin implements ClusterScalerPlugin  {
 
     private Logger logger = GlobalLogger.globalLogger;
 
+    private  String privateKey;
+
     public OverlordClusterScalerPlugin() {
         communicator = new OverlordCommunicator();
         communicator.register();
@@ -39,6 +41,8 @@ public class OverlordClusterScalerPlugin implements ClusterScalerPlugin  {
 
         String user = config.getValueForKey("Username");
         String pass = config.getValueForKey("Password");
+
+        privateKey = config.getValueForKey("SSH-Private-Key");
 
         if(user != null)
         {
@@ -169,8 +173,8 @@ public class OverlordClusterScalerPlugin implements ClusterScalerPlugin  {
     {
 
         OpenStackNode node1 = (OpenStackNode) node;
-        logger.log(Level.INFO,"Deleting node with IP "+node1.getIp());
-        MesosSlave slave = findSlave(node1.getIp());
+        logger.log(Level.INFO,"Deleting node with IP "+node1.getIp(),GlobalLogger.MANAGER_LOG_ID);
+        MesosSlave slave = findSlave(node1.getHostname());
 
         if(slave == null)
         {
@@ -180,6 +184,7 @@ public class OverlordClusterScalerPlugin implements ClusterScalerPlugin  {
 
         node1.setId(slave.getNodeId());
 
+            disconnectNode(node1.getHostname());
             communicator.deleteNode(node1.getId());
             Gson gson = new Gson();
             while (true)
@@ -193,6 +198,17 @@ public class OverlordClusterScalerPlugin implements ClusterScalerPlugin  {
             }
         logger.log(Level.INFO,"Deleted Node "+node1.getIp(),GlobalLogger.MANAGER_LOG_ID);
         return true;
+    }
+
+    private void disconnectNode(String hostname) {
+        SshProxy proxy = new SshProxy(privateKey);
+
+        try {
+            proxy.executeCommand(hostname,"hadoop-daemon.sh stop datanode");
+            proxy.executeCommand(hostname,"pkill mesos-slave");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private ArrayList<MesosSlave> convertToMesosSlaves(JsonArray array)
@@ -216,11 +232,11 @@ public class OverlordClusterScalerPlugin implements ClusterScalerPlugin  {
         return slaves;
     }
 
-    private MesosSlave findSlave(String ip)
+    private MesosSlave findSlave(String hostname)
     {
         for(MesosSlave slave : slaves)
         {
-            if(slave.getIp().equals(ip))
+            if(slave.getHostname().equals(hostname))
             {
                 return slave;
             }
