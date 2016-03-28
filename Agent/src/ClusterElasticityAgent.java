@@ -95,7 +95,7 @@ public class ClusterElasticityAgent {
         try {
             ClassLoader classLoader = ClusterElasticityAgent.class.getClassLoader();
             Class aClass = classLoader.loadClass(argumentList.getDbExecutorPluginMainClass());
-            dbExecutor = (DBExecutor) aClass.newInstance();
+            dbExecutor = (DBExecutor) aClass.getConstructor(String.class).newInstance(argumentList.getConfig().getValueForKey("Id"));
             if(argumentList.getDdlFile() != null)
                 dbExecutor.executeScript(argumentList.getDdlFile());
             logger.log(Level.INFO,"Executed DDL Script Successfully",Constants.MAIN_LOG_ID);
@@ -125,6 +125,7 @@ public class ClusterElasticityAgent {
 
         logger.log(Level.FINE,"Started HTTP Endpoint",Constants.MAIN_LOG_ID);
         // Route the end-point request-resource
+        port(Integer.parseInt(argumentList.getConfig().getValueForKey("Port")));
         post("/request-resource", (req, res) -> {
             String responseString = "";
 

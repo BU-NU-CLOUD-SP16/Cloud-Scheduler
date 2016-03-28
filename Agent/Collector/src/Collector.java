@@ -32,10 +32,13 @@ public final class Collector implements ClusterElasticityAgentFramework {
 
     private DBExecutor database;
 
+    private String id;
+
     public Collector(CommandLineArguments argumentList) {
         masterIpAddress = argumentList.getConfig().getValueForKey("Mesos-Master-Ip") + ":" + argumentList.getConfig().getValueForKey("Mesos-Master-Port");
         databasePluginClassName = argumentList.getDbExecutorPluginMainClass();
         collectorPluginClassName = argumentList.getCollectorPluginMainClass();
+        id = argumentList.getConfig().getValueForKey("Id");
         createInstances();
     }
 
@@ -43,7 +46,7 @@ public final class Collector implements ClusterElasticityAgentFramework {
         try
         {
             Class databaseExecutorPluginClass = Class.forName(databasePluginClassName);
-            database = (DBExecutor) databaseExecutorPluginClass.getConstructor().newInstance();
+            database = (DBExecutor) databaseExecutorPluginClass.getConstructor(String.class).newInstance(id);
             collectorPluginClasses = getCPluginClsIntances(collectorPluginClassName);
         }
 

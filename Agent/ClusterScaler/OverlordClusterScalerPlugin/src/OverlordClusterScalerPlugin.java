@@ -1,6 +1,7 @@
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -26,23 +27,35 @@ public class OverlordClusterScalerPlugin implements ClusterScalerPlugin  {
 
     private  String privateKey;
 
+    private  boolean registered = false;
+
+    private String id;
+
     public OverlordClusterScalerPlugin() {
         communicator = new OverlordCommunicator();
-        communicator.register();
+
     }
 
     @Override
-    public void setup(Config config)
+    public void setup(Config config, ArrayList<Node> nodes)
     {
         logger.log(Level.FINER,"Entering setup()",GlobalLogger.MANAGER_LOG_ID);
         String output = "";
 
+        id = config.getValueForKey("Id");
 
+        if (!registered)
+        {
+            communicator.register(id,nodes);
+            registered = true;
+        }
 
         String user = config.getValueForKey("Username");
         String pass = config.getValueForKey("Password");
 
         privateKey = config.getValueForKey("SSH-Private-Key");
+
+
 
         if(user != null)
         {
@@ -87,13 +100,13 @@ public class OverlordClusterScalerPlugin implements ClusterScalerPlugin  {
         communicator.setUsername(username);
         communicator.setPassword(password);
 
-            output = communicator.list();
+            output = communicator.list(id);
             logger.log(Level.FINE,"list output = "+output,GlobalLogger.MANAGER_LOG_ID);
 
             Gson gson = new Gson();
-            JsonArray json = gson.fromJson(output, JsonArray.class);
+            JsonObject json = gson.fromJson(output, JsonObject.class);
 
-            slaves = convertToMesosSlaves(json);
+            slaves = convertToMesosSlaves(json.get("nodes").getAsJsonArray());
             slaveCount = getLargestSlaveNumber() + 1;
 
             logger.log(Level.FINER,"Exiting setup()",GlobalLogger.MANAGER_LOG_ID);
@@ -109,7 +122,9 @@ public class OverlordClusterScalerPlugin implements ClusterScalerPlugin  {
         MesosSlave slave = new MesosSlave();
         try {
 
-            communicator.createNode("Spark-Slave-"+slaveCount+".cloud",openStackNode.getFlavor());
+           String json1 = communicator.createNode(id,openStackNode.getFlavor());
+
+            JsonObject object = new Gson().fromJson(json1,JsonObject.class);
 
             String output = "";
             int retry = 3;
@@ -120,7 +135,12 @@ public class OverlordClusterScalerPlugin implements ClusterScalerPlugin  {
             while(true) {
                 output = "";
 
-                JsonArray json = gson.fromJson(communicator.list("Spark-Slave-"+slaveCount+".cloud"),JsonArray.class);
+                JsonArray json = gson.fromJson(communicator.list(object.get("name").getAsString()),JsonArray.class);
+
+                if(json == null)
+                {
+                    continue;
+                }
 
                 if(json.get(0).getAsJsonObject().get("status").getAsString().toLowerCase().equals("active"))
                 {
@@ -138,8 +158,8 @@ public class OverlordClusterScalerPlugin implements ClusterScalerPlugin  {
                 {
                     openStackNode.setId(json.get(0).getAsJsonObject().get("id").getAsString());
 
-                    communicator.deleteNode(openStackNode.getId());
-                    communicator.createNode("Spark-Slave-"+slaveCount+".cloud",openStackNode.getFlavor());
+                    communicator.deleteNode(id,openStackNode.getId());
+                    communicator.createNode(id,openStackNode.getFlavor());
                     c++;
                     if(c > retry)
                     {
@@ -185,7 +205,7 @@ public class OverlordClusterScalerPlugin implements ClusterScalerPlugin  {
         node1.setId(slave.getNodeId());
 
             disconnectNode(node1.getHostname());
-            communicator.deleteNode(node1.getId());
+            communicator.deleteNode(id,node1.getId());
             Gson gson = new Gson();
             while (true)
             {
@@ -224,7 +244,7 @@ public class OverlordClusterScalerPlugin implements ClusterScalerPlugin  {
         {
             MesosSlave slave = new MesosSlave();
             slave.setHostname(obj.getAsJsonObject().get("name").getAsString());
-            slave.setFlavor(obj.getAsJsonObject().get("flavor").getAsJsonObject().get("id").getAsString());
+            slave.setFlavor(obj.getAsJsonObject().get("flavor").getAsString());
             slave.setNodeId(obj.getAsJsonObject().get("id").getAsString());
             slave.setIp(obj.getAsJsonObject().get("ip").getAsString());
             slaves.add(slave);

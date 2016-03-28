@@ -5,6 +5,7 @@ import org.openstack4j.openstack.OSFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -18,18 +19,10 @@ public class OpenStackWrapper implements Runnable {
     private static final String OS_USER_NAME = "Enter here";
     private static final String OS_PASSWORD = "Enter Here";
     private static final String OS_NODE_FLAVOR = "4";
-    private static final String OS_IMAGE_ID = "dc786b61-64eb-495a-a58a-3068e0231614";
-    private static final String OS_KEY_PAIR_NAME = "Your Key";
+    private static final String OS_IMAGE_ID = "9b9757a0-df69-4c63-bcf7-6cfa84ad12e3";
+    private static final String OS_KEY_PAIR_NAME = "Sourabh-OSX";
 
-    public Overlord getOverlordHandle() {
-        return overlordHandle;
-    }
 
-    public void setOverlordHandle(Overlord overlordHandle) {
-        this.overlordHandle = overlordHandle;
-    }
-
-    private Overlord overlordHandle;
     private OSClient osClientHandle;
     private Flavor nodeFlavor;
     private Image nodeImage;
@@ -41,10 +34,17 @@ public class OpenStackWrapper implements Runnable {
 
     private final LinkedBlockingQueue<OpenStackCommand> workerQueue;
 
-    public OpenStackWrapper(Overlord handle) {
-        this.overlordHandle = handle;
+    private LinkedBlockingQueue<Object> responseQueue;
+
+    public OpenStackWrapper() {
         this.workerQueue = new LinkedBlockingQueue<>();
+        this.responseQueue = new LinkedBlockingQueue<>();
     }
+
+    public LinkedBlockingQueue<Object> getResponseQueue() {
+        return responseQueue;
+    }
+
 
     public void initializeOpenStackClient(){
         this.osClientHandle = OSFactory.builder()
@@ -59,7 +59,7 @@ public class OpenStackWrapper implements Runnable {
         this.osKeyPair = this.osClientHandle.compute().keypairs().get(OS_KEY_PAIR_NAME);
     }
 
-    public String createNewNode(String nodeName) throws InterruptedException {
+    public Node createNewNode(String nodeName) throws InterruptedException {
 
         // Create a Server Model Object
         ServerCreate sc = Builders.server()
@@ -71,41 +71,99 @@ public class OpenStackWrapper implements Runnable {
 
         // Boot the Server
         Server server = this.osClientHandle.compute().servers().boot(sc);
-        String consoleOutput = this.osClientHandle.compute().servers().getConsoleOutput( server.getId(), 50);
+//        String consoleOutput = this.osClientHandle.compute().servers().getConsoleOutput( server.getId(), 50);
 
-        System.out.println(consoleOutput);
+//        System.out.println(consoleOutput);
 
-        try {
-            this.getOverlordHandle().getHttpHandle().getResponseQueue().put(server.getId());
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+//        try {
+//            this.getOverlordHandle().getHttpHandle().getResponseQueue().put(server.getId());
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+
+        while (true)
+        {
+            Node node = listNode(nodeName);
+
+            if(node == null)
+            {
+                continue;
+            }
+
+            if(node.getStatus().equalsIgnoreCase("active"))
+            {
+                break;
+            }
         }
 
-        return server.getId();
+        Node node = listNode(nodeName);
+        responseQueue.add(node);
+        return  node;
     }
 
     public void deleteNode(String serverID){
         this.osClientHandle.compute().servers().delete(serverID);
     }
 
-    public ArrayList<String> listNodes(){
+    public ArrayList<Node> listNodes(){
         // List all Servers
         List<? extends Server> servers = this.osClientHandle.compute().servers().list();
 
-        ArrayList<String> serverIdList = new ArrayList<>();
+        ArrayList<Node> serverIdList = new ArrayList<>();
 
         for (Server server: servers ) {
-            serverIdList.add(server.getId());
+
+            if(server.getName().toLowerCase().contains("slave")) {
+                Node node = new Node();
+                node.setName(server.getName());
+                node.setId(server.getId());
+                node.setFlavor(server.getFlavor().getId());
+                node.setStatus(server.getStatus().toString());
+                try {
+                    node.setIp(server.getAddresses().getAddresses("Mesos-Cluster").get(0).getAddr());
+                } catch (Exception e) {
+
+                }
+                serverIdList.add(node);
+            }
         }
 
+        responseQueue.add(serverIdList);
         return serverIdList;
     }
+
+    public Node listNode(String name)
+    {
+        List<? extends Server> servers = this.osClientHandle.compute().servers().list();
+
+        for (Server server : servers)
+        {
+            if(server.getName().equals(name))
+            {
+                Node node = new Node();
+                node.setName(server.getName());
+                node.setId(server.getId());
+                node.setFlavor(server.getFlavor().getId());
+                node.setStatus(server.getStatus().toString());
+                try {
+                    node.setIp(server.getAddresses().getAddresses("Mesos-Cluster").get(0).getAddr());
+                }
+                catch (Exception ex)
+                {
+
+                }
+                return  node;
+            }
+        }
+        return  null;
+    }
+
+
 
     @Override
     public void run() {
         initializeOpenStackClient();
 
-        while (true) {
             try {
                 OpenStackCommand command = this.workerQueue.take();
 
@@ -119,14 +177,21 @@ public class OpenStackWrapper implements Runnable {
                         deleteNode(command.getNodeName());
                         break;
 
+                    case "list":
+                        listNodes();
+                        break;
+
+                    case "listNode":
+                        listNode(command.getNodeName());
+                        break;
+
                     default:
-                        System.out.println("Unknown Command");
+                        System.out.println("Unknown Command "+command.getCommand());
                         break;
                 }
 
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        }
     }
 }

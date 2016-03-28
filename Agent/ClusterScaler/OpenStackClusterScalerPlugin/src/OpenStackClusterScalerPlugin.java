@@ -30,7 +30,7 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
     private Logger logger = GlobalLogger.globalLogger;
 
     @Override
-    public void setup(Config config)
+    public void setup(Config config, ArrayList<Node> nodes)
     {
         logger.log(Level.FINER,"Entering setup()",GlobalLogger.MANAGER_LOG_ID);
         String output = "";

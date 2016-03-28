@@ -78,7 +78,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
     // Will be called at beginning of each command
     @DataQuery(queries = {"select * from slave","select * from framework","select * from runs_on"})
     @Override
-    public void fetch(ArrayList<Data> data,Config config)
+    public ArrayList<Node> fetch(ArrayList<Data> data,Config config)
     {
         logger.log(Level.FINER,"Entering fetch",GlobalLogger.MANAGER_LOG_ID);
         long current_time = System.currentTimeMillis();
@@ -141,6 +141,18 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         }
         last_time = current_time;
         logger.log(Level.FINER,"Exiting fetch",GlobalLogger.MANAGER_LOG_ID);
+
+        ArrayList<Node> nodes = new ArrayList<>();
+
+        for (Slave slave : slaves)
+        {
+            OpenStackNode node = new OpenStackNode(newNodeFlavor);
+            node.setHostname(slave.getHostname());
+            node.setIp(slave.getIp());
+            nodes.add(node);
+        }
+
+        return nodes;
     }
 
     @Override

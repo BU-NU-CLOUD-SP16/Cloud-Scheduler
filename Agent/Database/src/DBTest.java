@@ -5,7 +5,7 @@ import java.io.IOException;
 
 public class DBTest {
     public static void main(String args[]) throws IOException{
-        SQLiteDBExecutor obj = new SQLiteDBExecutor();
+        SQLiteDBExecutor obj = new SQLiteDBExecutor("1");
         SQLiteJDBC obj1 = new SQLiteJDBC();
         String str = "INSERT INTO Framework values ('2','Framework1',20,56.0,1,10,CURRENT_TIMESTAMP);";
         String str2 = "SELECT * FROM Framework;";

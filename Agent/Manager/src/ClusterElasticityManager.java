@@ -67,7 +67,7 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
             logger.log(Level.FINE,"Created Instance of "+elasticityPluginClassName,Constants.MANAGER_LOG_ID);
             scalerPlugin = (ClusterScalerPlugin) clusterScalerPluginClass.getConstructor().newInstance();
             logger.log(Level.FINE,"Created Instance of "+clusterScalerPluginClassName,Constants.MANAGER_LOG_ID);
-            database = (DBExecutor) databaseExecutorPluginClass.getConstructor().newInstance();
+            database = (DBExecutor) databaseExecutorPluginClass.getConstructor(String.class).newInstance(config.getValueForKey("Id"));
             logger.log(Level.FINE,"Created Instance of "+databaseExecutorPluginClassName,Constants.MANAGER_LOG_ID);
         }
 
@@ -102,13 +102,13 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
     @Override
     public void notifyTimerExpiry() throws ClusterElasticityAgentException {
         logger.log(Level.FINER,"Entering notifyTimerExpiry",Constants.MANAGER_LOG_ID);
-        elasticityPlugin.fetch(fetchData(setupDataQueries),config);
+        ArrayList<Node> nodes = elasticityPlugin.fetch(fetchData(setupDataQueries),config);
         logger.log(Level.FINE,"Executed Fetch on plugin",Constants.MANAGER_LOG_ID);
 
         ArrayList<Node> newNodes = elasticityPlugin.scaleUp();
         logger.log(Level.FINE,"Executed ScaleUp on plugin",Constants.MANAGER_LOG_ID);
 
-        scalerPlugin.setup(config);
+        scalerPlugin.setup(config,nodes);
         logger.log(Level.FINE,"Executed Setup on plugin",Constants.MANAGER_LOG_ID);
 
         if(newNodes != null) {

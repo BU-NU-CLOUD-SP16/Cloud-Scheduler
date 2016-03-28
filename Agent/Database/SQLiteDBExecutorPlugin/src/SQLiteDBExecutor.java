@@ -100,17 +100,32 @@ public class SQLiteDBExecutor implements DBExecutor {
             System.err.println( e.getClass().getName() + ": " + 			e.getMessage() );
         }
     }
-    public SQLiteDBExecutor(){
+
+
+//    public SQLiteDBExecutor(){
+//        try {
+//            Class.forName("org.sqlite.JDBC");
+//            c = DriverManager.getConnection("jdbc:sqlite:cloudScheduler.db");
+//        } catch (Exception e){
+//            e.printStackTrace();
+//            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+//        }
+//
+//    }
+
+
+    public SQLiteDBExecutor(String id){
         try {
             Class.forName("org.sqlite.JDBC");
-            c = DriverManager.getConnection("jdbc:sqlite:cloudScheduler.db");
+            c = DriverManager.getConnection("jdbc:sqlite:cloudScheduler"+id+".db");
         } catch (Exception e){
             e.printStackTrace();
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
         }
 
     }
-    public SQLiteDBExecutor(String dbLocation){
+
+    public SQLiteDBExecutor(String id,String dbLocation){
         try {
             Class.forName("org.sqlite.JDBC");
             c = DriverManager.getConnection("jdbc:sqlite:" + dbLocation);
