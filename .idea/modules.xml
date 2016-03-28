@@ -15,6 +15,7 @@
       <module fileurl="file://$PROJECT_DIR$/Agent/Mesos/MesosElasticityPlugin/MesosElasticityPlugin.iml" filepath="$PROJECT_DIR$/Agent/Mesos/MesosElasticityPlugin/MesosElasticityPlugin.iml" />
       <module fileurl="file://$PROJECT_DIR$/Agent/Node/Node.iml" filepath="$PROJECT_DIR$/Agent/Node/Node.iml" />
       <module fileurl="file://$PROJECT_DIR$/Agent/ClusterScaler/OpenStackClusterScalerPlugin/OpenStackClusterScalerPlugin.iml" filepath="$PROJECT_DIR$/Agent/ClusterScaler/OpenStackClusterScalerPlugin/OpenStackClusterScalerPlugin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Overlord/Overlord.iml" filepath="$PROJECT_DIR$/Overlord/Overlord.iml" />
       <module fileurl="file://$PROJECT_DIR$/Agent/ClusterScaler/OverlordClusterScalerPlugin/OverlordClusterScalerPlugin.iml" filepath="$PROJECT_DIR$/Agent/ClusterScaler/OverlordClusterScalerPlugin/OverlordClusterScalerPlugin.iml" />
       <module fileurl="file://$PROJECT_DIR$/Agent/Plugin/Plugin.iml" filepath="$PROJECT_DIR$/Agent/Plugin/Plugin.iml" />
       <module fileurl="file://$PROJECT_DIR$/Agent/Database/SQLiteDBExecutorPlugin/SQLiteDBExecutorPlugin.iml" filepath="$PROJECT_DIR$/Agent/Database/SQLiteDBExecutorPlugin/SQLiteDBExecutorPlugin.iml" />

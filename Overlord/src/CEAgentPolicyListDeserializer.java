@@ -10,10 +10,9 @@ public class CEAgentPolicyListDeserializer implements JsonDeserializer<CEAgentPo
             context)
     {
         JsonArray jArray = (JsonArray) jsonCEAgentPolicyList;
-
         ArrayList<CEAgentPolicyInfo> policyList = new ArrayList<>();
 
-        for (int i=1; i<jArray.size(); i++) {
+        for (int i=0; i<jArray.size(); i++) {
 
             JsonObject jObject = (JsonObject) jArray.get(i);
             policyList.add(new CEAgentPolicyInfo(jObject.get("ceAgentID").getAsInt(),
