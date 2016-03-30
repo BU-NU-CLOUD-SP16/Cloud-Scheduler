@@ -40,6 +40,7 @@ public class Overlord {
         JsonObject object = gson.fromJson(jsonString, JsonObject.class);
 
         int ceAgentID = object.get("ceAgentID").getAsInt();
+        int port = object.get("port").getAsInt();
 
         JsonArray jsonArray = object.get("nodes").getAsJsonArray();
 
@@ -60,7 +61,8 @@ public class Overlord {
         ceAgent.setId(ceAgentID);
         ceAgent.setPriority(policyConfigHandle.getClusterPriority(ceAgentID));
         ceAgent.setIp(ceAgentIP);
-        ceAgent.setPort(ceAgentPort);
+        ceAgent.setPort(port);
+        ceAgent.setMinFixedNodes(2);
         ceAgent.setNodeList(nodes);
         return HTTP_SUCCESS_RESPONSE;
     }
@@ -92,7 +94,6 @@ public class Overlord {
                     Node node = (Node) openStackWrapper.getResponseQueue().take();
                     nodeList.add(node);
                     registeredAgents.get(ceAgentID).addNodeToList(node);
-                    return "{\"name\":\""+node.getName()+"\"}";
                 }
 
                 else if(nodeList.size() == maxNodes)
@@ -103,8 +104,8 @@ public class Overlord {
                     for(Agent agent : agents)
                     {
                         if(agent.getNodeList().size() > agent.getMinFixedNodes()) {
-                            communicator.sendReturnRevocableNodeSignal(agent, 1);
                             pendingNodeRequests.add(registeredAgents.get(ceAgentID));
+                            communicator.sendReturnRevocableNodeSignal(agent, 1);
                             foundAgent = true;
                             break;
                         }
@@ -152,11 +153,19 @@ public class Overlord {
             if(pendingNodeRequests.size() > 0)
             {
                 Agent pendingAgent = pendingNodeRequests.remove(0);
-                Node node = findNodeWithName(object.get("name").getAsString());
+                Node node = findNodeWithId(object.get("nodeId").getAsString());
+                registeredAgents.get(object.get("ceAgentID").getAsInt()).removeNodeFromList(node);
                 pendingAgent.addNodeToList(node);
             }
 
             else {
+                OpenStackCommand openStackCommand = new OpenStackCommand();
+                openStackCommand.setCommand("delete");
+                openStackCommand.setNodeName(object.get("nodeId").getAsString());
+                OpenStackWrapper openStackWrapper = new OpenStackWrapper();
+                openStackWrapper.getWorkerQueue().add(openStackCommand);
+                Thread t = new Thread(openStackWrapper);
+                t.start();
 //                openStackHandle.deleteNode(findNodeWithName(object.get("name").getAsString()).getId());
             }
 
@@ -177,7 +186,6 @@ public class Overlord {
         {
             name = nameElement.getAsString();
         }
-        JsonObject obj = new JsonObject();
         JsonArray array = new JsonArray();
         if( registeredAgents.contains(ceAgentID)) {
 
@@ -185,11 +193,11 @@ public class Overlord {
 
                 for (Node node : registeredAgents.get(ceAgentID).getNodeList()) {
                     JsonObject jsonObject = new JsonObject();
-                    jsonObject.addProperty("name", node.getName());
-                    jsonObject.addProperty("flavor", node.getFlavor());
-                    jsonObject.addProperty("ip", node.getIp());
-                    jsonObject.addProperty("id", node.getId());
-                    jsonObject.addProperty("status", node.getStatus());
+                    jsonObject.addProperty("name", ""+node.getName());
+                    jsonObject.addProperty("flavor", ""+node.getFlavor());
+                    jsonObject.addProperty("ip", ""+node.getIp());
+                    jsonObject.addProperty("id", ""+node.getId());
+                    jsonObject.addProperty("status", ""+node.getStatus());
                     array.add(jsonObject);
                 }
             }
@@ -198,11 +206,11 @@ public class Overlord {
                 for (Node node : registeredAgents.get(ceAgentID).getNodeList()) {
                     if(node.getName().equalsIgnoreCase(name)) {
                         JsonObject jsonObject = new JsonObject();
-                        jsonObject.addProperty("name", node.getName());
-                        jsonObject.addProperty("flavor", node.getFlavor());
-                        jsonObject.addProperty("ip", node.getIp());
-                        jsonObject.addProperty("id", node.getId());
-                        jsonObject.addProperty("status", node.getStatus());
+                        jsonObject.addProperty("name", ""+node.getName());
+                        jsonObject.addProperty("flavor", ""+node.getFlavor());
+                        jsonObject.addProperty("ip", ""+node.getIp());
+                        jsonObject.addProperty("id", ""+node.getId());
+                        jsonObject.addProperty("status", ""+node.getStatus());
                         array.add(jsonObject);
                         break;
                     }
@@ -210,9 +218,8 @@ public class Overlord {
             }
         }
 
-        obj.add("nodes",array);
 
-        return obj.toString();
+        return array.toString();
     }
 
     private int getLargestSlaveNumber()
@@ -254,16 +261,23 @@ public class Overlord {
         return  null;
     }
 
-
+    private Node findNodeWithId(String id)
+    {
+        for (Node node : nodeList)
+        {
+            if (node.getId().equalsIgnoreCase(id))
+            {
+                return node;
+            }
+        }
+        return  null;
+    }
 
     public static void main(String args[]) throws InterruptedException {
 
         Overlord overlordHandle = new Overlord();
 
         overlordHandle.getPolicyConfigHandle().LoadPolicyInfo();
-
-
-
         overlordHandle.getHttpHandle().configureHttpEndPoints();
 
         while(true) {
@@ -277,7 +291,7 @@ public class Overlord {
                ArrayList<Node> nodes = (ArrayList<Node>) openStackWrapper.getResponseQueue().take();
                overlordHandle.setNodeList(nodes);
                 overlordHandle.remakeAgentsNodeList();
-                sleep(5000);
+                sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -293,7 +307,15 @@ public class Overlord {
 
             for (Node node : oldList)
             {
-                newList.add(findNodeWithName(node.getName()));
+                Node node1 = findNodeWithName(node.getName());
+                if(node1 != null) {
+                    newList.add(node1);
+                }
+
+                else if(node.getIp() == null)
+                {
+                    newList.add(node);
+                }
             }
 
             agent.setNodeList(newList);

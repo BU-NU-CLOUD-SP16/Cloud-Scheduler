@@ -67,6 +67,9 @@ public class OpenStackWrapper implements Runnable {
                 .flavor(this.nodeFlavor)
                 .image(this.nodeImage)
                 .keypairName(OS_KEY_PAIR_NAME)
+                .addSecurityGroup("Hadoop")
+                .addSecurityGroup("Mesos-Slave")
+                .addSecurityGroup("SSH")
                 .build();
 
         // Boot the Server
@@ -81,22 +84,9 @@ public class OpenStackWrapper implements Runnable {
 //            e.printStackTrace();
 //        }
 
-        while (true)
-        {
-            Node node = listNode(nodeName);
 
-            if(node == null)
-            {
-                continue;
-            }
-
-            if(node.getStatus().equalsIgnoreCase("active"))
-            {
-                break;
-            }
-        }
-
-        Node node = listNode(nodeName);
+        Node node = new Node();
+        node.setName(nodeName);
         responseQueue.add(node);
         return  node;
     }

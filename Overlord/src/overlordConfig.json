@@ -3,11 +3,11 @@
   [
     {
       "ceAgentID" : 1,
-      "ceAgentPriority" : 1
+      "ceAgentPriority" : 2
     },
     {
       "ceAgentID" : 2,
-      "ceAgentPriority" : 2
+      "ceAgentPriority" : 1
     }
   ]
 }

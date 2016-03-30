@@ -32,11 +32,12 @@ public class OverlordCommunicator {
         this.password = password;
     }
 
-    public void register(String id,ArrayList<Node> slaves)
+    public void register(String id,String port,ArrayList<Node> slaves)
     {
 
         JsonObject object = new JsonObject();
         object.addProperty("ceAgentID",id);
+        object.addProperty("port",port);
         JsonArray array = new JsonArray();
 
         for (Node node : slaves)
@@ -101,6 +102,15 @@ public class OverlordCommunicator {
 
     public void deleteNode(String id,String nodeId)
     {
+        JsonObject object = new JsonObject();
+        object.addProperty("ceAgentID",id);
+        object.addProperty("nodeId",nodeId);
 
+        try {
+            HttpResponse<String> response = Unirest.post("http://localhost:6000/releaseNode").body(object.toString()).asString();
+
+        } catch (UnirestException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -1,6 +1,7 @@
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -351,11 +352,11 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         OpenStackNode openStackNode = (OpenStackNode) node;
 
         String s4 = "sudo hostname "+ openStackNode.getHostname();
-        String s0 = "sudo sed -i '1s/^/nameserver 192.168.0.51\\n /' /etc/resolv.conf";
+//        String s0 = "sudo sed -i '1s/^/nameserver 192.168.0.51\\n /' /etc/resolv.conf";
 //        String s1 =  "sudo sed -i '1s/^/" + openStackNode.getIp() + " " + openStackNode.getHostname() + "\\n /' /etc/hosts";
         String s1 = "sudo sed -i '1s/^/"+hdfsIp+" mesos-hdfs-master\\n /' /etc/hosts";
         String s2 = "nohup ./hadoop-2.5.0-cdh5.2.0/bin/hadoop-daemon.sh start datanode &>/dev/null &";
-        String s3 = "nohup mesos slave --master=spark-master.cloud:5050 --quiet &>/dev/null &";
+        String s3 = "nohup mesos slave --master="+hdfsIp+":5050 --quiet &>/dev/null &";
 
         SshProxy proxy = new SshProxy(privateKey);
 
@@ -382,8 +383,8 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         try {
             int exit = proxy.executeCommand(openStackNode.getIp(),s4);
             logger.log(Level.INFO,"Executed "+s4+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
-            exit = proxy.executeCommand(openStackNode.getIp(),s0);
-            logger.log(Level.INFO,"Executed "+s0+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
+//            exit = proxy.executeCommand(openStackNode.getIp(),s0);
+//            logger.log(Level.INFO,"Executed "+s0+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
             exit = proxy.executeCommand(openStackNode.getIp(),s1);
             logger.log(Level.INFO,"Executed "+s1+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
             exit = proxy.executeCommand(openStackNode.getIp(),s2);
@@ -405,6 +406,39 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         noScaleUpFilter = 300000;
         noScaleUpFilterSet = true;
     }
+
+    @Override
+    public ArrayList<Node> receivedReleaseNodeRequest(String string) {
+
+        JsonObject json = new Gson().fromJson(string,JsonObject.class);
+
+        ArrayList<Node> releaseNodes = new ArrayList<>();
+
+        int number = json.get("number").getAsInt();
+
+        for(Slave slave : slaves)
+        {
+            if(NO_DELETE_SLAVES.contains(slave.getHostname()))
+            {
+                continue;
+            }
+
+            if (number == 0)
+            {
+                break;
+            }
+
+            OpenStackNode node = new OpenStackNode(newNodeFlavor);
+            node.setHostname(slave.getHostname());
+            node.setIp(slave.getIp());
+
+            releaseNodes.add(node);
+            number--;
+        }
+
+        return releaseNodes;
+    }
+
 
     private double[] calculateClusterMetrics()
     {
@@ -429,7 +463,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
 
         tot_load = tot_load/slaves.size();
 
-        double metrics[] = {tot_load,(double) tot_free_mem,(double) tot_tot_mem,tot_cpu,tot_allocated_cpu};
+        double metrics[] = {tot_load,tot_free_mem,tot_tot_mem,tot_cpu,tot_allocated_cpu};
 
         return metrics;
     }

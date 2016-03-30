@@ -46,7 +46,7 @@ public class OverlordClusterScalerPlugin implements ClusterScalerPlugin  {
 
         if (!registered)
         {
-            communicator.register(id,nodes);
+            communicator.register(id,config.getValueForKey("Port"),nodes);
             registered = true;
         }
 
@@ -104,9 +104,9 @@ public class OverlordClusterScalerPlugin implements ClusterScalerPlugin  {
             logger.log(Level.FINE,"list output = "+output,GlobalLogger.MANAGER_LOG_ID);
 
             Gson gson = new Gson();
-            JsonObject json = gson.fromJson(output, JsonObject.class);
+            JsonArray json = gson.fromJson(output, JsonArray.class);
 
-            slaves = convertToMesosSlaves(json.get("nodes").getAsJsonArray());
+            slaves = convertToMesosSlaves(json);
             slaveCount = getLargestSlaveNumber() + 1;
 
             logger.log(Level.FINER,"Exiting setup()",GlobalLogger.MANAGER_LOG_ID);
@@ -122,9 +122,7 @@ public class OverlordClusterScalerPlugin implements ClusterScalerPlugin  {
         MesosSlave slave = new MesosSlave();
         try {
 
-           String json1 = communicator.createNode(id,openStackNode.getFlavor());
-
-            JsonObject object = new Gson().fromJson(json1,JsonObject.class);
+           communicator.createNode(id,openStackNode.getFlavor());
 
             String output = "";
             int retry = 3;
@@ -132,22 +130,59 @@ public class OverlordClusterScalerPlugin implements ClusterScalerPlugin  {
 
             Gson gson = new Gson();
 
+            String newNodeName = null;
+
+            while (true)
+            {
+                JsonArray array = new Gson().fromJson(communicator.list(id),JsonArray.class);
+
+                if(array.size() > slaves.size())
+                {
+                    for(JsonElement element : array)
+                    {
+
+                       MesosSlave slave1 = findSlave(element.getAsJsonObject().get("name").getAsString());
+
+                       if(slave1 == null)
+                       {
+                           newNodeName = element.getAsJsonObject().get("name").getAsString();
+                           break;
+                       }
+                    }
+
+                    if(newNodeName != null)
+                    {
+                        break;
+                    }
+                }
+            }
+
             while(true) {
                 output = "";
 
-                JsonArray json = gson.fromJson(communicator.list(object.get("name").getAsString()),JsonArray.class);
+                JsonArray json = gson.fromJson(communicator.list(id,newNodeName),JsonArray.class);
 
                 if(json == null)
                 {
                     continue;
                 }
 
-                if(json.get(0).getAsJsonObject().get("status").getAsString().toLowerCase().equals("active"))
+                if(json.size() == 0)
+                {
+                    continue;
+                }
+
+                if(json.get(0).getAsJsonObject().get("status").equals("null"))
+                {
+                    continue;
+                }
+
+                if(json.get(0).getAsJsonObject().get("status").getAsString().equalsIgnoreCase("active"))
                 {
 
                     JsonElement obj = json.get(0);
                     slave.setHostname(obj.getAsJsonObject().get("name").getAsString());
-                    slave.setFlavor(obj.getAsJsonObject().get("flavor").getAsJsonObject().get("id").getAsString());
+                    slave.setFlavor(obj.getAsJsonObject().get("flavor").getAsString());
                     slave.setNodeId(obj.getAsJsonObject().get("id").getAsString());
                     slave.setIp(obj.getAsJsonObject().get("ip").getAsString());
                     slaves.add(slave);
@@ -204,18 +239,8 @@ public class OverlordClusterScalerPlugin implements ClusterScalerPlugin  {
 
         node1.setId(slave.getNodeId());
 
-            disconnectNode(node1.getHostname());
-            communicator.deleteNode(id,node1.getId());
-            Gson gson = new Gson();
-            while (true)
-            {
-                JsonArray array = gson.fromJson(communicator.list(slave.getHostname()),JsonArray.class);
-
-                if(array == null)
-                {
-                    break;
-                }
-            }
+        disconnectNode(node1.getHostname());
+        communicator.deleteNode(id,node1.getId());
         logger.log(Level.INFO,"Deleted Node "+node1.getIp(),GlobalLogger.MANAGER_LOG_ID);
         return true;
     }

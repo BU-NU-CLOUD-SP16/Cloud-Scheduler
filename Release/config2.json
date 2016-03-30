@@ -13,7 +13,7 @@
   "Port": "5500",
   "Id": "2",
 
-  "Mesos-HDFS-Master": "192.168.0.103",
+  "Mesos-HDFS-Master": "192.168.0.129",
   "SSH-Private-Key": "/Users/chemistry_sourabh/.ssh/id_rsa",
   "OpenStack-Client-Path": "./Release/OpenStackClient",
   "No-Delete-Slaves": ["spark-slave-3.cloud","spark-slave-4.cloud"],
@@ -26,7 +26,7 @@
   "Mesos-Master-Port": "5050",
   "Scale-Up-Cluster-Load": 0.85,
   "Scale-Down-Cluster-Load": 0.8,
-  "Scale-Up-Cluster-Memory": 0.1,
+  "Scale-Up-Cluster-Memory": 0.00001,
   "Scale-Down-Cluster-Memory": 0.3,
   "Scale-Up-Slave-Load": 0.85,
   "Scale-Down-Slave-Load": 0.3,

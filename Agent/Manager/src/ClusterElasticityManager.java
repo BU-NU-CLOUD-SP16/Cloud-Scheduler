@@ -100,6 +100,16 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
     }
 
     @Override
+    public void notifyReleaseNodeRequest(String string)
+    {
+        logger.log(Level.FINER,"Entering notifyReleaseNodeRequest",Constants.MANAGER_LOG_ID);
+        ArrayList<Node> releaseNodes = elasticityPlugin.receivedReleaseNodeRequest(string);
+        for(Node node : releaseNodes) {
+            scalerPlugin.deleteNode(node);
+        }
+    }
+
+    @Override
     public void notifyTimerExpiry() throws ClusterElasticityAgentException {
         logger.log(Level.FINER,"Entering notifyTimerExpiry",Constants.MANAGER_LOG_ID);
         ArrayList<Node> nodes = elasticityPlugin.fetch(fetchData(setupDataQueries),config);

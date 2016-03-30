@@ -15,7 +15,6 @@ public class Agent {
 
     public Agent(){
         this.nodeList = new ArrayList<>();
-
     }
 
     public Agent(Integer id) {
@@ -76,7 +75,7 @@ public class Agent {
     }
 
     public void setNodeList(ArrayList<Node> nodeList) {
-        System.out.println("Node List size" + nodeList.size());
+        System.out.println(id+" Node List size " + nodeList.size());
         this.nodeList = nodeList;
     }
 

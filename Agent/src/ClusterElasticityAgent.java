@@ -143,6 +143,12 @@ public class ClusterElasticityAgent {
             return res.body();
         });
 
+        post("/releaseNode", ((request, response) -> {
+            agent.getElasticityManager().notifyReleaseNodeRequest(request.body());
+            response.status(200);
+            return response;
+        }));
+
         logger.log(Level.INFO,"Starting Collector - Manager Cycle",Constants.MAIN_LOG_ID);
         while(true){
             try {
@@ -170,10 +176,10 @@ public class ClusterElasticityAgent {
         Logger logger = Logger.getLogger(Constants.LOGGER_NAME);
         logger.setLevel(Level.FINEST);
         try {
-            FileHandler managerFileHandler = new FileHandler(arguments.getLogDir() + File.separator + Constants.MANAGER_LOG_NAME);
-            FileHandler collectorFileHandler = new FileHandler(arguments.getLogDir()+ File.separator + Constants.COLLECTOR_LOG_NAME);
-            FileHandler centralFileHandler = new FileHandler(arguments.getLogDir() + File.separator + Constants.CENTRAL_LOG_NAME);
-            FileHandler mainFileHandler = new FileHandler(arguments.getLogDir() + File.separator + Constants.MAIN_LOG_NAME);
+            FileHandler managerFileHandler = new FileHandler(arguments.getLogDir() + File.separator + Constants.MANAGER_LOG_NAME +arguments.getConfig().getValueForKey("Id")+".log");
+            FileHandler collectorFileHandler = new FileHandler(arguments.getLogDir()+ File.separator + Constants.COLLECTOR_LOG_NAME+arguments.getConfig().getValueForKey("Id")+".log");
+            FileHandler centralFileHandler = new FileHandler(arguments.getLogDir() + File.separator + Constants.CENTRAL_LOG_NAME+arguments.getConfig().getValueForKey("Id")+".log");
+            FileHandler mainFileHandler = new FileHandler(arguments.getLogDir() + File.separator + Constants.MAIN_LOG_NAME+arguments.getConfig().getValueForKey("Id")+".log");
             ConsoleHandler consoleHandler = new ConsoleHandler();
             managerFileHandler.setFormatter(new SimpleFormatter());
             managerFileHandler.setFilter(record -> record.getParameters()[0].equals(Constants.MANAGER_LOG_ID));
