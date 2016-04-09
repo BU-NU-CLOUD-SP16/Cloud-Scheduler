@@ -100,16 +100,16 @@ public class OverlordClusterScalerPlugin implements ClusterScalerPlugin  {
         communicator.setUsername(username);
         communicator.setPassword(password);
 
-            output = communicator.list(id);
-            logger.log(Level.FINE,"list output = "+output,GlobalLogger.MANAGER_LOG_ID);
+        output = communicator.list(id);
+        logger.log(Level.FINE,"list output = "+output,GlobalLogger.MANAGER_LOG_ID);
 
-            Gson gson = new Gson();
-            JsonArray json = gson.fromJson(output, JsonArray.class);
+        Gson gson = new Gson();
+        JsonArray json = gson.fromJson(output, JsonArray.class);
 
-            slaves = convertToMesosSlaves(json);
-            slaveCount = getLargestSlaveNumber() + 1;
+        slaves = convertToMesosSlaves(json);
+        slaveCount = getLargestSlaveNumber() + 1;
 
-            logger.log(Level.FINER,"Exiting setup()",GlobalLogger.MANAGER_LOG_ID);
+        logger.log(Level.FINER,"Exiting setup()",GlobalLogger.MANAGER_LOG_ID);
 
 
     }

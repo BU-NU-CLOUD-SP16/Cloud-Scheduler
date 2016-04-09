@@ -28,7 +28,7 @@ public class HttpEndPoints {
 
         port(6000);
         post("/registerCEAgent", (request, response) -> {
-            response.status(overlordHandle.registerCEAgent(request.body(), request.ip(), request.port()));
+            response.status(overlordHandle.registerCEAgent(request.body(), request.ip()));
             System.out.println("Got register");
             return SUCCESS;
         });
@@ -37,24 +37,18 @@ public class HttpEndPoints {
             response.body( overlordHandle.requestNode( request.body() ) );
             response.type("application/json");
 
-            if(response.body() == "")
-                response.status(HTTP_SERVER_ERROR);
-            else
-                response.status(HTTP_CREATE_CODE);
+            switch (response.body())
+            {
+                case "200":
+                    response.status(HTTP_SUCCESS_RESPONSE);
+                    break;
+                case "201":
+                    response.status(HTTP_CREATE_CODE);
+                    break;
+                default:
+                    response.status(HTTP_SERVER_ERROR);
+            }
 
-            return response.body();
-        });
-
-        post("/releaseNode", (request, response) -> {
-            overlordHandle.releaseNode( request.body() );
-            response.status(HTTP_SUCCESS_RESPONSE);
-            return SUCCESS;
-        });
-
-        post("/getNodeList", (request, response) -> {
-           response.body( overlordHandle.getNodeList( request.body() ) );
-            response.status(HTTP_SUCCESS_RESPONSE);
-            response.type("application/json");
             return response.body();
         });
     }

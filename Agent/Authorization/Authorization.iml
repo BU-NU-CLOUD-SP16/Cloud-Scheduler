@@ -7,10 +7,9 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="Common" exported="" />
-    <orderEntry type="module" module-name="Database" exported="" />
-    <orderEntry type="module" module-name="MesosElasticityPlugin" exported="" />
-    <orderEntry type="module" module-name="OpenStackClusterScalerPlugin" exported="" />
-    <orderEntry type="module" module-name="Authorization" />
+    <orderEntry type="library" name="com.mashape.unirest:unirest-java:1.4.8" level="project" />
+    <orderEntry type="library" name="com.google.code.gson:gson:2.6.2" level="project" />
+    <orderEntry type="module" module-name="Node" />
+    <orderEntry type="module" module-name="Plugin" />
   </component>
 </module>

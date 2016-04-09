@@ -24,6 +24,8 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
     // Instance to database API
     private DBExecutor database;
 
+    private AuthorizationAgent authorizationAgent;
+
     private String[] setupDataQueries;
 
     private Logger logger = GlobalLogger.globalLogger;
@@ -39,12 +41,14 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
         this.databaseExecutorPluginClassName = arguments.getDbExecutorPluginMainClass();
         this.config = arguments.getConfig();
 
+
         logger.log(Level.CONFIG,"Elasticity Plugin Class Name = "+elasticityPluginClassName,Constants.MANAGER_LOG_ID);
         logger.log(Level.CONFIG,"Cluster Scaler Plugin Class Name = "+clusterScalerPluginClassName,Constants.MANAGER_LOG_ID);
         logger.log(Level.CONFIG,"Database Executor Plugin Class Name = "+databaseExecutorPluginClassName,Constants.MANAGER_LOG_ID);
 
         createInstances();
         processAnnotations();
+        createAuthorizationAgent();
         logger.log(Level.FINER,"Exiting ClusterElasticityManager Constructor",Constants.MANAGER_LOG_ID);
     }
 
@@ -106,7 +110,26 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
         ArrayList<Node> releaseNodes = elasticityPlugin.receivedReleaseNodeRequest(string);
         for(Node node : releaseNodes) {
             scalerPlugin.deleteNode(node);
+            authorizationAgent.deletedNode(node);
         }
+        logger.log(Level.FINER,"Exiting notifyReleaseNodeRequest",Constants.MANAGER_LOG_ID);
+    }
+
+    @Override
+    public void notifyCreateNodeResponse(String json) {
+        logger.log(Level.FINER,"Entering notifyCreateNodeResponse",Constants.MANAGER_LOG_ID);
+
+        ArrayList<Node> nodes = elasticityPlugin.receivedCreateNodeResponse(json);
+
+        for(Node node : nodes)
+        {
+            OpenStackNode openStackNode = (OpenStackNode) node;
+            scalerPlugin.createNewNode(openStackNode);
+        }
+
+        authorizationAgent.setWaitingForResponse(false);
+
+        logger.log(Level.FINER,"Exiting notifyCreateNodeResponse",Constants.MANAGER_LOG_ID);
     }
 
     @Override
@@ -120,8 +143,7 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
 
         scalerPlugin.setup(config,nodes);
         logger.log(Level.FINE,"Executed Setup on plugin",Constants.MANAGER_LOG_ID);
-
-        if(newNodes != null) {
+        if(newNodes != null && authorizationAgent.canCreateNewNodes(newNodes.size())) {
             for (Node newNode : newNodes) {
                 Node node = scalerPlugin.createNewNode(newNode);
                 logger.log(Level.FINE,"Executed CreateNewNode on plugin",Constants.MANAGER_LOG_ID);
@@ -135,6 +157,7 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
         if(shouldBeDeletedNodes != null) {
             for (Node nodeToBeDeleted : shouldBeDeletedNodes) {
                 scalerPlugin.deleteNode(nodeToBeDeleted);
+                authorizationAgent.deletedNode(nodeToBeDeleted);
                 logger.log(Level.FINE,"Executed DeleteNode on plugin",Constants.MANAGER_LOG_ID);
             }
         }
@@ -156,6 +179,12 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
             }
 
         }
+    }
+
+    private void createAuthorizationAgent()
+    {
+        ArrayList<Node> nodes = elasticityPlugin.fetch(fetchData(setupDataQueries),config);
+        this.authorizationAgent = new AuthorizationAgent(config.getValueForKey("Id"),Double.parseDouble(config.getValueForKey("Base-Priority")),Integer.parseInt(config.getValueForKey("Port")),config.getValueForKey("Overlord-Ip"),Integer.parseInt(config.getValueForKey("Overlord-Port")),nodes);
     }
 
     private ArrayList<Data> fetchData(String[] queries)

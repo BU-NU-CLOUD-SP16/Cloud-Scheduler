@@ -440,6 +440,28 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
     }
 
 
+
+
+    @Override
+    public ArrayList<Node> receivedCreateNodeResponse(String jsonString)
+    {
+        JsonObject json = new Gson().fromJson(jsonString,JsonObject.class);
+
+        ArrayList<Node> createNodes = new ArrayList<>();
+
+        int number = json.get("number").getAsInt();
+
+        for (int i = 0; i < number;i++)
+        {
+            OpenStackNode openStackNode = new OpenStackNode(newNodeFlavor);
+            createNodes.add(openStackNode);
+        }
+
+        return createNodes;
+
+    }
+
+
     private double[] calculateClusterMetrics()
     {
 

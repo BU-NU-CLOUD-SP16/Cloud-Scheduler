@@ -12,7 +12,7 @@ public class AgentCommunicator {
     public void sendReturnRevocableNodeSignal(Agent agent,int  numberOfNodes)
     {
         JsonObject object = new JsonObject();
-        object.addProperty("number","1");
+        object.addProperty("number",""+numberOfNodes);
 
         try {
             HttpResponse<String> response = Unirest.post("http://"+agent.getIp()+":"+agent.getPort()+"/releaseNode").body(object.toString()).asString();
@@ -20,6 +20,20 @@ public class AgentCommunicator {
         } catch (UnirestException e) {
             e.printStackTrace();
         }
+    }
+
+    public String getAgentState(Agent agent)
+    {
+        try {
+            HttpResponse<String> response = Unirest.post("http://"+agent.getIp()+":"+agent.getPort()+"/state").asString();
+            return response.getBody();
+        }
+
+        catch (UnirestException ex)
+        {
+            ex.printStackTrace();
+        }
+        return "";
     }
 
 }

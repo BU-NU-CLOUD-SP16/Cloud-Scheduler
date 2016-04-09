@@ -4,6 +4,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
 
 import static java.lang.Thread.sleep;
 
@@ -34,12 +36,14 @@ public class Overlord {
     }
 
 
-    public int registerCEAgent(String jsonString, String ceAgentIP, int ceAgentPort) {
+    public int registerCEAgent(String jsonString, String ceAgentIP) {
 
         Gson gson = new Gson();
         JsonObject object = gson.fromJson(jsonString, JsonObject.class);
 
-        int ceAgentID = object.get("ceAgentID").getAsInt();
+        int ceAgentID = object.get("id").getAsInt();
+        double priority = object.get("priority").getAsDouble();
+        int minFixedNodes = object.get("minNodes").getAsInt();
         int port = object.get("port").getAsInt();
 
         JsonArray jsonArray = object.get("nodes").getAsJsonArray();
@@ -51,54 +55,37 @@ public class Overlord {
            nodes.add(findNodeWithName(jsonElement.getAsJsonObject().get("name").getAsString()));
         }
 
-        if(!policyConfigHandle.isPolicyConfigured(ceAgentID)){
-            return HTTP_CLIENT_ERROR;
-        }
 
-        registeredAgents.add(ceAgentID);
-
-        Agent ceAgent = registeredAgents.get(ceAgentID);
+        Agent ceAgent = new Agent();
         ceAgent.setId(ceAgentID);
-        ceAgent.setPriority(policyConfigHandle.getClusterPriority(ceAgentID));
+        ceAgent.setPriority(priority);
         ceAgent.setIp(ceAgentIP);
         ceAgent.setPort(port);
-        ceAgent.setMinFixedNodes(2);
+        ceAgent.setMinFixedNodes(minFixedNodes);
         ceAgent.setNodeList(nodes);
+
+        registeredAgents.add(ceAgent);
         return HTTP_SUCCESS_RESPONSE;
     }
 
     public String requestNode(String jsonString) {
 
         Gson gson = new Gson();
-        Integer ceAgentID = gson.fromJson(jsonString, JSONRequestNode.class).getCeAgentID();
+        RequestNodeJSONObject request = gson.fromJson(jsonString, RequestNodeJSONObject.class);
+        Integer ceAgentID = request.getCeAgentID();
+        Integer number = request.getNumberOfNodes();
 
         if( registeredAgents.contains(ceAgentID)) {
-            int slaveCount = getLargestSlaveNumber() + 1;
-            String serverID = null;
-            try {
-//                OpenStackCommand command = new OpenStackCommand();
-//                command.setCommand("create");
-//                command.setNodeName("Spark-Slave-"+
-//                        slaveCount + "" +
-//                        ".cloud");
-//                overlordHandle.getOpenStackHandle().getWorkerQueue().put(command);
+
                 if(nodeList.size() < maxNodes)
                 {
-                    OpenStackWrapper openStackWrapper = new OpenStackWrapper();
-                    OpenStackCommand command = new OpenStackCommand();
-                    command.setCommand("create");
-                    command.setNodeName("Spark-Slave-"+slaveCount+".cloud");
-                    openStackWrapper.getWorkerQueue().add(command);
-                    Thread t = new Thread(openStackWrapper);
-                    t.start();
-                    Node node = (Node) openStackWrapper.getResponseQueue().take();
-                    nodeList.add(node);
-                    registeredAgents.get(ceAgentID).addNodeToList(node);
+                    return "200";
                 }
 
                 else if(nodeList.size() == maxNodes)
                 {
                     ArrayList<Agent> agents = registeredAgents.getLowerPriorityAgents(ceAgentID);
+                    agents.sort((o1, o2) -> o1.getPriority() > o2.getPriority()?1:0);
                     AgentCommunicator communicator = new AgentCommunicator();
                     boolean foundAgent = false;
                     for(Agent agent : agents)
@@ -106,147 +93,16 @@ public class Overlord {
                         if(agent.getNodeList().size() > agent.getMinFixedNodes()) {
                             pendingNodeRequests.add(registeredAgents.get(ceAgentID));
                             communicator.sendReturnRevocableNodeSignal(agent, 1);
-                            foundAgent = true;
-                            break;
+                            return "201";
                         }
                     }
 
+                    return "";
 
                 }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-//            try {
-//                serverID = httpHandle.getResponseQueue().take();
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-
-//            registeredAgents.get(ceAgentID).addNodeToList(serverID);
-            return "";
-        }
-        else
-            return "";
-    }
-
-    public void releaseNode(String jsonString) {
-
-        Gson gson = new Gson();
-//        JSONReleaseNode releaseNodeDetails = gson.fromJson(jsonString, JSONReleaseNode.class);
-
-
-        JsonObject object = new Gson().fromJson(jsonString,JsonObject.class);
-
-        if(registeredAgents.contains(object.get("ceAgentID").getAsInt())) {
-
-//            OpenStackCommand command = new OpenStackCommand();
-//            command.setCommand("delete");
-//            command.setNodeName(releaseNodeDetails.getServerID());
-//
-//            try {
-//                openStackHandle.getWorkerQueue().put(command);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-
-            if(pendingNodeRequests.size() > 0)
-            {
-                Agent pendingAgent = pendingNodeRequests.remove(0);
-                Node node = findNodeWithId(object.get("nodeId").getAsString());
-                registeredAgents.get(object.get("ceAgentID").getAsInt()).removeNodeFromList(node);
-                pendingAgent.addNodeToList(node);
-            }
-
-            else {
-                OpenStackCommand openStackCommand = new OpenStackCommand();
-                openStackCommand.setCommand("delete");
-                openStackCommand.setNodeName(object.get("nodeId").getAsString());
-                OpenStackWrapper openStackWrapper = new OpenStackWrapper();
-                openStackWrapper.getWorkerQueue().add(openStackCommand);
-                Thread t = new Thread(openStackWrapper);
-                t.start();
-//                openStackHandle.deleteNode(findNodeWithName(object.get("name").getAsString()).getId());
-            }
-
-//            registeredAgents.get(releaseNodeDetails.getCeAgentID()).removeNodeFromList(releaseNodeDetails.getServerID());
         }
 
-    }
-
-    public String getNodeList(String jsonString) {
-
-        Gson gson = new Gson();
-        JsonObject object = gson.fromJson(jsonString, JsonObject.class);
-
-        int ceAgentID = object.get("ceAgentID").getAsInt();
-        JsonElement nameElement = object.get("name");
-        String name = null;
-        if(nameElement != null)
-        {
-            name = nameElement.getAsString();
-        }
-        JsonArray array = new JsonArray();
-        if( registeredAgents.contains(ceAgentID)) {
-
-            if(name == null) {
-
-                for (Node node : registeredAgents.get(ceAgentID).getNodeList()) {
-                    JsonObject jsonObject = new JsonObject();
-                    jsonObject.addProperty("name", ""+node.getName());
-                    jsonObject.addProperty("flavor", ""+node.getFlavor());
-                    jsonObject.addProperty("ip", ""+node.getIp());
-                    jsonObject.addProperty("id", ""+node.getId());
-                    jsonObject.addProperty("status", ""+node.getStatus());
-                    array.add(jsonObject);
-                }
-            }
-
-            else {
-                for (Node node : registeredAgents.get(ceAgentID).getNodeList()) {
-                    if(node.getName().equalsIgnoreCase(name)) {
-                        JsonObject jsonObject = new JsonObject();
-                        jsonObject.addProperty("name", ""+node.getName());
-                        jsonObject.addProperty("flavor", ""+node.getFlavor());
-                        jsonObject.addProperty("ip", ""+node.getIp());
-                        jsonObject.addProperty("id", ""+node.getId());
-                        jsonObject.addProperty("status", ""+node.getStatus());
-                        array.add(jsonObject);
-                        break;
-                    }
-                }
-            }
-        }
-
-
-        return array.toString();
-    }
-
-    private int getLargestSlaveNumber()
-    {
-        String firstHost = null;
-        try {
-            firstHost = nodeList.get(0).getName();
-        } catch (IndexOutOfBoundsException e) {
-            return 0;
-        }
-
-        int max = Integer.parseInt(""+firstHost.charAt(firstHost.length() - 7));
-
-        ArrayList<Node> slaves1 = new ArrayList<>(nodeList);
-        slaves1.remove(0);
-
-        for(Node slave : slaves1)
-        {
-            String hostname = slave.getName();
-            int num = Integer.parseInt(""+hostname.charAt(hostname.length() - 7));
-            if(num > max)
-            {
-                max = num;
-            }
-        }
-
-        return max;
+        return "";
     }
 
     private Node findNodeWithName(String name)
@@ -291,12 +147,23 @@ public class Overlord {
                ArrayList<Node> nodes = (ArrayList<Node>) openStackWrapper.getResponseQueue().take();
                overlordHandle.setNodeList(nodes);
                 overlordHandle.remakeAgentsNodeList();
+                overlordHandle.updateCloudState();
                 sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
 
+    }
+
+    private void updateCloudState() {
+        AgentCommunicator agentCommunicator = new AgentCommunicator();
+        ArrayList<Agent> agents = registeredAgents.getAll();
+
+        for(Agent agent  : agents)
+        {
+            String state = agentCommunicator.getAgentState(agent);
+        }
     }
 
     private void remakeAgentsNodeList() {

@@ -25,6 +25,8 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
     private String keyname;
     private String imageName;
 
+    private String id;
+
     private String openStackClientPath;
 
     private Logger logger = GlobalLogger.globalLogger;
@@ -130,7 +132,7 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
             while(true) {
                 output = "";
 
-                JsonArray json = listNode("Spark-Slave-"+slaveCount+".cloud");
+                JsonArray json = listNode("Spark-Slave-"+id+"-"+slaveCount+".cloud");
 
                 if(json.get(0).getAsJsonObject().get("status").getAsString().toLowerCase().equals("active"))
                 {

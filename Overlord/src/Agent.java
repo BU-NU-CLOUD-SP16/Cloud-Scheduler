@@ -6,7 +6,7 @@ import java.util.ArrayList;
 public class Agent {
 
     private Integer id;
-    private Integer priority;
+    private double priority;
     private String ip;
     private Integer port;
     private Integer minFixedNodes;
@@ -26,15 +26,15 @@ public class Agent {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(int id) {
         this.id = id;
     }
 
-    public Integer getPriority() {
+    public double getPriority() {
         return priority;
     }
 
-    public void setPriority(Integer priority) {
+    public void setPriority(double priority) {
         this.priority = priority;
     }
 

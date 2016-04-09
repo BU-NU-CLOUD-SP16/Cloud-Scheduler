@@ -16,8 +16,8 @@ public class OpenStackWrapper implements Runnable {
     private static final String OS_AUTH_URL = "https://keystone.kaizen.massopencloud.org:5000/v2.0";
     private static final String OS_TENANT_NAME = "Cloud Scheduler";
     private static final String OS_REGION_NAME = "MOC_Kaizen";
-    private static final String OS_USER_NAME = "Enter here";
-    private static final String OS_PASSWORD = "Enter Here";
+    private static final String OS_USER_NAME = "bollapragada.s@husky.neu.edu";
+    private static final String OS_PASSWORD = "Soumya123$";
     private static final String OS_NODE_FLAVOR = "4";
     private static final String OS_IMAGE_ID = "9b9757a0-df69-4c63-bcf7-6cfa84ad12e3";
     private static final String OS_KEY_PAIR_NAME = "Sourabh-OSX";

@@ -16,11 +16,8 @@ public class AgentList {
         this.ceAgentMap = ceAgentMap;
     }
 
-    public Agent add(Integer ceAgentID){
-        Agent newAgent = new Agent();
-
-        this.ceAgentMap.put(ceAgentID, newAgent);
-        return newAgent;
+    public void add(Agent agent){
+        this.ceAgentMap.put(agent.getId(), agent);
     }
 
     public void remove(Integer ceAgentID){

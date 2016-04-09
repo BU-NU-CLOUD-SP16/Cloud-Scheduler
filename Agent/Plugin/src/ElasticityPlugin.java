@@ -11,4 +11,5 @@ public interface ElasticityPlugin {
     public ArrayList<Node> fetch(ArrayList<Data> data,Config config);
     public void notifyNewNodeCreation(Node node);
     public ArrayList<Node> receivedReleaseNodeRequest(String string);
+    public ArrayList<Node> receivedCreateNodeResponse(String json);
 }
