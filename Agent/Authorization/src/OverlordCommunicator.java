@@ -22,16 +22,19 @@ public class OverlordCommunicator {
         this.overlordPort = overlordPort;
     }
 
-    public void register(String id,String priority, int port, ArrayList<Node> slaves)
+    public void register(ClusterState state)
     {
 
-        this.agentId = id;
+        this.agentId = state.getId();
 
         JsonObject object = new JsonObject();
-        object.addProperty("id",id);
-        object.addProperty("priority",priority);
-        object.addProperty("port",port);
+        object.addProperty("id",state.getId());
+        object.addProperty("priority",state.getPriority());
+        object.addProperty("minNodes",state.getMinNodes());
+        object.addProperty("port",state.getPort());
         JsonArray array = new JsonArray();
+
+        ArrayList<Node> slaves = state.getNodesInCluster();
 
         for (Node node : slaves)
         {
@@ -50,34 +53,6 @@ public class OverlordCommunicator {
         }
     }
 
-    public String list(String id)
-    {
-        JsonObject object = new JsonObject();
-        object.addProperty("ceAgentID",id);
-
-        try {
-          HttpResponse<String> stringHttpResponse =  Unirest.post("http://localhost:6000/getNodeList").body(object.toString()).asString();
-            return stringHttpResponse.getBody();
-        } catch (UnirestException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public String list(String id,String name)
-    {
-        JsonObject object = new JsonObject();
-        object.addProperty("ceAgentID",id);
-        object.addProperty("name",name);
-
-        try {
-            HttpResponse<String> stringHttpResponse =  Unirest.post("http://localhost:6000/getNodeList").body(object.toString()).asString();
-            return stringHttpResponse.getBody();
-        } catch (UnirestException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 
     public String createNode(int number)
     {
@@ -92,19 +67,5 @@ public class OverlordCommunicator {
             e.printStackTrace();
         }
         return null;
-    }
-
-    public void deleteNode(String nodeId)
-    {
-        JsonObject object = new JsonObject();
-        object.addProperty("ceAgentID",agentId);
-        object.addProperty("nodeId",nodeId);
-
-        try {
-            HttpResponse<String> response = Unirest.post("http://"+overlordIp+":"+overlordPort+"/releaseNode").body(object.toString()).asString();
-
-        } catch (UnirestException e) {
-            e.printStackTrace();
-        }
     }
 }

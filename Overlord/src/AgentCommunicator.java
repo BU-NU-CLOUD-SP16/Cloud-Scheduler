@@ -25,7 +25,7 @@ public class AgentCommunicator {
     public String getAgentState(Agent agent)
     {
         try {
-            HttpResponse<String> response = Unirest.post("http://"+agent.getIp()+":"+agent.getPort()+"/state").asString();
+            HttpResponse<String> response = Unirest.get("http://"+agent.getIp()+":"+agent.getPort()+"/state").asString();
             return response.getBody();
         }
 
@@ -36,4 +36,13 @@ public class AgentCommunicator {
         return "";
     }
 
+    public void sendCreateNodeSignal(Agent agent) {
+        try {
+            JsonObject jsonObject = new JsonObject();
+            jsonObject.addProperty("number",1);
+            HttpResponse<String> response = Unirest.post("http://"+agent.getIp()+":"+agent.getPort()+"/createNode").body(jsonObject).asString();
+        } catch (UnirestException e) {
+            e.printStackTrace();
+        }
+    }
 }

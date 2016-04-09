@@ -164,6 +164,19 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
         logger.log(Level.FINER,"Exiting notifyTimerExpiry",Constants.MANAGER_LOG_ID);
     }
 
+    @Override
+    public String notifyStateRequest() {
+        ArrayList<Node> nodes = elasticityPlugin.fetch(fetchData(setupDataQueries),config);
+
+        ClusterState state = new ClusterState();
+        state.setId(config.getValueForKey("Id"));
+        state.setPriority(Double.parseDouble(config.getValueForKey("Base-Priority")));
+        state.setPort(config.getValueForKey("Port"));
+        state.setMinNodes(Integer.parseInt(config.getValueForKey("Min-Nodes")));
+        state.setNodesInCluster(nodes);
+
+        return state.toString();
+    }
 
     private void processAnnotations()
     {
@@ -184,7 +197,14 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
     private void createAuthorizationAgent()
     {
         ArrayList<Node> nodes = elasticityPlugin.fetch(fetchData(setupDataQueries),config);
-        this.authorizationAgent = new AuthorizationAgent(config.getValueForKey("Id"),Double.parseDouble(config.getValueForKey("Base-Priority")),Integer.parseInt(config.getValueForKey("Port")),config.getValueForKey("Overlord-Ip"),Integer.parseInt(config.getValueForKey("Overlord-Port")),nodes);
+
+        ClusterState state = new ClusterState();
+        state.setId(config.getValueForKey("Id"));
+        state.setPriority(Double.parseDouble(config.getValueForKey("Base-Priority")));
+        state.setPort(config.getValueForKey("Port"));
+        state.setNodesInCluster(nodes);
+
+        this.authorizationAgent = new AuthorizationAgent(config.getValueForKey("Overlord-Ip"),Integer.parseInt(config.getValueForKey("Overlord-Port")),state);
     }
 
     private ArrayList<Data> fetchData(String[] queries)

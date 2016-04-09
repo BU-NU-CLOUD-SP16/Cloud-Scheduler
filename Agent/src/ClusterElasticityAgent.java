@@ -146,13 +146,19 @@ public class ClusterElasticityAgent {
         post("/releaseNode", ((request, response) -> {
             agent.getElasticityManager().notifyReleaseNodeRequest(request.body());
             response.status(200);
-            return response;
+            return "";
         }));
 
         post("/createNode",((request, response) -> {
             agent.getElasticityManager().notifyCreateNodeResponse(request.body());
             response.status(200);
-            return response;
+            return "";
+        }));
+
+        get("/state",((request, response) -> {
+           String json = agent.getElasticityManager().notifyStateRequest();
+            response.status(200);
+            return json;
         }));
 
         logger.log(Level.INFO,"Starting Collector - Manager Cycle",Constants.MAIN_LOG_ID);

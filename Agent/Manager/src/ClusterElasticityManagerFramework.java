@@ -7,4 +7,5 @@ public interface ClusterElasticityManagerFramework extends ClusterElasticityAgen
     public void notifyResourceScaling(String parameters) throws ClusterElasticityAgentException;
     public void notifyReleaseNodeRequest(String string);
     public void notifyCreateNodeResponse(String json);
+    public String notifyStateRequest();
 }

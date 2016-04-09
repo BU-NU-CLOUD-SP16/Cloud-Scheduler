@@ -9,9 +9,9 @@ public class AuthorizationAgent {
     private  OverlordCommunicator overlordCommunicator;
     private boolean waitingForResponse = false;
 
-    public AuthorizationAgent(String id,double priority, int clientPort, String ip, int port, ArrayList<Node> slaves) {
+    public AuthorizationAgent(String ip, int port, ClusterState state) {
         overlordCommunicator = new OverlordCommunicator(ip,port);
-        overlordCommunicator.register(id,priority,clientPort,slaves);
+        overlordCommunicator.register(state);
     }
 
     public boolean isWaitingForResponse() {

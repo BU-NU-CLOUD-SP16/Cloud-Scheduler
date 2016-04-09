@@ -133,7 +133,6 @@ public class Overlord {
 
         Overlord overlordHandle = new Overlord();
 
-        overlordHandle.getPolicyConfigHandle().LoadPolicyInfo();
         overlordHandle.getHttpHandle().configureHttpEndPoints();
 
         while(true) {
@@ -163,6 +162,28 @@ public class Overlord {
         for(Agent agent  : agents)
         {
             String state = agentCommunicator.getAgentState(agent);
+
+            Gson gson = new Gson();
+
+            JsonObject object = gson.fromJson(state,JsonObject.class);
+
+            agent.setPriority(object.get("priority").getAsDouble());
+
+            ArrayList<Node> nodes = new ArrayList<>();
+            JsonArray array = object.get("nodes").getAsJsonArray();
+
+            for(JsonElement element : array)
+            {
+               Node node = findNodeWithName(element.getAsString());
+                nodes.add(node);
+            }
+
+            if (nodes.size() < agent.getNodeList().size())
+            {
+                Agent agent1 = pendingNodeRequests.remove(0);
+                agentCommunicator.sendCreateNodeSignal(agent1);
+                agent.setNodeList(nodes);
+            }
         }
     }
 
@@ -189,14 +210,6 @@ public class Overlord {
         }
     }
 
-
-    public OverlordPolicyInfo getPolicyConfigHandle() {
-        return policyConfigHandle;
-    }
-
-    public void setPolicyConfigHandle(OverlordPolicyInfo policyConfigHandle) {
-        this.policyConfigHandle = policyConfigHandle;
-    }
 
     public HttpEndPoints getHttpHandle() {
         return httpHandle;

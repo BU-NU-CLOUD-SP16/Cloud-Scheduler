@@ -19,6 +19,7 @@
   "Mesos-HDFS-Master": "192.168.3.3",
   "SSH-Private-Key": "/Users/chemistry_sourabh/.ssh/id_rsa",
   "OpenStack-Client-Path": "./Release/OpenStackClient",
+  "Min-Nodes": "2",
   "No-Delete-Slaves": ["spark-slave-3-1.cloud","spark-slave-3-2.cloud"],
   "New-Node-Flavor": "4",
   "Key-Name": "Sourabh-OSX",

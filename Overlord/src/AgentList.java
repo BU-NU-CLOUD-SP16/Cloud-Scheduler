@@ -58,4 +58,9 @@ public class AgentList {
 
         return lowAgents;
     }
+
+    public void clear()
+    {
+        ceAgentMap.clear();
+    }
 }
