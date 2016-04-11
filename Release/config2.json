@@ -38,6 +38,8 @@
   "Scale-Up-Slave-Load": 0.85,
   "Scale-Down-Slave-Load": 0.3,
   "Scale-Up-Slave-Memory": 0.1,
-  "Scale-Down-Slave-Memory": 0.7
+  "Scale-Down-Slave-Memory": 0.7,
+
+  "Framework-Priorities": [{"name":"PageRank","priority":1},{"name":"PageRank2","priority":2}]
 
 }

@@ -10,6 +10,7 @@ public interface ElasticityPlugin {
     public ArrayList<Node> requestResources(String parameters);
     public ArrayList<Node> fetch(ArrayList<Data> data,Config config);
     public ArrayList<Node> getNodes();
+    public ArrayList<String> getFrameworkNames();
     public void notifyNewNodeCreation(Node node);
     public ArrayList<Node> receivedReleaseNodeRequest(String string);
     public ArrayList<Node> receivedCreateNodeResponse(String json);

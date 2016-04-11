@@ -1,3 +1,8 @@
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.logging.*;
@@ -34,6 +39,7 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
 
     private ClusterPriority clusterPriority;
     private  long lastTime = 0;
+    private JsonArray frameworkPriorityJson;
 
     public ClusterElasticityManager(CommandLineArguments arguments) {
 
@@ -163,7 +169,7 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
             }
         }
 
-        else if(newNodes.size() > 0)
+        else if(!authorizationAgent.isWaitingForResponse() && newNodes.size() > 0)
         {
             clusterPriority.incrementRequestsSent();
         }
@@ -182,8 +188,29 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
     @Override
     public String notifyStateRequest() {
         ArrayList<Node> nodes = elasticityPlugin.getNodes();
+        ArrayList<String> names = elasticityPlugin.getFrameworkNames();
 
-        clusterPriority.decrementPOPBySeconds((double) (System.currentTimeMillis() - lastTime)/1000.0);
+        double diffTime = (System.currentTimeMillis() - lastTime) / 1000.0;
+
+        clusterPriority.decrementPOPBySeconds(diffTime);
+        lastTime = System.currentTimeMillis();
+        Gson gson = new Gson();
+
+        frameworkPriorityJson = gson.fromJson(config.getValueForKey("Framework-Priorities"),JsonArray.class);
+
+        int sumPriority = 0;
+
+        for(String name : names)
+        {
+            JsonObject obj = findPriorityWithName(name);
+
+            if (obj != null)
+            {
+                sumPriority += obj.get("priority").getAsInt();
+            }
+        }
+
+        clusterPriority.setJobPriorities(sumPriority);
 
         ClusterState state = new ClusterState();
         state.setId(config.getValueForKey("Id"));
@@ -216,8 +243,29 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
     private void createAuthorizationAgent()
     {
         ArrayList<Node> nodes = elasticityPlugin.getNodes();
+        ArrayList<String> names = elasticityPlugin.getFrameworkNames();
+
+
+        Gson gson = new Gson();
+
+        frameworkPriorityJson = gson.fromJson(config.getValueForKey("Framework-Priorities"),JsonArray.class);
 
         clusterPriority = new ClusterPriority(Integer.parseInt(config.getValueForKey("Base-Priority")));
+
+        int sumPriority = 0;
+
+        for(String name : names)
+        {
+            JsonObject obj = findPriorityWithName(name);
+
+            if (obj != null)
+            {
+                sumPriority += obj.get("priority").getAsInt();
+            }
+        }
+
+        clusterPriority.setJobPriorities(sumPriority);
+
         lastTime = System.currentTimeMillis();
         ClusterState state = new ClusterState();
         state.setId(config.getValueForKey("Id"));
@@ -226,6 +274,20 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
         state.setNodesInCluster(nodes);
 
         this.authorizationAgent = new AuthorizationAgent(config.getValueForKey("Overlord-Ip"),Integer.parseInt(config.getValueForKey("Overlord-Port")),state);
+    }
+
+    private JsonObject findPriorityWithName(String name)
+    {
+        for(JsonElement element : frameworkPriorityJson)
+        {
+            JsonObject object = element.getAsJsonObject();
+            if (object.get("name").getAsString().equals(name))
+            {
+                return object;
+            }
+        }
+
+        return null;
     }
 
     private ArrayList<Data> fetchData(String[] queries)

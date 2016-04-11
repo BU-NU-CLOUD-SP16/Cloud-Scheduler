@@ -173,6 +173,18 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
     }
 
     @Override
+    public ArrayList<String> getFrameworkNames()
+    {
+        ArrayList<String> names = new ArrayList<>();
+        for(Framework framework : frameworks)
+        {
+            names.add(framework.getName());
+        }
+
+        return names;
+    }
+
+    @Override
     public ArrayList<Node> scaleUp()
     {
 
