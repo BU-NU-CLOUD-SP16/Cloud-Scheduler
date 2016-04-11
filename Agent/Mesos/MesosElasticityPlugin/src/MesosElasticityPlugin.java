@@ -157,6 +157,22 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
     }
 
     @Override
+    public ArrayList<Node> getNodes()
+    {
+        ArrayList<Node> nodes = new ArrayList<>();
+
+        for (Slave slave : slaves)
+        {
+            OpenStackNode node = new OpenStackNode();
+            node.setHostname(slave.getHostname());
+            node.setIp(slave.getIp());
+            nodes.add(node);
+        }
+
+        return nodes;
+    }
+
+    @Override
     public ArrayList<Node> scaleUp()
     {
 

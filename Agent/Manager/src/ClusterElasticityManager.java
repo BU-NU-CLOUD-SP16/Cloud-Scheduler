@@ -166,7 +166,7 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
 
     @Override
     public String notifyStateRequest() {
-        ArrayList<Node> nodes = elasticityPlugin.fetch(fetchData(setupDataQueries),config);
+        ArrayList<Node> nodes = elasticityPlugin.getNodes();
 
         ClusterState state = new ClusterState();
         state.setId(config.getValueForKey("Id"));
