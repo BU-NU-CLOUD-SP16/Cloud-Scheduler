@@ -7,6 +7,10 @@ public class OpenStackNode extends Node {
     private String flavor;
     private String id;
     private String ip;
+    private String status;
+
+    public OpenStackNode() {
+    }
 
     public OpenStackNode(String flavor) {
         this.flavor = flavor;
@@ -42,5 +46,13 @@ public class OpenStackNode extends Node {
 
     public void setIp(String ip) {
         this.ip = ip;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

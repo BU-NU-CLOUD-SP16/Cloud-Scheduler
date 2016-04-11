@@ -277,8 +277,8 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         for(Slave slave : slaves)
         {
             OpenStackNode node = new OpenStackNode(newNodeFlavor);
-            node.setIp(slave.getHostname());
-
+            node.setHostname(slave.getHostname());
+            node.setIp(slave.getIp());
 
             if(slave.isFilterSet())
             {

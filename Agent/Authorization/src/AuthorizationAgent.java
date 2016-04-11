@@ -24,6 +24,8 @@ public class AuthorizationAgent {
 
     public boolean canCreateNewNodes(int numberOfNodes)
     {
+        if (numberOfNodes == 0)
+            return  false;
 
         String status = overlordCommunicator.createNode(numberOfNodes);
 

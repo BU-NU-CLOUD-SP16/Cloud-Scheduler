@@ -35,19 +35,6 @@ public final class MesosMetric implements ICollectorPluginByTable {
             String errorMsg = "[Collector Plugin] Failed to execute HTTP request " + httpReq
                     + " .Reason: " + e.getMessage();
             LOGGER.log(Level.SEVERE, errorMsg,Constants.COLLECTOR_LOG_ID);
-            LOGGER.log(Level.FINE, "[Collector Plugin] Retrying to execute HTTP request " + httpReq,Constants.COLLECTOR_LOG_ID);
-            try {
-                stateSummary = HTTP.executeRequest(httpReq);
-                LOGGER.log(Level.FINE, "[Collector Plugin] Successfully executed HTTP request " + httpReq,Constants.COLLECTOR_LOG_ID );
-                LOGGER.log(Level.FINE, "[Collector Plugin] State Summary:",Constants.COLLECTOR_LOG_ID);
-                LOGGER.log(Level.FINE, stateSummary,Constants.COLLECTOR_LOG_ID);
-            } catch (IOException e1) {
-                errorMsg = "[Collector Plugin] Retry attempt 1 Failed to execute HTTP request " + httpReq
-                        + " .Reason: " + e.getMessage();
-                LOGGER.log(Level.SEVERE, errorMsg,Constants.COLLECTOR_LOG_ID);
-                // Not throwing any exception as the master must be temporary down and new master will be elected
-                //throw new IllegalStateException(errorMsg, e1);
-            }
         }
         if (stateSummary!= null) {
             parseStateSummary(stateSummary, slaveLst, frameworkDetailsLst, runsOn);
@@ -137,19 +124,6 @@ public final class MesosMetric implements ICollectorPluginByTable {
                 String errorMsg = "[Collector Plugin] Failed to execute HTTP request " + httpReq
                         + " .Reason: " + e.getMessage();
                 LOGGER.log(Level.SEVERE, errorMsg,Constants.COLLECTOR_LOG_ID);
-                LOGGER.log(Level.FINE, "[Collector Plugin] Retrying to execute HTTP request " + httpReq,Constants.COLLECTOR_LOG_ID);
-                try {
-                    slaveMetrics = HTTP.executeRequest(httpReq);
-                    LOGGER.log(Level.FINE, "[Collector Plugin] Successfully executed HTTP request " + httpReq,Constants.COLLECTOR_LOG_ID );
-                    LOGGER.log(Level.FINE, "[Collector Plugin] Slave Metric:",Constants.COLLECTOR_LOG_ID);
-                    LOGGER.log(Level.FINE, slaveMetrics,Constants.COLLECTOR_LOG_ID);
-                } catch (IOException e1) {
-                    errorMsg = "[Collector Plugin] Retry attempt 1 Failed to execute HTTP request " + httpReq
-                            + " .Reason: " + e.getMessage();
-                    LOGGER.log(Level.SEVERE, errorMsg,Constants.COLLECTOR_LOG_ID);
-                    //not throwing ann exception as slave must be temporary down
-                    //throw new IllegalStateException(errorMsg, e1);
-                }
             }
             if (slaveMetrics != null) {
                 parseSlaveMetrics(slave, slaveMetrics);

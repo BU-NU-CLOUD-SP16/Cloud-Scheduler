@@ -19,16 +19,14 @@ public class Overlord {
     private static final int HTTP_CLIENT_ERROR = 400;
     private static final int HTTP_SERVER_ERROR = 500;
 
-    private OverlordPolicyInfo policyConfigHandle;
     private HttpEndPoints httpHandle;
     private  ArrayList<Node> nodeList;
     private AgentList registeredAgents;
-    private int maxNodes = 5;
+    private int maxNodes = 7;
 
     private ArrayList<Agent> pendingNodeRequests;
 
     public Overlord(){
-        policyConfigHandle = new OverlordPolicyInfo();
         httpHandle = new HttpEndPoints(this);
         registeredAgents = new AgentList();
         nodeList = new ArrayList<>();
@@ -69,7 +67,7 @@ public class Overlord {
     }
 
     public String requestNode(String jsonString) {
-
+        System.out.println("Got request for new node");
         Gson gson = new Gson();
         RequestNodeJSONObject request = gson.fromJson(jsonString, RequestNodeJSONObject.class);
         Integer ceAgentID = request.getCeAgentID();
@@ -147,6 +145,7 @@ public class Overlord {
                overlordHandle.setNodeList(nodes);
                 overlordHandle.remakeAgentsNodeList();
                 overlordHandle.updateCloudState();
+                System.out.println("Can start Agents");
                 sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -162,6 +161,12 @@ public class Overlord {
         for(Agent agent  : agents)
         {
             String state = agentCommunicator.getAgentState(agent);
+
+            if(state.equals(""))
+            {
+                registeredAgents.remove(agent.getId());
+                continue;
+            }
 
             Gson gson = new Gson();
 

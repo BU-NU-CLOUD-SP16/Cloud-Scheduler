@@ -31,7 +31,6 @@ public class AgentCommunicator {
 
         catch (UnirestException ex)
         {
-            ex.printStackTrace();
         }
         return "";
     }
