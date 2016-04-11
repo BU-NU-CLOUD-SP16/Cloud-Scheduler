@@ -50,7 +50,9 @@ public class Overlord {
 
         for(JsonElement jsonElement : jsonArray)
         {
-           nodes.add(findNodeWithName(jsonElement.getAsJsonObject().get("name").getAsString()));
+            Node node = findNodeWithName(jsonElement.getAsJsonObject().get("name").getAsString());
+            if(node != null)
+                nodes.add(node);
         }
 
 
@@ -85,7 +87,6 @@ public class Overlord {
                     ArrayList<Agent> agents = registeredAgents.getLowerPriorityAgents(ceAgentID);
                     agents.sort((o1, o2) -> o1.getPriority() > o2.getPriority()?1:0);
                     AgentCommunicator communicator = new AgentCommunicator();
-                    boolean foundAgent = false;
                     for(Agent agent : agents)
                     {
                         if(agent.getNodeList().size() > agent.getMinFixedNodes()) {
@@ -180,7 +181,8 @@ public class Overlord {
             for(JsonElement element : array)
             {
                Node node = findNodeWithName(element.getAsString());
-                nodes.add(node);
+                if(node != null)
+                    nodes.add(node);
             }
 
             if (nodes.size() < agent.getNodeList().size() && pendingNodeRequests.size() > 0)

@@ -27,6 +27,9 @@ public class AuthorizationAgent {
         if (numberOfNodes == 0)
             return  false;
 
+        if(waitingForResponse)
+            return false;
+
         String status = overlordCommunicator.createNode(numberOfNodes);
 
         switch(status)
@@ -41,11 +44,5 @@ public class AuthorizationAgent {
                 return false;
         }
     }
-
-    public void deletedNode(Node node)
-    {
-//        overlordCommunicator.deleteNode();
-    }
-
 
 }

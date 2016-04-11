@@ -32,6 +32,9 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
 
     private  Config config;
 
+    private ClusterPriority clusterPriority;
+    private  long lastTime = 0;
+
     public ClusterElasticityManager(CommandLineArguments arguments) {
 
         logger.log(Level.FINER,"Entering ClusterElasticityManager Constructor",Constants.MANAGER_LOG_ID);
@@ -99,6 +102,9 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
             logger.log(Level.FINE,"Executed CreateNewNode on plugin",Constants.MANAGER_LOG_ID);
             elasticityPlugin.notifyNewNodeCreation(node);
             logger.log(Level.FINE,"Executed NotifyNewNodeCreation on plugin",Constants.MANAGER_LOG_ID);
+            clusterPriority.decrementNodesSurrendered();
+            clusterPriority.resetRequestsSent();
+            clusterPriority.incrementPOP();
         }
         logger.log(Level.FINER,"Exiting notifyResourceScaling",Constants.MANAGER_LOG_ID);
     }
@@ -110,8 +116,8 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
         ArrayList<Node> releaseNodes = elasticityPlugin.receivedReleaseNodeRequest(string);
         for(Node node : releaseNodes) {
             scalerPlugin.deleteNode(node);
-            authorizationAgent.deletedNode(node);
         }
+        clusterPriority.incrementNodesSurrendered();
         logger.log(Level.FINER,"Exiting notifyReleaseNodeRequest",Constants.MANAGER_LOG_ID);
     }
 
@@ -128,7 +134,9 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
         }
 
         authorizationAgent.setWaitingForResponse(false);
-
+        clusterPriority.decrementNodesSurrendered();
+        clusterPriority.resetRequestsSent();
+        clusterPriority.incrementPOP();
         logger.log(Level.FINER,"Exiting notifyCreateNodeResponse",Constants.MANAGER_LOG_ID);
     }
 
@@ -149,7 +157,15 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
                 logger.log(Level.FINE,"Executed CreateNewNode on plugin",Constants.MANAGER_LOG_ID);
                 elasticityPlugin.notifyNewNodeCreation(node);
                 logger.log(Level.FINE,"Executed NotifyNewNodeCreation on plugin",Constants.MANAGER_LOG_ID);
+                clusterPriority.decrementNodesSurrendered();
+                clusterPriority.resetRequestsSent();
+                clusterPriority.incrementPOP();
             }
+        }
+
+        else if(newNodes.size() > 0)
+        {
+            clusterPriority.incrementRequestsSent();
         }
 
         ArrayList<Node> shouldBeDeletedNodes = elasticityPlugin.scaleDown();
@@ -157,7 +173,6 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
         if(shouldBeDeletedNodes != null) {
             for (Node nodeToBeDeleted : shouldBeDeletedNodes) {
                 scalerPlugin.deleteNode(nodeToBeDeleted);
-                authorizationAgent.deletedNode(nodeToBeDeleted);
                 logger.log(Level.FINE,"Executed DeleteNode on plugin",Constants.MANAGER_LOG_ID);
             }
         }
@@ -168,12 +183,16 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
     public String notifyStateRequest() {
         ArrayList<Node> nodes = elasticityPlugin.getNodes();
 
+        clusterPriority.decrementPOPBySeconds((double) (System.currentTimeMillis() - lastTime)/1000.0);
+
         ClusterState state = new ClusterState();
         state.setId(config.getValueForKey("Id"));
-        state.setPriority(Double.parseDouble(config.getValueForKey("Base-Priority")));
+        state.setPriority(clusterPriority.getClusterPriority());
         state.setPort(config.getValueForKey("Port"));
         state.setMinNodes(Integer.parseInt(config.getValueForKey("Min-Nodes")));
         state.setNodesInCluster(nodes);
+
+        logger.log(Level.INFO,"Cluster Priority = "+clusterPriority,Constants.MANAGER_LOG_ID);
 
         return state.toString();
     }
@@ -196,11 +215,13 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
 
     private void createAuthorizationAgent()
     {
-        ArrayList<Node> nodes = elasticityPlugin.fetch(fetchData(setupDataQueries),config);
+        ArrayList<Node> nodes = elasticityPlugin.getNodes();
 
+        clusterPriority = new ClusterPriority(Integer.parseInt(config.getValueForKey("Base-Priority")));
+        lastTime = System.currentTimeMillis();
         ClusterState state = new ClusterState();
         state.setId(config.getValueForKey("Id"));
-        state.setPriority(Double.parseDouble(config.getValueForKey("Base-Priority")));
+        state.setPriority(clusterPriority.getClusterPriority());
         state.setPort(config.getValueForKey("Port"));
         state.setNodesInCluster(nodes);
 

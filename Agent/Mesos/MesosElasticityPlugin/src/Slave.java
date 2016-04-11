@@ -116,6 +116,10 @@ public class Slave {
         this.id = slave.getId();
         this.free_mem = slave.getFree_mem();
         this.load = slave.getLoad();
+        this.cpu = slave.getCpu();
+        this.hostname = slave.getHostname();
+        this.ip = slave.getIp();
+        this.total_mem = slave.getTotal_mem();
         this.allocated_cpu = slave.getAllocated_cpu();
     }
 
