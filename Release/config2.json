@@ -15,10 +15,10 @@
   "Overlord-Port": "6000",
   "Id": "2",
   "Base-Priority": "2",
+  "Log": "./logs/",
 
   "Mesos-HDFS-Master": "192.168.1.4",
   "SSH-Private-Key": "/Users/chemistry_sourabh/.ssh/id_rsa",
-  "OpenStack-Client-Path": "./Release/OpenStackClient",
   "Min-Nodes": "2",
   "No-Delete-Slaves": ["spark-slave-2-1.cloud","spark-slave-2-2.cloud"],
   "Cluster-Security-Group": "Cluster-2",

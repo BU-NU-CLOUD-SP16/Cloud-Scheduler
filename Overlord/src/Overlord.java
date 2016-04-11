@@ -183,10 +183,15 @@ public class Overlord {
                 nodes.add(node);
             }
 
-            if (nodes.size() < agent.getNodeList().size())
+            if (nodes.size() < agent.getNodeList().size() && pendingNodeRequests.size() > 0)
             {
                 Agent agent1 = pendingNodeRequests.remove(0);
                 agentCommunicator.sendCreateNodeSignal(agent1);
+                agent.setNodeList(nodes);
+            }
+
+            else
+            {
                 agent.setNodeList(nodes);
             }
         }
