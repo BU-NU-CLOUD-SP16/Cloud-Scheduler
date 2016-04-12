@@ -11,6 +11,6 @@
     <orderEntry type="module" module-name="Database" exported="" />
     <orderEntry type="module" module-name="MesosElasticityPlugin" exported="" />
     <orderEntry type="module" module-name="OpenStackClusterScalerPlugin" exported="" />
-    <orderEntry type="module" module-name="Authorization" />
+    <orderEntry type="module" module-name="Authorization" exported="" />
   </component>
 </module>

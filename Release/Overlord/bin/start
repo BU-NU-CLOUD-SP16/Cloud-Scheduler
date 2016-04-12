@@ -1,0 +1,20 @@
+#!/usr/bin/env python
+import  argparse
+import subprocess
+import os
+import signal
+import sys
+
+
+command  = "/Library/Java/JavaVirtualMachines/jdk1.8.0_74.jdk/Contents/Home/bin/java -jar ./Release/Overlord/jars/Overlord.jar"
+
+
+p = subprocess.Popen(command,shell=True)
+
+def signal_handler(signal1, frame):
+        os.killpg(os.getpgid(p.pid), signal.SIGTERM)
+        sys.exit(0)
+signal.signal(signal.SIGINT, signal_handler)
+
+while True:
+    ""

@@ -137,7 +137,10 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
         for(Node node : nodes)
         {
             OpenStackNode openStackNode = (OpenStackNode) node;
-            scalerPlugin.createNewNode(openStackNode);
+            Node newNode = scalerPlugin.createNewNode(openStackNode);
+            logger.log(Level.FINE,"Executed CreateNewNode on plugin",Constants.MANAGER_LOG_ID);
+            elasticityPlugin.notifyNewNodeCreation(newNode);
+            logger.log(Level.FINE,"Executed NotifyNewNodeCreation on plugin",Constants.MANAGER_LOG_ID);
         }
 
         authorizationAgent.setWaitingForResponse(false);
@@ -272,6 +275,7 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
         state.setId(config.getValueForKey("Id"));
         state.setPriority(clusterPriority.getClusterPriority());
         state.setPort(config.getValueForKey("Port"));
+        state.setMinNodes(Integer.parseInt(config.getValueForKey("Min-Nodes")));
         state.setNodesInCluster(nodes);
 
         this.authorizationAgent = new AuthorizationAgent(config.getValueForKey("Overlord-Ip"),Integer.parseInt(config.getValueForKey("Overlord-Port")),state);

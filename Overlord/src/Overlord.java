@@ -24,6 +24,8 @@ public class Overlord {
     private AgentList registeredAgents;
     private int maxNodes = 7;
 
+    private boolean creatingNode = false;
+
     private ArrayList<Agent> pendingNodeRequests;
 
     public Overlord(){
@@ -75,10 +77,14 @@ public class Overlord {
         Integer ceAgentID = request.getCeAgentID();
         Integer number = request.getNumberOfNodes();
 
+        if (creatingNode)
+            return "";
+
         if( registeredAgents.contains(ceAgentID)) {
 
                 if(nodeList.size() < maxNodes)
                 {
+                    creatingNode = true;
                     return "200";
                 }
 
@@ -191,6 +197,13 @@ public class Overlord {
                 Agent agent1 = pendingNodeRequests.remove(0);
                 System.out.println("Sent Create Signal to Cluster "+agent1.getId());
                 agentCommunicator.sendCreateNodeSignal(agent1);
+                creatingNode = true;
+                agent.setNodeList(nodes);
+            }
+
+            else if (nodes.size() > agent.getNodeList().size() && creatingNode)
+            {
+                creatingNode = false;
                 agent.setNodeList(nodes);
             }
 
