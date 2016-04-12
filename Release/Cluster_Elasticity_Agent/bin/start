@@ -14,7 +14,7 @@ args = parser.parse_args()
 config = args.config
 verbose = args.v
 
-command  = "/Library/Java/JavaVirtualMachines/jdk1.8.0_74.jdk/Contents/Home/bin/java -jar ./Cluster\ Elasticity\ Agent/jars/Cloud-Scheduler.jar -config="+config
+command  = "/Library/Java/JavaVirtualMachines/jdk1.8.0_74.jdk/Contents/Home/bin/java -jar ./Release/Cluster_Elasticity_Agent/jars/Agent.jar -config="+config
 
 if verbose:
     command += " -v"
