@@ -39,7 +39,7 @@ public class AgentCommunicator {
         try {
             JsonObject jsonObject = new JsonObject();
             jsonObject.addProperty("number",1);
-            HttpResponse<String> response = Unirest.post("http://"+agent.getIp()+":"+agent.getPort()+"/createNode").body(jsonObject).asString();
+            HttpResponse<String> response = Unirest.post("http://"+agent.getIp()+":"+agent.getPort()+"/createNode").body(jsonObject.toString()).asString();
         } catch (UnirestException e) {
             e.printStackTrace();
         }

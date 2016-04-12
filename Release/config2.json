@@ -14,7 +14,7 @@
   "Overlord-Ip": "localhost",
   "Overlord-Port": "6000",
   "Id": "2",
-  "Base-Priority": "2",
+  "Base-Priority": "3",
   "Log": "./logs/",
 
   "Mesos-HDFS-Master": "192.168.1.4",
@@ -40,6 +40,6 @@
   "Scale-Up-Slave-Memory": 0.1,
   "Scale-Down-Slave-Memory": 0.7,
 
-  "Framework-Priorities": [{"name":"PageRank","priority":1},{"name":"PageRank2","priority":2}]
+  "Framework-Priorities": [{"name":"PageRank","priority":2},{"name":"Hadoop","priority":1}]
 
 }

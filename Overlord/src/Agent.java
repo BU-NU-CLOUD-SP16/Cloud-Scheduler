@@ -75,7 +75,7 @@ public class Agent {
     }
 
     public void setNodeList(ArrayList<Node> nodeList) {
-        System.out.println(id+" Node List size " + nodeList.size());
+        System.out.println("Cluster "+id+" has " + nodeList.size()+" nodes");
         this.nodeList = nodeList;
     }
 

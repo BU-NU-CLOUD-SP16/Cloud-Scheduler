@@ -119,6 +119,7 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
     public void notifyReleaseNodeRequest(String string)
     {
         logger.log(Level.FINER,"Entering notifyReleaseNodeRequest",Constants.MANAGER_LOG_ID);
+        logger.log(Level.INFO,"Got order from Overlord to Give up node",Constants.MANAGER_LOG_ID);
         ArrayList<Node> releaseNodes = elasticityPlugin.receivedReleaseNodeRequest(string);
         for(Node node : releaseNodes) {
             scalerPlugin.deleteNode(node);
@@ -130,7 +131,7 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
     @Override
     public void notifyCreateNodeResponse(String json) {
         logger.log(Level.FINER,"Entering notifyCreateNodeResponse",Constants.MANAGER_LOG_ID);
-
+        logger.log(Level.INFO,"Got Permission from Overlord to create node",Constants.MANAGER_LOG_ID);
         ArrayList<Node> nodes = elasticityPlugin.receivedCreateNodeResponse(json);
 
         for(Node node : nodes)
@@ -281,7 +282,7 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
         for(JsonElement element : frameworkPriorityJson)
         {
             JsonObject object = element.getAsJsonObject();
-            if (object.get("name").getAsString().equals(name))
+            if (object.get("name").getAsString().toLowerCase().contains(name.toLowerCase()))
             {
                 return object;
             }

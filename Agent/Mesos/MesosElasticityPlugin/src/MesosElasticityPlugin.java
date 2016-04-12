@@ -95,7 +95,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
 
         for (JsonElement  element : json)
         {
-            NO_DELETE_SLAVES.add(element.getAsString());
+            NO_DELETE_SLAVES.add(element.getAsString().toLowerCase());
         }
 
         newNodeFlavor = config.getValueForKey("New-Node-Flavor");
@@ -446,7 +446,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
 
         for(Slave slave : slaves)
         {
-            if(NO_DELETE_SLAVES.contains(slave.getHostname()))
+            if(NO_DELETE_SLAVES.contains(slave.getHostname().toLowerCase()))
             {
                 continue;
             }

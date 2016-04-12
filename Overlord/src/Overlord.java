@@ -85,12 +85,13 @@ public class Overlord {
                 else if(nodeList.size() == maxNodes)
                 {
                     ArrayList<Agent> agents = registeredAgents.getLowerPriorityAgents(ceAgentID);
-                    agents.sort((o1, o2) -> o1.getPriority() > o2.getPriority()?1:0);
+                    agents.sort((o1, o2) -> o1.getPriority() < o2.getPriority()?1:0);
                     AgentCommunicator communicator = new AgentCommunicator();
                     for(Agent agent : agents)
                     {
                         if(agent.getNodeList().size() > agent.getMinFixedNodes()) {
                             pendingNodeRequests.add(registeredAgents.get(ceAgentID));
+                            System.out.println("Sent Return Node Signal to Cluster "+agent.getId());
                             communicator.sendReturnRevocableNodeSignal(agent, 1);
                             return "201";
                         }
@@ -146,7 +147,7 @@ public class Overlord {
                overlordHandle.setNodeList(nodes);
                 overlordHandle.remakeAgentsNodeList();
                 overlordHandle.updateCloudState();
-                System.out.println("Can start Agents");
+//                System.out.println("Can start Agents");
                 sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -188,6 +189,7 @@ public class Overlord {
             if (nodes.size() < agent.getNodeList().size() && pendingNodeRequests.size() > 0)
             {
                 Agent agent1 = pendingNodeRequests.remove(0);
+                System.out.println("Sent Create Signal to Cluster "+agent1.getId());
                 agentCommunicator.sendCreateNodeSignal(agent1);
                 agent.setNodeList(nodes);
             }
