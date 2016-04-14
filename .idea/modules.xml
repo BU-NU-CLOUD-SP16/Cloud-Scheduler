@@ -3,8 +3,10 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Agent/Agent.iml" filepath="$PROJECT_DIR$/Agent/Agent.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Overlord/Policy/AgingPolicyPlugin/AgingPolicyPlugin.iml" filepath="$PROJECT_DIR$/Overlord/Policy/AgingPolicyPlugin/AgingPolicyPlugin.iml" />
       <module fileurl="file://$PROJECT_DIR$/Agent/Authorization/Authorization.iml" filepath="$PROJECT_DIR$/Agent/Authorization/Authorization.iml" />
       <module fileurl="file://$PROJECT_DIR$/Cloud-Scheduler.iml" filepath="$PROJECT_DIR$/Cloud-Scheduler.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Overlord/CloudInfoCollector/CloudInfoCollector.iml" filepath="$PROJECT_DIR$/Overlord/CloudInfoCollector/CloudInfoCollector.iml" />
       <module fileurl="file://$PROJECT_DIR$/Agent/ClusterScaler/ClusterScaler.iml" filepath="$PROJECT_DIR$/Agent/ClusterScaler/ClusterScaler.iml" />
       <module fileurl="file://$PROJECT_DIR$/Agent/Collector/Collector.iml" filepath="$PROJECT_DIR$/Agent/Collector/Collector.iml" />
       <module fileurl="file://$PROJECT_DIR$/Agent/Common/Common.iml" filepath="$PROJECT_DIR$/Agent/Common/Common.iml" />
@@ -12,9 +14,12 @@
       <module fileurl="file://$PROJECT_DIR$/Agent/Manager/Manager.iml" filepath="$PROJECT_DIR$/Agent/Manager/Manager.iml" />
       <module fileurl="file://$PROJECT_DIR$/Agent/Collector/MesosCollectorPlugin/MesosCollectorPlugin.iml" filepath="$PROJECT_DIR$/Agent/Collector/MesosCollectorPlugin/MesosCollectorPlugin.iml" />
       <module fileurl="file://$PROJECT_DIR$/Agent/Manager/MesosElasticityPlugin/MesosElasticityPlugin.iml" filepath="$PROJECT_DIR$/Agent/Manager/MesosElasticityPlugin/MesosElasticityPlugin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Overlord/CloudInfoCollector/OpenStackCloudInfoCollectorPlugin/OpenStackCloudInfoCollectorPlugin.iml" filepath="$PROJECT_DIR$/Overlord/CloudInfoCollector/OpenStackCloudInfoCollectorPlugin/OpenStackCloudInfoCollectorPlugin.iml" />
       <module fileurl="file://$PROJECT_DIR$/Agent/ClusterScaler/OpenStackClusterScalerPlugin/OpenStackClusterScalerPlugin.iml" filepath="$PROJECT_DIR$/Agent/ClusterScaler/OpenStackClusterScalerPlugin/OpenStackClusterScalerPlugin.iml" />
       <module fileurl="file://$PROJECT_DIR$/Overlord/Overlord.iml" filepath="$PROJECT_DIR$/Overlord/Overlord.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Overlord/OverlordPlugin/OverlordPlugin.iml" filepath="$PROJECT_DIR$/Overlord/OverlordPlugin/OverlordPlugin.iml" />
       <module fileurl="file://$PROJECT_DIR$/Agent/Plugin/Plugin.iml" filepath="$PROJECT_DIR$/Agent/Plugin/Plugin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Overlord/Policy/Policy.iml" filepath="$PROJECT_DIR$/Overlord/Policy/Policy.iml" />
       <module fileurl="file://$PROJECT_DIR$/Agent/Database/SQLiteDBExecutorPlugin/SQLiteDBExecutorPlugin.iml" filepath="$PROJECT_DIR$/Agent/Database/SQLiteDBExecutorPlugin/SQLiteDBExecutorPlugin.iml" />
       <module fileurl="file://$PROJECT_DIR$/Utilities/Utilities.iml" filepath="$PROJECT_DIR$/Utilities/Utilities.iml" />
     </modules>

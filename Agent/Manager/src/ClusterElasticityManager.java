@@ -37,6 +37,7 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
 
     private  Config config;
 
+    private int status = ClusterState.ACTIVE_STATUS;
     private ClusterPriority clusterPriority;
     private  long lastTime = 0;
     private JsonArray frameworkPriorityJson;
@@ -161,6 +162,7 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
         scalerPlugin.setup(config,nodes);
         logger.log(Level.FINE,"Executed Setup on plugin",Constants.MANAGER_LOG_ID);
         if(newNodes != null && authorizationAgent.canCreateNewNodes(newNodes.size())) {
+            status = ClusterState.CREATE_STATUS;
             for (Node newNode : newNodes) {
                 Node node = scalerPlugin.createNewNode(newNode);
                 logger.log(Level.FINE,"Executed CreateNewNode on plugin",Constants.MANAGER_LOG_ID);
@@ -180,11 +182,15 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
         ArrayList<Node> shouldBeDeletedNodes = elasticityPlugin.scaleDown();
         logger.log(Level.FINE,"Executed ScaleDown on plugin",Constants.MANAGER_LOG_ID);
         if(shouldBeDeletedNodes != null) {
+            status = ClusterState.DELETE_STATUS;
             for (Node nodeToBeDeleted : shouldBeDeletedNodes) {
                 scalerPlugin.deleteNode(nodeToBeDeleted);
                 logger.log(Level.FINE,"Executed DeleteNode on plugin",Constants.MANAGER_LOG_ID);
             }
         }
+
+        status = ClusterState.ACTIVE_STATUS;
+
         logger.log(Level.FINER,"Exiting notifyTimerExpiry",Constants.MANAGER_LOG_ID);
     }
 
@@ -221,6 +227,7 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
         state.setPort(config.getValueForKey("Port"));
         state.setMinNodes(Integer.parseInt(config.getValueForKey("Min-Nodes")));
         state.setNodesInCluster(nodes);
+        state.setStatus(status);
 
         logger.log(Level.INFO,"Cluster Priority = "+clusterPriority,Constants.MANAGER_LOG_ID);
 
@@ -276,6 +283,7 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
         state.setPort(config.getValueForKey("Port"));
         state.setMinNodes(Integer.parseInt(config.getValueForKey("Min-Nodes")));
         state.setNodesInCluster(nodes);
+        state.setStatus(status);
 
         this.authorizationAgent = new AuthorizationAgent(config.getValueForKey("Overlord-Ip"),Integer.parseInt(config.getValueForKey("Overlord-Port")),state);
     }

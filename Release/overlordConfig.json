@@ -1,0 +1,9 @@
+{
+  "Username":"Enter here",
+  "Password":"Enter here",
+
+  "Max-Nodes":7,
+  "Polling-Interval": 1000,
+  "Port": 6000
+
+}

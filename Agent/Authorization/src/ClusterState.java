@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public class ClusterState {
 
     public static final int ACTIVE_STATUS = 0;
-    public static final  int CREATE_STATUS = 1;
+    public static final int CREATE_STATUS = 1;
     public static final int DELETE_STATUS = 2;
 
     private String id;
@@ -75,6 +75,7 @@ public class ClusterState {
         jsonObject.addProperty("priority",priority);
         jsonObject.addProperty("port",port);
         jsonObject.addProperty("minNodes",minNodes);
+        jsonObject.addProperty("status",status);
 
         JsonArray array = new JsonArray();
 

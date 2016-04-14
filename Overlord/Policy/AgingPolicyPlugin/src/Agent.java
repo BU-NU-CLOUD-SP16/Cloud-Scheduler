@@ -7,6 +7,7 @@ public class Agent {
 
     private Integer id;
     private double priority;
+    private int status;
     private String ip;
     private Integer port;
     private Integer minFixedNodes;
@@ -85,6 +86,14 @@ public class Agent {
 
     public void removeNodeFromList(Node node){
         this.nodeList.remove(node);
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
     }
 
     @Override

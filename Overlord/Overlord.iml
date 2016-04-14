@@ -11,5 +11,7 @@
     <orderEntry type="library" exported="" name="com.sparkjava:spark-core:2.3" level="project" />
     <orderEntry type="library" exported="" name="com.google.code.gson:gson:2.6.2" level="project" />
     <orderEntry type="library" name="com.mashape.unirest:unirest-java:1.4.8" level="project" />
+    <orderEntry type="library" name="args4j-2.33" level="project" />
+    <orderEntry type="module" module-name="OverlordPlugin" />
   </component>
 </module>
