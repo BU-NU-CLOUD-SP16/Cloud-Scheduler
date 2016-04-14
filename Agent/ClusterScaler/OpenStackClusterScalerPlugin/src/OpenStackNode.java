@@ -1,19 +1,19 @@
 /**
- * Created by chemistry_sourabh on 3/9/16.
+ * Created by chemistry_sourabh on 3/7/16.
  */
-public class MesosSlave {
+public class OpenStackNode extends Node {
 
-    private String nodeId;
     private String hostname;
     private String flavor;
+    private String id;
     private String ip;
+    private String status;
 
-    public String getNodeId() {
-        return nodeId;
+    public OpenStackNode() {
     }
 
-    public void setNodeId(String nodeId) {
-        this.nodeId = nodeId;
+    public OpenStackNode(String flavor) {
+        this.flavor = flavor;
     }
 
     public String getHostname() {
@@ -32,6 +32,14 @@ public class MesosSlave {
         this.flavor = flavor;
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public String getIp() {
         return ip;
     }
@@ -40,13 +48,11 @@ public class MesosSlave {
         this.ip = ip;
     }
 
-    @Override
-    public String toString() {
-        return "MesosSlave{" +
-                "nodeId='" + nodeId + '\'' +
-                ", hostname='" + hostname + '\'' +
-                ", flavor='" + flavor + '\'' +
-                ", ip='" + ip + '\'' +
-                '}';
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

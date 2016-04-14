@@ -3,6 +3,7 @@
  */
 
 import java.io.File;
+import java.util.concurrent.SynchronousQueue;
 import java.util.logging.*;
 
 import static spark.Spark.*;
@@ -186,12 +187,13 @@ public class ClusterElasticityAgent {
     {
         LogManager.getLogManager().reset();
         Logger logger = Logger.getLogger(Constants.LOGGER_NAME);
-        logger.setLevel(Level.FINEST);
+        logger.setLevel(Level.FINE);
+        new File(arguments.getLogDir()).mkdirs();
         try {
-            FileHandler managerFileHandler = new FileHandler(arguments.getLogDir() + File.separator + Constants.MANAGER_LOG_NAME +arguments.getConfig().getValueForKey("Id")+".log");
-            FileHandler collectorFileHandler = new FileHandler(arguments.getLogDir()+ File.separator + Constants.COLLECTOR_LOG_NAME+arguments.getConfig().getValueForKey("Id")+".log");
-            FileHandler centralFileHandler = new FileHandler(arguments.getLogDir() + File.separator + Constants.CENTRAL_LOG_NAME+arguments.getConfig().getValueForKey("Id")+".log");
-            FileHandler mainFileHandler = new FileHandler(arguments.getLogDir() + File.separator + Constants.MAIN_LOG_NAME+arguments.getConfig().getValueForKey("Id")+".log");
+            FileHandler managerFileHandler = new FileHandler(arguments.getLogDir() + File.separator + Constants.MANAGER_LOG_NAME +"-"+arguments.getConfig().getValueForKey("Id")+"-"+ System.currentTimeMillis()+".log");
+            FileHandler collectorFileHandler = new FileHandler(arguments.getLogDir()+ File.separator + Constants.COLLECTOR_LOG_NAME+"-"+arguments.getConfig().getValueForKey("Id")+"-"+ System.currentTimeMillis()+".log");
+            FileHandler centralFileHandler = new FileHandler(arguments.getLogDir() + File.separator + Constants.CENTRAL_LOG_NAME+"-"+arguments.getConfig().getValueForKey("Id")+"-"+ System.currentTimeMillis()+".log");
+            FileHandler mainFileHandler = new FileHandler(arguments.getLogDir() + File.separator + Constants.MAIN_LOG_NAME+"-"+arguments.getConfig().getValueForKey("Id")+"-"+ System.currentTimeMillis()+".log");
             ConsoleHandler consoleHandler = new ConsoleHandler();
             managerFileHandler.setFormatter(new SimpleFormatter());
             managerFileHandler.setFilter(record -> record.getParameters()[0].equals(Constants.MANAGER_LOG_ID));

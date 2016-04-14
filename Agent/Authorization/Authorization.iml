@@ -9,7 +9,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="com.mashape.unirest:unirest-java:1.4.8" level="project" />
     <orderEntry type="library" name="com.google.code.gson:gson:2.6.2" level="project" />
-    <orderEntry type="module" module-name="Node" />
     <orderEntry type="module" module-name="Plugin" />
+    <orderEntry type="module" module-name="Common" />
   </component>
 </module>

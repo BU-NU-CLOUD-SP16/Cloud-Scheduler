@@ -136,8 +136,7 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
 
         for(Node node : nodes)
         {
-            OpenStackNode openStackNode = (OpenStackNode) node;
-            Node newNode = scalerPlugin.createNewNode(openStackNode);
+            Node newNode = scalerPlugin.createNewNode(node);
             logger.log(Level.FINE,"Executed CreateNewNode on plugin",Constants.MANAGER_LOG_ID);
             elasticityPlugin.notifyNewNodeCreation(newNode);
             logger.log(Level.FINE,"Executed NotifyNewNodeCreation on plugin",Constants.MANAGER_LOG_ID);

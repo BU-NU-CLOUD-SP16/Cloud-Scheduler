@@ -8,12 +8,16 @@ import java.util.ArrayList;
  */
 public class ClusterState {
 
+    public static final int ACTIVE_STATUS = 0;
+    public static final  int CREATE_STATUS = 1;
+    public static final int DELETE_STATUS = 2;
+
     private String id;
     private double priority;
     private int minNodes;
     private String port;
     private ArrayList<Node> nodesInCluster;
-
+    private int status;
 
     public String getId() {
         return id;
@@ -55,10 +59,19 @@ public class ClusterState {
         this.nodesInCluster = nodesInCluster;
     }
 
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
     @Override
     public String toString() {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("id",id);
+        jsonObject.addProperty("status",status);
         jsonObject.addProperty("priority",priority);
         jsonObject.addProperty("port",port);
         jsonObject.addProperty("minNodes",minNodes);

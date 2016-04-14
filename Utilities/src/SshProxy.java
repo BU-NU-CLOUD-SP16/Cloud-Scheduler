@@ -17,7 +17,7 @@ public class SshProxy {
         this.privateKey = privateKey;
     }
 
-    public int executeCommand(String final_host, String command) throws Exception{
+    public int executeCommand(String finalHost, String command) throws Exception{
 
         int exitStatus = 1;
 
@@ -30,7 +30,7 @@ public class SshProxy {
         session=jsch.getSession(user, host, port);
         session.setConfig("StrictHostKeyChecking", "no");
         session.setConfig("UserKnownHostsFile","/dev/null");
-        session.setPortForwardingL(2233, final_host, 22);
+        session.setPortForwardingL(2233, finalHost, 22);
         session.connect();
         Channel ch = session.openChannel("direct-tcpip");
 
