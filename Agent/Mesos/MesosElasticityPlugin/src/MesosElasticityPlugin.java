@@ -9,7 +9,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Created by chemistry_sourabh on 3/2/16.
+ * <h1>MesosElasticityPlugin</h1>
+ * This class maintains and is the reason for
+ * any scaling up or down of the nodes based on
+ * data received from Mesos.
+ *
+ * @author Sourabh
+ * @version 1.0
+ * @since 2016-03-02
  */
 public class MesosElasticityPlugin implements ElasticityPlugin {
 
@@ -67,6 +74,10 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
     private String privateKey;
     private String hdfsIp;
 
+    /**
+     * <h1>MesosElasticityPlugin Constructor</h1>
+     * Creates new objects for framework and slave
+     */
     public MesosElasticityPlugin()
     {
         frameworks = new ArrayList<>();
@@ -74,9 +85,17 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         logger = GlobalLogger.globalLogger;
     }
 
-
-    // Should be used to fetch required data from db and policy info from files
-    // Will be called at beginning of each command
+    /**
+     * <h1>fetch</h1>
+     * Takes in the list of queries as the first parameter
+     * and the config values as the second
+     * Should be used to fetch required data from db and
+     * policy info from files, and will be called at beginning
+     * of each command
+     * @param data First parameter of type Arraylist<Data>
+     * @param config Second parameter of type Config
+     * @return ArrayList<Node>
+     */
     @DataQuery(queries = {"select * from slave","select * from framework","select * from runs_on"})
     @Override
     public ArrayList<Node> fetch(ArrayList<Data> data,Config config)
@@ -156,6 +175,12 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         return nodes;
     }
 
+    /**
+     * <h1>getNodes</h1>
+     * Returns the list of nodes currently used
+     * by all the slaves of the agent.
+     * @return ArrayList<Nodes> List of Nodes
+     */
     @Override
     public ArrayList<Node> getNodes()
     {
@@ -168,10 +193,14 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
             node.setIp(slave.getIp());
             nodes.add(node);
         }
-
         return nodes;
     }
 
+    /**
+     * <h1>getFrameworkNames</h1>
+     * Returns the list of Framework Names.
+     * @return ArrayList<String> List of Framework names
+     */
     @Override
     public ArrayList<String> getFrameworkNames()
     {
@@ -184,6 +213,12 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         return names;
     }
 
+    /**
+     * <h1>scaleUp</h1>
+     * Scales up a node and provides the
+     * list of nodes.
+     * @return ArrayList<Node> List of Nodes
+     */
     @Override
     public ArrayList<Node> scaleUp()
     {
@@ -290,6 +325,12 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
     }
 
 
+    /**
+     * <h1>scaleDown</h1>
+     * Scales down a node based on a reason
+     * and return the list of nodes
+     * @return ArrayList<Node>
+     */
     @Override
     public ArrayList<Node> scaleDown()
     {
@@ -362,6 +403,14 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         return toBeDeleted;
     }
 
+    /**
+     * <h1>requestResources</h1>
+     * Dynamic request to add a new node
+     * based on the given parameter and
+     * returns the list of nodes
+     * @param parameters
+     * @return ArrayList<Node>
+     */
     @Override
     public ArrayList<Node> requestResources(String parameters)
     {
@@ -435,6 +484,12 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         noScaleUpFilterSet = true;
     }
 
+    /**
+     * <h1>receivedReleaseNodeRequest</h1>
+     * Provides the list of Nodes which were released
+     * @param string
+     * @return ArrayList<Node> List of nodes which are released
+     */
     @Override
     public ArrayList<Node> receivedReleaseNodeRequest(String string) {
 
@@ -467,9 +522,13 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         return releaseNodes;
     }
 
-
-
-
+    /**
+     * <h1>receivedCreateNodeResponse</h1>
+     * Returns a list of nodes which are to be added
+     * to the existing frameworks
+     * @param jsonString
+     * @return ArrayList<Node> The new list of nodes to be added to the agent.
+     */
     @Override
     public ArrayList<Node> receivedCreateNodeResponse(String jsonString)
     {
@@ -490,6 +549,13 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
     }
 
 
+    /**
+     * <h1>calculateClusterMetrics</h1>
+     * Calculates the cluster metrics from the nodes.
+     * This data is received from Mesos Endpoints of Slave nodes.
+     * @return double[] An array of the below metrics
+     * {total load,total free mem,total mem,total cpu,total allocated cpu}
+     */
     private double[] calculateClusterMetrics()
     {
 
@@ -518,6 +584,13 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         return metrics;
     }
 
+    /**
+     * <h1>findActiveFrameworksWithNoResources</h1>
+     * Provides the list of Frameworks which do not have
+     * any resources to work upon.
+     * @return ArrayList<Framework> List of Frameworks without
+     * any resources
+     */
     private ArrayList<Framework> findActiveFrameworksWithNoResources()
     {
         ArrayList <Framework> frameworks = new ArrayList<>();
@@ -532,6 +605,12 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         return frameworks;
     }
 
+    /**
+     * <h1>isFreeCPUPresent</h1>
+     * Returns true if there are free CPUS
+     * available for any Slave.
+     * @return Boolean
+     */
     private boolean isFreeCPUPresent() {
 
         for(Slave slave : slaves)
@@ -545,6 +624,16 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         return false;
     }
 
+    /**
+     * <h1>convertToFrameworkObjects</h1>
+     * Takes the Data from the Framework table
+     * and converts it into an object and returns
+     * the list of all the rows of Framework table
+     * in a list of objects.
+     * @param frameworkData
+     * @return ArrayList<Framework> Returns List of
+     * Framework Objects
+     */
     private ArrayList<Framework> convertToFrameworkObjects(Data frameworkData) {
         ArrayList<Framework> frameworks = new ArrayList<>();
 
@@ -580,6 +669,16 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         return frameworks;
     }
 
+    /**
+     * <h1>convertToSlaveObjects</h1>
+     * Takes the Data from the Slave table
+     * and converts it into an object and returns
+     * the list of all the rows of Slave table
+     * in a list of Slave objects.
+     * @param slaveData of Data type
+     * @return ArrayList<Slave> Returns List of
+     * Slave Objects
+     */
     private ArrayList<Slave> convertToSlaveObjects(Data slaveData) {
         ArrayList<Slave> slaves = new ArrayList<>();
 
@@ -600,6 +699,15 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         return slaves;
     }
 
+    /**
+     * <h1>connect</h1>
+     * Using The RunsOnData table, we connect
+     * the slaves with their current
+     * respective frameworks.
+     * @param frameworks ArrayList<Frameworks>
+     * @param slaves ArrayList<Frameworks>
+     * @param runsOnData Data
+     */
     private void connect(ArrayList<Framework> frameworks, ArrayList<Slave> slaves, Data runsOnData)
     {
         for(Framework f : frameworks)
@@ -629,6 +737,12 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         }
     }
 
+    /**
+     * <h1>integrateSlaves</h1>
+     * Adds newly added slaves to the
+     * main list of slaves.
+     * @param newSlaves ArralList<Slave>
+     */
     private void integrateSlaves(ArrayList<Slave> newSlaves)
     {
         ArrayList<Slave> oldSlaves = slaves;
@@ -649,6 +763,12 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         }
     }
 
+    /**
+     * <h1>integrateFrameworks</h1>
+     * Adds newly added Frameworks to the
+     * existing List of Frameworks.
+     * @param newFrameworks ArrayList<Framework>
+     */
     private void integrateFrameworks(ArrayList<Framework> newFrameworks)
     {
         ArrayList<Framework> oldFrameworks = frameworks;
@@ -669,6 +789,15 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         }
     }
 
+    /**
+     * <h1>findSlave</h1>
+     * Returns the Slave object using the
+     * slave id from the list of existing Slaves.
+     * Returns null if not available.
+     * @param id type-> String
+     * @param slaves type-> ArrayList<Slave>
+     * @return Slave
+     */
     private Slave findSlave(String id, ArrayList<Slave> slaves)
     {
         for(Slave slave : slaves)
@@ -682,6 +811,15 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         return null;
     }
 
+    /**
+     * <h1>findSlaveWithHostname</h1>
+     * Returns the Slave object using the
+     * slave hostname from the list of existing Slaves.
+     * Returns null if not available.
+     * @param hostname type->String
+     * @param slaves type->ArrayList<Slave>
+     * @return Slave
+     */
     private Slave findSlaveWithHostname(String hostname, ArrayList<Slave> slaves)
     {
         for(Slave slave : slaves)
@@ -695,6 +833,16 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         return null;
     }
 
+    /**
+     * <h1>findFramework</h1>
+     * finds the framework from the given
+     * framework id and the list of
+     * Frameworks.
+     * Returns null if not found.
+     * @param id type-> String
+     * @param frameworks type-> ArrayList<Framework>
+     * @return Framework
+     */
     private Framework findFramework(String id, ArrayList<Framework> frameworks)
     {
         for(Framework framework : frameworks)
@@ -707,6 +855,11 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         return null;
     }
 
+    /**
+     * <h1>findSlavesWithResourceCrunch</h1>
+     * Returns the list of Slaves with resource crunch.
+     * @return ArrayList<Slave> having resource crunch.
+     */
     private ArrayList<Slave> findSlavesWithResourceCrunch() {
         ArrayList<Slave> slaves = new ArrayList<>();
 
