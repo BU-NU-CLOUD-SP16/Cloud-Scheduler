@@ -92,7 +92,7 @@ public class OpenStackWrapper implements Runnable {
         for (Server server: servers ) {
 
             if(server.getName().toLowerCase().contains("slave")) {
-                Node node = new Node();
+                OpenStackNode node = new OpenStackNode();
                 node.setName(server.getName());
                 node.setId(server.getId());
                 node.setFlavor(server.getFlavor().getId());
@@ -123,7 +123,7 @@ public class OpenStackWrapper implements Runnable {
         {
             if(server.getName().equals(command.getName()))
             {
-                Node node = new Node();
+                OpenStackNode node = new OpenStackNode();
                 node.setName(server.getName());
                 node.setId(server.getId());
                 node.setFlavor(server.getFlavor().getId());

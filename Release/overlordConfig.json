@@ -2,8 +2,14 @@
   "Username":"Enter here",
   "Password":"Enter here",
 
+  "Policy-Plugin": "./Release/AgingPolicyPlugin.jar",
+  "Cloud-Info-Collector-Plugin": "./Release/OpenStackCloudInfoCollectorPlugin.jar",
+  "Policy-Main": "AgingPolicyPlugin",
+  "Cloud-Info-Collector-Main": "OpenStackCloudInfoCollectorPlugin",
+
+
   "Max-Nodes":7,
-  "Polling-Interval": 1000,
+  "Poll-Interval": 1000,
   "Port": 6000
 
 }

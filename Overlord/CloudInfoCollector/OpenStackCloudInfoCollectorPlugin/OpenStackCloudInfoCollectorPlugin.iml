@@ -9,5 +9,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="org.pacesys:openstack4j:2.11" level="project" />
     <orderEntry type="library" name="com.google.code.gson:gson:2.6.2" level="project" />
+    <orderEntry type="module" module-name="OverlordPlugin" />
   </component>
 </module>

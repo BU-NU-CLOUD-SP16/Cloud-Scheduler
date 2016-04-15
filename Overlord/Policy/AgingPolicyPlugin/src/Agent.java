@@ -12,15 +12,15 @@ public class Agent {
     private Integer port;
     private Integer minFixedNodes;
     private Integer maxScaledNodes;
-    private ArrayList<Node> nodeList;
+    private ArrayList<OpenStackNode> openStackNodeList;
 
     public Agent(){
-        this.nodeList = new ArrayList<>();
+        this.openStackNodeList = new ArrayList<>();
     }
 
     public Agent(Integer id) {
         this.id = id;
-        this.nodeList = new ArrayList<>();
+        this.openStackNodeList = new ArrayList<>();
     }
 
     public Integer getId() {
@@ -71,21 +71,21 @@ public class Agent {
         this.maxScaledNodes = maxScaledNodes;
     }
 
-    public ArrayList<Node> getNodeList() {
-        return nodeList;
+    public ArrayList<OpenStackNode> getOpenStackNodeList() {
+        return openStackNodeList;
     }
 
-    public void setNodeList(ArrayList<Node> nodeList) {
-        System.out.println("Cluster "+id+" has " + nodeList.size()+" nodes");
-        this.nodeList = nodeList;
+    public void setOpenStackNodeList(ArrayList<OpenStackNode> openStackNodeList) {
+        System.out.println("Cluster "+id+" has " + openStackNodeList.size()+" nodes");
+        this.openStackNodeList = openStackNodeList;
     }
 
-    public void addNodeToList(Node node){
-        this.nodeList.add(node);
+    public void addNodeToList(OpenStackNode openStackNode){
+        this.openStackNodeList.add(openStackNode);
     }
 
-    public void removeNodeFromList(Node node){
-        this.nodeList.remove(node);
+    public void removeNodeFromList(OpenStackNode openStackNode){
+        this.openStackNodeList.remove(openStackNode);
     }
 
     public int getStatus() {

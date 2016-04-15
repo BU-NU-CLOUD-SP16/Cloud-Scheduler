@@ -22,19 +22,6 @@ public class AgentCommunicator {
         }
     }
 
-    public String getAgentState(Agent agent)
-    {
-        try {
-            HttpResponse<String> response = Unirest.get("http://"+agent.getIp()+":"+agent.getPort()+"/state").asString();
-            return response.getBody();
-        }
-
-        catch (UnirestException ex)
-        {
-        }
-        return "";
-    }
-
     public void sendCreateNodeSignal(Agent agent) {
         try {
             JsonObject jsonObject = new JsonObject();

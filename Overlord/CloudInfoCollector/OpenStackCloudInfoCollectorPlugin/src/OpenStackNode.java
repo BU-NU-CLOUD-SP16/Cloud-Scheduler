@@ -1,7 +1,7 @@
 /**
  * Created by chemistry_sourabh on 3/28/16.
  */
-public class Node {
+public class OpenStackNode extends Node {
 
     private String id;
     private String name;
@@ -9,10 +9,10 @@ public class Node {
     private String flavor;
     private String ip;
 
-    public Node() {
+    public OpenStackNode() {
     }
 
-    public Node(String id) {
+    public OpenStackNode(String id) {
         this.id = id;
     }
 

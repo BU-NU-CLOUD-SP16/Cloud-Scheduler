@@ -20,6 +20,10 @@ public class CommandLineArguments {
     private static final Integer DEFAULT_INTERVAL = 1000;
     private static final int DEFAULT_PORT = 6000;
 
+    private static final String POLICY_PLUGIN = "Policy-Plugin";
+    private static final String POLICY_MAIN = "Policy-Main";
+    private static final String CLOUD_INFO_COLLECTOR_PLUGIN = "Cloud-Info-Collector-Plugin";
+    private static final String CLOUD_INFO_COLLECTOR_MAIN = "Cloud-Info-Collector-Main";
     private static final String POLL_INTERVAL = "Poll-Interval";
     private static final String LOG = "Log";
     private static final String PORT = "Port";
@@ -29,11 +33,15 @@ public class CommandLineArguments {
     private String logDir = System.getProperty("user.dir");
     private boolean verbose = false;
 
+    private File policyPluginJar;
+    private String policyPluginMainClass;
+    private File cloudInfoCollectorJar;
+    private String cloudInfoCollectorMainClass;
+
     private String configFile;
     private  Config config;
 
     public CommandLineArguments() {
-
         pollInterval = DEFAULT_INTERVAL;
     }
 
@@ -50,7 +58,11 @@ public class CommandLineArguments {
 
             JsonObject obj = gson.fromJson(new FileReader(file),JsonObject.class);
             pollInterval = obj.get(POLL_INTERVAL).getAsInt();
-            port = obj.get(POLL_INTERVAL).getAsInt();
+            port = obj.get(PORT).getAsInt();
+            policyPluginJar = new File(obj.get(POLICY_PLUGIN).getAsString());
+            policyPluginMainClass = obj.get(POLICY_MAIN).getAsString();
+            cloudInfoCollectorJar = new File(obj.get(CLOUD_INFO_COLLECTOR_PLUGIN).getAsString());
+            cloudInfoCollectorMainClass = obj.get(CLOUD_INFO_COLLECTOR_MAIN).getAsString();
             if(obj.has(LOG)) {
                 logDir = obj.get(LOG).getAsString();
                 obj.remove(LOG);
@@ -58,6 +70,10 @@ public class CommandLineArguments {
 
             obj.remove(POLL_INTERVAL);
             obj.remove(PORT);
+            obj.remove(POLICY_MAIN);
+            obj.remove(POLICY_PLUGIN);
+            obj.remove(CLOUD_INFO_COLLECTOR_MAIN);
+            obj.remove(CLOUD_INFO_COLLECTOR_PLUGIN);
 
             Set<Map.Entry<String,JsonElement>> members = obj.entrySet();
 
@@ -93,7 +109,11 @@ public class CommandLineArguments {
         try {
 
             JsonObject obj = gson.fromJson(new FileReader(file),JsonObject.class);
-            port = obj.get(POLL_INTERVAL).getAsInt();
+            port = obj.get(PORT).getAsInt();
+            policyPluginJar = new File(obj.get(POLICY_PLUGIN).getAsString());
+            policyPluginMainClass = obj.get(POLICY_MAIN).getAsString();
+            cloudInfoCollectorJar = new File(obj.get(CLOUD_INFO_COLLECTOR_PLUGIN).getAsString());
+            cloudInfoCollectorMainClass = obj.get(CLOUD_INFO_COLLECTOR_MAIN).getAsString();
             if(obj.has(LOG)) {
                 logDir = obj.get(LOG).getAsString();
                 obj.remove(LOG);
@@ -101,6 +121,10 @@ public class CommandLineArguments {
 
             obj.remove(POLL_INTERVAL);
             obj.remove(PORT);
+            obj.remove(POLICY_MAIN);
+            obj.remove(POLICY_PLUGIN);
+            obj.remove(CLOUD_INFO_COLLECTOR_MAIN);
+            obj.remove(CLOUD_INFO_COLLECTOR_PLUGIN);
 
             Set<Map.Entry<String,JsonElement>> members = obj.entrySet();
 
@@ -148,16 +172,24 @@ public class CommandLineArguments {
         return pollInterval;
     }
 
-    public void setPollInterval(Integer pollInterval) {
-        this.pollInterval = pollInterval;
-    }
-
     public int getPort() {
         return port;
     }
 
-    public void setPort(int port) {
-        this.port = port;
+    public File getPolicyPluginJar() {
+        return policyPluginJar;
+    }
+
+    public String getPolicyPluginMainClass() {
+        return policyPluginMainClass;
+    }
+
+    public File getCloudInfoCollectorJar() {
+        return cloudInfoCollectorJar;
+    }
+
+    public String getCloudInfoCollectorMainClass() {
+        return cloudInfoCollectorMainClass;
     }
 
     public void parseCommandLineArguments(String[] args) {

@@ -3,7 +3,7 @@
  */
 public class Constants {
 
-    public static final String HTTP_CREATE_CODE = "200";
-    public static final String HTTP_WAIT_CODE = "201";
-    public static final String HTTP_DENY_CODE = "500";
+    public static final String LOGGER_NAME = "Overlord Logger";
+    public static final String LOG_NAME = "Overlord";
+
 }
