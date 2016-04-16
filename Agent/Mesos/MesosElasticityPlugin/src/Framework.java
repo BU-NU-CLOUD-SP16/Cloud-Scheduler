@@ -1,7 +1,12 @@
 import java.util.ArrayList;
 
 /**
- * Created by chemistry_sourabh on 3/7/16.
+ * <h1>Framework</h1>
+ * Framework Getter Setters
+ *
+ * @author Sourabh
+ * @version 1.0
+ * @since 2016-03-07
  */
 public class Framework {
 
@@ -15,10 +20,15 @@ public class Framework {
     private boolean filterSet;
     private ArrayList<Slave> allocated_slaves;
 
+
     public Framework() {
         this.allocated_slaves = new ArrayList<>();
     }
 
+    /**
+     *
+     * @return
+     */
     public int getFilterTime() {
         return filterTime;
     }
