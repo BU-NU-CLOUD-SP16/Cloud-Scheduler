@@ -22,9 +22,11 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
     private String elasticityPluginClassName;
     private String clusterScalerPluginClassName;
     private String databaseExecutorPluginClassName;
+    private String policyInfoPluginClassName;
 
     private ElasticityPlugin elasticityPlugin;
     private ClusterScalerPlugin scalerPlugin;
+    private PolicyInfoPlugin policyInfoPlugin;
 
     // Instance to database API
     private DBExecutor database;
@@ -32,15 +34,14 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
     private AuthorizationAgent authorizationAgent;
 
     private String[] setupDataQueries;
+    private String[] policySetupDataQueries;
 
     private Logger logger = GlobalLogger.globalLogger;
 
     private  Config config;
 
     private int status = ClusterState.ACTIVE_STATUS;
-    private ClusterPriority clusterPriority;
     private  long lastTime = 0;
-    private JsonArray frameworkPriorityJson;
 
     public ClusterElasticityManager(CommandLineArguments arguments) {
 
@@ -49,6 +50,7 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
         this.elasticityPluginClassName = arguments.getCemanagerPluginMainClass();
         this.clusterScalerPluginClassName = arguments.getClusterScalerPluginMainClass();
         this.databaseExecutorPluginClassName = arguments.getDbExecutorPluginMainClass();
+        this.policyInfoPluginClassName = arguments.getPolicyInfoMainClass();
         this.config = arguments.getConfig();
 
 
@@ -74,6 +76,9 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
             Class clusterScalerPluginClass = Class.forName(clusterScalerPluginClassName);
             logger.log(Level.FINE,"Got Class of Cluster Scaler Plugin = "+clusterScalerPluginClassName,Constants.MANAGER_LOG_ID);
 
+            Class policyInfoPluginClass = Class.forName(policyInfoPluginClassName);
+            logger.log(Level.FINE,"Got Class of Policy Info Plugin = "+policyInfoPluginClassName,Constants.MANAGER_LOG_ID);
+
             Class databaseExecutorPluginClass = Class.forName(databaseExecutorPluginClassName);
             logger.log(Level.FINE,"Got Class of Database Executor Plugin = "+databaseExecutorPluginClassName,Constants.MANAGER_LOG_ID);
 
@@ -81,13 +86,15 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
             logger.log(Level.FINE,"Created Instance of "+elasticityPluginClassName,Constants.MANAGER_LOG_ID);
             scalerPlugin = (ClusterScalerPlugin) clusterScalerPluginClass.getConstructor().newInstance();
             logger.log(Level.FINE,"Created Instance of "+clusterScalerPluginClassName,Constants.MANAGER_LOG_ID);
+            policyInfoPlugin = (PolicyInfoPlugin) policyInfoPluginClass.getConstructor().newInstance();
+            logger.log(Level.FINE,"Created Instance of "+policyInfoPluginClassName,Constants.MANAGER_LOG_ID);
             database = (DBExecutor) databaseExecutorPluginClass.getConstructor(String.class).newInstance(config.getValueForKey("Id"));
             logger.log(Level.FINE,"Created Instance of "+databaseExecutorPluginClassName,Constants.MANAGER_LOG_ID);
         }
 
         catch(ClassNotFoundException ex)
         {
-            logger.log(Level.SEVERE,ex.toString(),Constants.MANAGER_LOG_NAME);
+            logger.log(Level.SEVERE,ex.toString(),Constants.MANAGER_LOG_ID);
         }
 
         catch(Exception ex)
@@ -109,10 +116,8 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
             logger.log(Level.FINE,"Executed CreateNewNode on plugin",Constants.MANAGER_LOG_ID);
             elasticityPlugin.notifyNewNodeCreation(node);
             logger.log(Level.FINE,"Executed NotifyNewNodeCreation on plugin",Constants.MANAGER_LOG_ID);
-            clusterPriority.decrementNodesSurrendered();
-            clusterPriority.resetRequestsSent();
-            clusterPriority.incrementPOP();
         }
+        policyInfoPlugin.notifyNewNodesCreation(newNodes);
         logger.log(Level.FINER,"Exiting notifyResourceScaling",Constants.MANAGER_LOG_ID);
     }
 
@@ -125,7 +130,7 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
         for(Node node : releaseNodes) {
             scalerPlugin.deleteNode(node);
         }
-        clusterPriority.incrementNodesSurrendered();
+        policyInfoPlugin.notifyRequestToReleaseReceived(releaseNodes);
         logger.log(Level.FINER,"Exiting notifyReleaseNodeRequest",Constants.MANAGER_LOG_ID);
     }
 
@@ -141,12 +146,11 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
             logger.log(Level.FINE,"Executed CreateNewNode on plugin",Constants.MANAGER_LOG_ID);
             elasticityPlugin.notifyNewNodeCreation(newNode);
             logger.log(Level.FINE,"Executed NotifyNewNodeCreation on plugin",Constants.MANAGER_LOG_ID);
+
         }
 
+        policyInfoPlugin.notifyCreateResponseReceived(nodes);
         authorizationAgent.setWaitingForResponse(false);
-        clusterPriority.decrementNodesSurrendered();
-        clusterPriority.resetRequestsSent();
-        clusterPriority.incrementPOP();
         logger.log(Level.FINER,"Exiting notifyCreateNodeResponse",Constants.MANAGER_LOG_ID);
     }
 
@@ -168,15 +172,14 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
                 logger.log(Level.FINE,"Executed CreateNewNode on plugin",Constants.MANAGER_LOG_ID);
                 elasticityPlugin.notifyNewNodeCreation(node);
                 logger.log(Level.FINE,"Executed NotifyNewNodeCreation on plugin",Constants.MANAGER_LOG_ID);
-                clusterPriority.decrementNodesSurrendered();
-                clusterPriority.resetRequestsSent();
-                clusterPriority.incrementPOP();
+
             }
+            policyInfoPlugin.notifyNewNodesCreation(newNodes);
         }
 
         else if(!authorizationAgent.isWaitingForResponse() && newNodes.size() > 0)
         {
-            clusterPriority.incrementRequestsSent();
+            policyInfoPlugin.notifyRejectionFromOverlord();
         }
 
         ArrayList<Node> shouldBeDeletedNodes = elasticityPlugin.scaleDown();
@@ -187,6 +190,7 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
                 scalerPlugin.deleteNode(nodeToBeDeleted);
                 logger.log(Level.FINE,"Executed DeleteNode on plugin",Constants.MANAGER_LOG_ID);
             }
+            policyInfoPlugin.notifyDeletionOfNodes(nodes);
         }
 
         status = ClusterState.ACTIVE_STATUS;
@@ -197,41 +201,23 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
     @Override
     public String notifyStateRequest() {
         ArrayList<Node> nodes = elasticityPlugin.getNodes();
-        ArrayList<String> names = elasticityPlugin.getFrameworkNames();
 
         double diffTime = (System.currentTimeMillis() - lastTime) / 1000.0;
 
-        clusterPriority.decrementPOPBySeconds(diffTime);
+        policyInfoPlugin.fetch(fetchData(policySetupDataQueries),config);
+        policyInfoPlugin.notifyElapseOfTime(diffTime);
+
         lastTime = System.currentTimeMillis();
-        Gson gson = new Gson();
-
-        frameworkPriorityJson = gson.fromJson(config.getValueForKey("Framework-Priorities"),JsonArray.class);
-
-        int sumPriority = 0;
-
-        for(String name : names)
-        {
-            JsonObject obj = findPriorityWithName(name);
-
-            if (obj != null)
-            {
-                sumPriority += obj.get("priority").getAsInt();
-            }
-        }
-
-        clusterPriority.setJobPriorities(sumPriority);
 
         ClusterState state = new ClusterState();
         state.setId(config.getValueForKey("Id"));
-        state.setPriority(clusterPriority.getClusterPriority());
         state.setPort(config.getValueForKey("Port"));
         state.setMinNodes(Integer.parseInt(config.getValueForKey("Min-Nodes")));
         state.setNodesInCluster(nodes);
         state.setStatus(status);
 
-        logger.log(Level.INFO,"Cluster Priority = "+clusterPriority,Constants.MANAGER_LOG_ID);
 
-        return state.toString();
+        return policyInfoPlugin.updateStateInfo(state.toString());
     }
 
     private void processAnnotations()
@@ -248,58 +234,36 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
             }
 
         }
+
+        methods = policyInfoPlugin.getClass().getDeclaredMethods();
+
+        for (Method method : methods)
+        {
+            if (method.getName().equals(SETUP_METHOD))
+            {
+                DataQuery dataQuery = method.getAnnotation(DataQuery.class);
+                policySetupDataQueries = dataQuery.queries();
+            }
+        }
     }
 
     private void createAuthorizationAgent()
     {
-        ArrayList<Node> nodes = elasticityPlugin.getNodes();
-        ArrayList<String> names = elasticityPlugin.getFrameworkNames();
-
-
-        Gson gson = new Gson();
-
-        frameworkPriorityJson = gson.fromJson(config.getValueForKey("Framework-Priorities"),JsonArray.class);
-
-        clusterPriority = new ClusterPriority(Integer.parseInt(config.getValueForKey("Base-Priority")));
-
-        int sumPriority = 0;
-
-        for(String name : names)
-        {
-            JsonObject obj = findPriorityWithName(name);
-
-            if (obj != null)
-            {
-                sumPriority += obj.get("priority").getAsInt();
-            }
-        }
-
-        clusterPriority.setJobPriorities(sumPriority);
+        ArrayList<Node> nodes = elasticityPlugin.fetch(fetchData(setupDataQueries),config);
 
         lastTime = System.currentTimeMillis();
         ClusterState state = new ClusterState();
         state.setId(config.getValueForKey("Id"));
-        state.setPriority(clusterPriority.getClusterPriority());
         state.setPort(config.getValueForKey("Port"));
         state.setMinNodes(Integer.parseInt(config.getValueForKey("Min-Nodes")));
         state.setNodesInCluster(nodes);
         state.setStatus(status);
 
-        this.authorizationAgent = new AuthorizationAgent(config.getValueForKey("Overlord-Ip"),Integer.parseInt(config.getValueForKey("Overlord-Port")),state);
-    }
+        policyInfoPlugin.fetch(fetchData(policySetupDataQueries),config);
+        String updatedJson = policyInfoPlugin.updateStateInfo(state.toString());
 
-    private JsonObject findPriorityWithName(String name)
-    {
-        for(JsonElement element : frameworkPriorityJson)
-        {
-            JsonObject object = element.getAsJsonObject();
-            if (object.get("name").getAsString().toLowerCase().contains(name.toLowerCase()))
-            {
-                return object;
-            }
-        }
-
-        return null;
+        this.authorizationAgent = new AuthorizationAgent(config.getValueForKey("Overlord-Ip"),Integer.parseInt(config.getValueForKey("Overlord-Port")),updatedJson);
+        logger.log(Level.INFO,"Registered With Overlord Successfully",Constants.MANAGER_LOG_ID);
     }
 
     private ArrayList<Data> fetchData(String[] queries)

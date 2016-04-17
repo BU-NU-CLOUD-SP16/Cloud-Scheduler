@@ -28,13 +28,13 @@ public final class MesosMetric implements ICollectorPluginByTable {
         String httpReq = "http://" + masterAddr + "/master/state-summary";
         try {
             stateSummary = HTTP.executeRequest(httpReq);
-            LOGGER.log(Level.FINE, "[Collector Plugin] Successfully executed HTTP request " + httpReq,Constants.COLLECTOR_LOG_ID);
-            LOGGER.log(Level.FINE, "[Collector Plugin] State Summary:",Constants.COLLECTOR_LOG_ID);
-            LOGGER.log(Level.FINE, stateSummary,Constants.COLLECTOR_LOG_ID);
+            LOGGER.log(Level.FINE, "[Collector Plugin] Successfully executed HTTP request " + httpReq,GlobalLogger.COLLECTOR_LOG_ID);
+            LOGGER.log(Level.FINE, "[Collector Plugin] State Summary:",GlobalLogger.COLLECTOR_LOG_ID);
+            LOGGER.log(Level.FINE, stateSummary,GlobalLogger.COLLECTOR_LOG_ID);
         } catch (IOException e) {
             String errorMsg = "[Collector Plugin] Failed to execute HTTP request " + httpReq
                     + " .Reason: " + e.getMessage();
-            LOGGER.log(Level.SEVERE, errorMsg,Constants.COLLECTOR_LOG_ID);
+            LOGGER.log(Level.SEVERE, errorMsg,GlobalLogger.COLLECTOR_LOG_ID);
         }
         if (stateSummary!= null) {
             parseStateSummary(stateSummary, slaveLst, frameworkDetailsLst, runsOn);
@@ -42,7 +42,7 @@ public final class MesosMetric implements ICollectorPluginByTable {
             return convertIntoTableRows(slaveLst, frameworkDetailsLst, runsOn);
         }
 
-        LOGGER.log(Level.SEVERE, "As master could not be reached nothing will be inserted in the db",Constants.COLLECTOR_LOG_ID);
+        LOGGER.log(Level.SEVERE, "As master could not be reached nothing will be inserted in the db",GlobalLogger.COLLECTOR_LOG_ID);
         return null;
     }
 
@@ -53,7 +53,7 @@ public final class MesosMetric implements ICollectorPluginByTable {
         slaveTableRows(slaveLst, lst);
         frameworkTableRows(frameworkDetailsLst, lst);
         runsOnTableRows(runsOn, lst);
-        LOGGER.log(Level.FINE, "[Collector Plugin] Total no of rows to be inserted " + lst.size(),Constants.COLLECTOR_LOG_ID);
+        LOGGER.log(Level.FINE, "[Collector Plugin] Total no of rows to be inserted " + lst.size(),GlobalLogger.COLLECTOR_LOG_ID);
         return lst;
     }
 
@@ -64,12 +64,12 @@ public final class MesosMetric implements ICollectorPluginByTable {
                 t.addColName("Framework_ID").addColValue(fsr.getFrameworkId())
                         .addColName("Slave_ID").addColValue(fsr.getSlaveId());
                 t.setPriority(2);
-                LOGGER.log(Level.FINE, "[Collector Plugin] runs_on table row " + t.toString(),Constants.COLLECTOR_LOG_ID);
+                LOGGER.log(Level.FINE, "[Collector Plugin] runs_on table row " + t.toString(),GlobalLogger.COLLECTOR_LOG_ID);
                 lst.add(t);
             }
             else {
                 LOGGER.log(Level.SEVERE, "Slave " + fsr.getSlave().getHostName() + " is unreachable, hence no rows for this slave will " +
-                        "be inserted in the Runs_On table for framework " + fsr.getFrameworkId(),Constants.COLLECTOR_LOG_ID);
+                        "be inserted in the Runs_On table for framework " + fsr.getFrameworkId(),GlobalLogger.COLLECTOR_LOG_ID);
             }
         }
     }
@@ -85,7 +85,7 @@ public final class MesosMetric implements ICollectorPluginByTable {
                     .addColName("Scheduled_Tasks").addColValue(f.getScheduledTasks())
                     .addColName("TimeStamp").addColValue(new Date().toString());
             t.setPriority(1);
-            LOGGER.log(Level.FINE, "[Collector Plugin] framework table row " + t.toString(),Constants.COLLECTOR_LOG_ID);
+            LOGGER.log(Level.FINE, "[Collector Plugin] framework table row " + t.toString(),GlobalLogger.COLLECTOR_LOG_ID);
             lst.add(t);
         }
     }
@@ -104,7 +104,7 @@ public final class MesosMetric implements ICollectorPluginByTable {
                         .addColName("IP").addColValue(s.getIp())
                         .addColName("TimeStamp").addColValue(new Date().toString());
                 t.setPriority(0);
-                LOGGER.log(Level.FINE, "[Collector Plugin] slave table row " + t.toString(),Constants.COLLECTOR_LOG_ID);
+                LOGGER.log(Level.FINE, "[Collector Plugin] slave table row " + t.toString(),GlobalLogger.COLLECTOR_LOG_ID);
                 lst.add(t);
             }
         }
@@ -116,14 +116,14 @@ public final class MesosMetric implements ICollectorPluginByTable {
             String httpReq = "http://" + slave.getIpNPort() + "/metrics/snapshot";
             try {
                 slaveMetrics = HTTP.executeRequest(httpReq);
-                LOGGER.log(Level.FINE, "[Collector Plugin] Successfully executed HTTP request " + httpReq,Constants.COLLECTOR_LOG_ID);
-                LOGGER.log(Level.FINE, "[Collector Plugin] Slave Metrics:",Constants.COLLECTOR_LOG_ID);
-                LOGGER.log(Level.FINE, slaveMetrics,Constants.COLLECTOR_LOG_ID);
+                LOGGER.log(Level.FINE, "[Collector Plugin] Successfully executed HTTP request " + httpReq,GlobalLogger.COLLECTOR_LOG_ID);
+                LOGGER.log(Level.FINE, "[Collector Plugin] Slave Metrics:",GlobalLogger.COLLECTOR_LOG_ID);
+                LOGGER.log(Level.FINE, slaveMetrics,GlobalLogger.COLLECTOR_LOG_ID);
             }
             catch (IOException e) {
                 String errorMsg = "[Collector Plugin] Failed to execute HTTP request " + httpReq
                         + " .Reason: " + e.getMessage();
-                LOGGER.log(Level.SEVERE, errorMsg,Constants.COLLECTOR_LOG_ID);
+                LOGGER.log(Level.SEVERE, errorMsg,GlobalLogger.COLLECTOR_LOG_ID);
             }
             if (slaveMetrics != null) {
                 parseSlaveMetrics(slave, slaveMetrics);
@@ -131,7 +131,7 @@ public final class MesosMetric implements ICollectorPluginByTable {
             else {
                 slave.setReachable(false);
                 LOGGER.log(Level.SEVERE, "Unreachable slave " + slave.getHostName() +
-                        ". Hence no rows will be inserted for this slave",Constants.COLLECTOR_LOG_ID);
+                        ". Hence no rows will be inserted for this slave",GlobalLogger.COLLECTOR_LOG_ID);
             }
         }
     }

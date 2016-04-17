@@ -28,6 +28,9 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
     private String clusterNetworkName;
     private String clusterNetworkId;
 
+    private String prefix;
+    private String suffix;
+
     private String id;
 
 
@@ -41,6 +44,9 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
 
         keyname = config.getValueForKey("Key-Name");
         imageName = config.getValueForKey("Image-Name");
+
+        prefix = config.getValueForKey("Node-Name-Prefix");
+        suffix = config.getValueForKey("Node-Name-Suffix");
 
         String user = config.getValueForKey("Username");
         String pass = config.getValueForKey("Password");
@@ -122,7 +128,7 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
             int c = 0;
             while(true) {
 
-                ArrayList<OpenStackNode> nodes = listNode("Spark-Slave-"+id+"-"+slaveCount+".cloud");
+                ArrayList<OpenStackNode> nodes = listNode(prefix+"-"+id+"-"+slaveCount+suffix);
 
                 if(nodes.size() == 0)
                     continue;
@@ -142,7 +148,7 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
                 else if(nodes.get(0).getStatus().toLowerCase().equals("error"))
                 {
                     openStackNode.setId(nodes.get(0).getId());
-
+                    logger.log(Level.FINE,"Got Error Recreating Node",GlobalLogger.MANAGER_LOG_ID);
                     deleteNode(openStackNode);
                     createNode(openStackNode);
                     c++;
@@ -276,7 +282,7 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
 
         OpenStackWrapper openStackWrapper = new OpenStackWrapper(username,password);
         CreateCommand openStackCommand = new CreateCommand();
-        openStackCommand.setName("Spark-Slave-"+id+"-"+slaveCount+".cloud");
+        openStackCommand.setName(prefix+"-"+id+"-"+slaveCount+suffix);
         openStackCommand.setSecurityGroup(clusterSecurityGroup);
         openStackCommand.setFlavor(openStackNode.getFlavor());
         openStackCommand.setImageName(imageName);

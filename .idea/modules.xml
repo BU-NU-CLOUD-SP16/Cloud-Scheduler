@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Agent/Agent.iml" filepath="$PROJECT_DIR$/Agent/Agent.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Agent/PolicyInfo/AgingPolicyInfoPlugin/AgingPolicyInfoPlugin.iml" filepath="$PROJECT_DIR$/Agent/PolicyInfo/AgingPolicyInfoPlugin/AgingPolicyInfoPlugin.iml" />
       <module fileurl="file://$PROJECT_DIR$/Overlord/Policy/AgingPolicyPlugin/AgingPolicyPlugin.iml" filepath="$PROJECT_DIR$/Overlord/Policy/AgingPolicyPlugin/AgingPolicyPlugin.iml" />
       <module fileurl="file://$PROJECT_DIR$/Agent/Authorization/Authorization.iml" filepath="$PROJECT_DIR$/Agent/Authorization/Authorization.iml" />
       <module fileurl="file://$PROJECT_DIR$/Cloud-Scheduler.iml" filepath="$PROJECT_DIR$/Cloud-Scheduler.iml" />
@@ -20,6 +21,7 @@
       <module fileurl="file://$PROJECT_DIR$/Overlord/OverlordPlugin/OverlordPlugin.iml" filepath="$PROJECT_DIR$/Overlord/OverlordPlugin/OverlordPlugin.iml" />
       <module fileurl="file://$PROJECT_DIR$/Agent/Plugin/Plugin.iml" filepath="$PROJECT_DIR$/Agent/Plugin/Plugin.iml" />
       <module fileurl="file://$PROJECT_DIR$/Overlord/Policy/Policy.iml" filepath="$PROJECT_DIR$/Overlord/Policy/Policy.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Agent/PolicyInfo/PolicyInfo.iml" filepath="$PROJECT_DIR$/Agent/PolicyInfo/PolicyInfo.iml" />
       <module fileurl="file://$PROJECT_DIR$/Agent/Database/SQLiteDBExecutorPlugin/SQLiteDBExecutorPlugin.iml" filepath="$PROJECT_DIR$/Agent/Database/SQLiteDBExecutorPlugin/SQLiteDBExecutorPlugin.iml" />
       <module fileurl="file://$PROJECT_DIR$/Utilities/Utilities.iml" filepath="$PROJECT_DIR$/Utilities/Utilities.iml" />
     </modules>

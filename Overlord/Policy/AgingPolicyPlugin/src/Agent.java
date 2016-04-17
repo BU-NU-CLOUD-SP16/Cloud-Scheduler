@@ -76,7 +76,6 @@ public class Agent {
     }
 
     public void setOpenStackNodeList(ArrayList<OpenStackNode> openStackNodeList) {
-        System.out.println("Cluster "+id+" has " + openStackNodeList.size()+" nodes");
         this.openStackNodeList = openStackNodeList;
     }
 

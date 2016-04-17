@@ -33,15 +33,22 @@ public class CommandLineArguments {
     private static final String DDL_SCRIPT = "DDL-Script";
     private static final String POLL_INTERVAL = "Poll-Interval";
     private static final String LOG = "Log";
+    private static final String POLICY_INFO_PLUGIN = "Policy-Info-Plugin";
+    private static final String POLICY_INFO_MAIN = "Policy-Info-Main";
+
+
+
 
     private File collectorPluginJar;
     private File cemanagerPluginJar;
     private File clusterScalerPluginJar;
+    private File policyInfoPluginJar;
     private File dbExecutorPluginJar;
     private String collectorPluginMainClass;
     private String cemanagerPluginMainClass;
     private String clusterScalerPluginMainClass;
     private String dbExecutorPluginMainClass;
+    private String policyInfoMainClass;
     private Integer pollInterval;
     private File ddlFile;
     private String logDir = System.getProperty("user.dir");
@@ -81,6 +88,8 @@ public class CommandLineArguments {
             dbExecutorPluginMainClass = obj.get(DATABASE_MAIN).getAsString();
             cemanagerPluginMainClass = obj.get(MANAGER_MAIN).getAsString();
             clusterScalerPluginMainClass = obj.get(CLUSTER_SCALER_MAIN).getAsString();
+            policyInfoPluginJar = new File(obj.get(POLICY_INFO_PLUGIN).getAsString());
+            policyInfoMainClass = obj.get(POLICY_INFO_MAIN).getAsString();
             if(obj.has(LOG)) {
                 logDir = obj.get(LOG).getAsString();
                 obj.remove(LOG);
@@ -96,6 +105,8 @@ public class CommandLineArguments {
             obj.remove(COLLECTOR_MAIN);
             obj.remove(CLUSTER_SCALER_MAIN);
             obj.remove(DATABASE_MAIN);
+            obj.remove(POLICY_INFO_PLUGIN);
+            obj.remove(POLICY_INFO_MAIN);
 
             Set<Map.Entry<String,JsonElement>> members = obj.entrySet();
 
@@ -142,6 +153,8 @@ public class CommandLineArguments {
             dbExecutorPluginMainClass = obj.get(DATABASE_MAIN).getAsString();
             cemanagerPluginMainClass = obj.get(MANAGER_MAIN).getAsString();
             clusterScalerPluginMainClass = obj.get(CLUSTER_SCALER_MAIN).getAsString();
+            policyInfoPluginJar = new File(obj.get(POLICY_INFO_PLUGIN).getAsString());
+            policyInfoMainClass = obj.get(POLICY_INFO_MAIN).getAsString();
             if(obj.has(LOG)) {
                 logDir = obj.get(LOG).getAsString();
                 obj.remove(LOG);
@@ -157,6 +170,8 @@ public class CommandLineArguments {
             obj.remove(COLLECTOR_MAIN);
             obj.remove(CLUSTER_SCALER_MAIN);
             obj.remove(DATABASE_MAIN);
+            obj.remove(POLICY_INFO_PLUGIN);
+            obj.remove(POLICY_INFO_MAIN);
 
             Set<Map.Entry<String,JsonElement>> members = obj.entrySet();
 
@@ -290,8 +305,13 @@ public class CommandLineArguments {
         return cemanagerPluginMainClass;
     }
 
-    public void setCemanagerPluginMainClass(String cemanagerPluginMainClass) {
-        this.cemanagerPluginMainClass = cemanagerPluginMainClass;
+    public File getPolicyInfoPluginJar() {
+        return policyInfoPluginJar;
+    }
+
+
+    public String getPolicyInfoMainClass() {
+        return policyInfoMainClass;
     }
 
     public void parseCommandLineArguments(String[] args) throws ClusterElasticityAgentException {

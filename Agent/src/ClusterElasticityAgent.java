@@ -81,7 +81,8 @@ public class ClusterElasticityAgent {
                 ModuleLoader.addFile(argumentList.getCemanagerPluginJar());
             if(argumentList.getClusterScalerPluginJar() != null)
                 ModuleLoader.addFile(argumentList.getClusterScalerPluginJar());
-
+            if(argumentList.getPolicyInfoPluginJar() != null)
+                ModuleLoader.addFile(argumentList.getPolicyInfoPluginJar());
             if(argumentList.getDbExecutorPluginJar() != null)
                 ModuleLoader.addFile(argumentList.getDbExecutorPluginJar());
             logger.log(Level.INFO,"Loaded all Modules",Constants.MAIN_LOG_ID);

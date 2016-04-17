@@ -4,6 +4,15 @@
 public class ListCommand extends OpenStackCommand {
 
     private String name;
+    private String prefix;
+
+    public String getPrefix() {
+        return prefix;
+    }
+
+    public void setPrefix(String prefix) {
+        this.prefix = prefix;
+    }
 
     public String getName() {
         return name;

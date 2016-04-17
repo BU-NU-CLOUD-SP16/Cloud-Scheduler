@@ -8,10 +8,13 @@ public class OpenStackCloudInfoCollectorPlugin implements CloudInfoCollectorPlug
     private String username;
     private String password;
 
+    private String prefix;
+
     @Override
     public void setup(Config config) {
         username = config.getValueForKey("Username");
         password = config.getValueForKey("Password");
+        prefix = config.getValueForKey("Slave-Prefix");
     }
 
     @Override
@@ -21,7 +24,9 @@ public class OpenStackCloudInfoCollectorPlugin implements CloudInfoCollectorPlug
 
         try {
             OpenStackWrapper openStackWrapper = new OpenStackWrapper(username, password);
-            openStackWrapper.getWorkerQueue().add(new ListCommand());
+            ListCommand listCommand = new ListCommand();
+            listCommand.setPrefix(prefix);
+            openStackWrapper.getWorkerQueue().add(listCommand);
             Thread t = new Thread(openStackWrapper);
             t.start();
             nodes = (ArrayList<Node>) openStackWrapper.getResponseQueue().take();

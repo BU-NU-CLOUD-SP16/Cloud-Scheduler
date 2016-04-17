@@ -7,7 +7,7 @@ import java.util.HashMap;
 public interface PolicyPlugin {
 
     public void setup(Config config);
-    public void registerAgent(String json);
+    public void registerAgent(String ip,String json);
     public String requestNode(String json);
     public void updateState(HashMap<String,String> clusterStates,ArrayList<Node> nodesInCloud);
     public HashMap<String,String> getAgentHostnames();

@@ -91,7 +91,7 @@ public class OpenStackWrapper implements Runnable {
 
         for (Server server: servers ) {
 
-            if(server.getName().toLowerCase().contains("slave")) {
+            if(server.getName().toLowerCase().contains(command.getPrefix().toLowerCase())) {
                 OpenStackNode node = new OpenStackNode();
                 node.setName(server.getName());
                 node.setId(server.getId());

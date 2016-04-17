@@ -10,6 +10,9 @@
 
   "Max-Nodes":7,
   "Poll-Interval": 1000,
-  "Port": 6000
+  "Port": 6000,
+  "Log": "./logs/",
+
+  "Slave-Prefix": "Mesos-Slave"
 
 }

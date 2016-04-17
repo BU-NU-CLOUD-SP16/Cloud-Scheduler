@@ -5,6 +5,7 @@ import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
 import java.util.ArrayList;
+import java.util.logging.Level;
 
 /**
  * Created by chemistry_sourabh on 3/25/16.
@@ -22,34 +23,13 @@ public class OverlordCommunicator {
         this.overlordPort = overlordPort;
     }
 
-    public void register(ClusterState state)
+    public void register(String stateJson)
     {
 
-        this.agentId = state.getId();
-
-        JsonObject object = new JsonObject();
-        object.addProperty("id",state.getId());
-        object.addProperty("priority",state.getPriority());
-        object.addProperty("minNodes",state.getMinNodes());
-        object.addProperty("port",state.getPort());
-        JsonArray array = new JsonArray();
-
-        ArrayList<Node> slaves = state.getNodesInCluster();
-
-        for (Node node : slaves)
-        {
-            OpenStackNode openStackNode = (OpenStackNode) node;
-            JsonObject object1 = new JsonObject();
-            object1.addProperty("name",openStackNode.getHostname());
-            array.add(object1);
-        }
-
-        object.add("nodes",array);
-
         try {
-            Unirest.post("http://"+overlordIp+":"+overlordPort+"/registerCEAgent").body(object.toString()).asString();
+            Unirest.post("http://"+overlordIp+":"+overlordPort+"/registerCEAgent").body(stateJson.toString()).asString();
         } catch (UnirestException e) {
-            e.printStackTrace();
+            GlobalLogger.globalLogger.log(Level.SEVERE,e.getMessage(),GlobalLogger.MANAGER_LOG_ID);
         }
     }
 
@@ -64,7 +44,7 @@ public class OverlordCommunicator {
            HttpResponse<String> response = Unirest.post("http://"+overlordIp+":"+overlordPort+"/requestNode").body(object.toString()).asString();
            return ""+response.getStatus();
         } catch (UnirestException e) {
-            e.printStackTrace();
+            GlobalLogger.globalLogger.log(Level.SEVERE,e.getMessage(),GlobalLogger.MANAGER_LOG_ID);
         }
         return null;
     }
