@@ -8,7 +8,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Created by chemistry_sourabh on 3/4/16.
+ * <h1>OpenStackClusterScalerPlugin</h1>
+ * Manages the Open Stack Cluster
+ *
+ * @author Sourabh
+ * @version 1.0
+ * @since 2016-04-03
  */
 public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
 
@@ -33,6 +38,12 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
 
     private Logger logger = GlobalLogger.globalLogger;
 
+    /**
+     * <h1>setup</h1>
+     * @param config
+     * @param nodes
+     * Sets up all the given slave nodes.
+     */
     @Override
     public void setup(Config config, ArrayList<Node> nodes)
     {
@@ -108,6 +119,13 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
 
     }
 
+    /**
+     * <h1>createNewNode</h1>
+     * @param node
+     * @return Node
+     * Creates a new node with current OpenStack
+     * Pool.
+     */
     @Override
     public Node createNewNode(Node node)
     {
@@ -175,6 +193,12 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
         return newNode;
     }
 
+    /**
+     * <h1>deleteNode</h1>
+     * @param node
+     * @return Boolean
+     * True iff a node gets deleted.
+     */
     @Override
     public boolean deleteNode(Node node)
     {
@@ -212,6 +236,13 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
         return true;
     }
 
+    /**
+     * <h1>convertToMesosSlaves</h1>
+     * @param openStackNodes
+     * @return ArrayList<MesosSlave>
+     * Converts the given openstack nodes to
+     * the current Cluster Slave Nodes.
+     */
     private ArrayList<MesosSlave> convertToMesosSlaves(ArrayList<OpenStackNode> openStackNodes)
     {
         ArrayList<MesosSlave> slaves = new ArrayList<>();
@@ -233,6 +264,12 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
         return slaves;
     }
 
+    /**
+     * <h1>findSlave</h1>
+     * @param hostname
+     * @return MesosSlave
+     * Returns the Slave with the given hostname.
+     */
     private MesosSlave findSlave(String hostname)
     {
         for(MesosSlave slave : slaves)
@@ -245,6 +282,13 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
         return null;
     }
 
+    /**
+     * <h1>getLargestSlaveNumber</h1>
+     * @return int
+     * The latest Slave which has been added to the
+     * cluster. The Slaves are numbered according
+     * to a serial increasing number.
+     */
     private int getLargestSlaveNumber()
     {
         String firstHost = null;
@@ -272,6 +316,14 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
         return max;
     }
 
+    /**
+     * <h1>createNode</h1>
+     * Creates a new node for the cluster from
+     * the Openstack.
+     * @param openStackNode
+     * @throws IOException
+     * @throws InterruptedException
+     */
     private void createNode(OpenStackNode openStackNode) throws IOException, InterruptedException {
 
         OpenStackWrapper openStackWrapper = new OpenStackWrapper(username,password);
@@ -288,6 +340,13 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
         openStackWrapper.getResponseQueue().take();
     }
 
+    /**
+     * <h1>listNode </h1>
+     * Returns the list of node present in the cluster.
+     * @param name
+     * @return ArrayList<OpenStackNode>
+     * @throws IOException
+     */
     private ArrayList<OpenStackNode> listNode(String name) throws IOException {
 
         OpenStackWrapper openStackWrapper = new OpenStackWrapper(username,password);
@@ -304,6 +363,13 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
         return null;
     }
 
+    /**
+     * <h1>deleteNode</h1>
+     * Deletes a node from the cluster.
+     * @param node
+     * @throws IOException
+     * @throws InterruptedException
+     */
     private void deleteNode(OpenStackNode node) throws IOException, InterruptedException {
         OpenStackWrapper openStackWrapper = new OpenStackWrapper(username,password);
         DeleteCommand deleteCommand = new DeleteCommand();

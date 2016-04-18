@@ -8,30 +8,61 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 import java.util.ArrayList;
 
 /**
- * Created by chemistry_sourabh on 3/25/16.
+ * <h1>OverlordCommunicator</h1>
+ * Overlord Communicator contacts the agents
+ * in each clusters and based on the priority
+ * asks agents to exchange nodes or gives
+ * permission to create a new node from the
+ * openstack.
+ *
+ * @author Sourabh
+ * @version 1.0
+ * @since 2016-03-16
  */
 public class OverlordCommunicator {
 
     private String username;
     private String password;
 
-
+    /**
+     * <h1>getUsername</h1>
+     * @return String
+     */
     public String getUsername() {
         return username;
     }
 
+    /**
+     * <h1>setUsername</h1>
+     * @param username String
+     */
     public void setUsername(String username) {
         this.username = username;
     }
 
+    /**
+     * <h1>getPassword</h1>
+     * @return String
+     */
     public String getPassword() {
         return password;
     }
 
+    /**
+     * <h1>setPassword</h1>
+     * @param password String
+     */
     public void setPassword(String password) {
         this.password = password;
     }
 
+    /**
+     * <h1>register</h1>
+     * registers a node with one of the clusters.
+     * @param id String
+     * @param port String
+     * @param slaves String
+     */
     public void register(String id,String port,ArrayList<Node> slaves)
     {
 
@@ -57,6 +88,12 @@ public class OverlordCommunicator {
         }
     }
 
+    /**
+     * <h1>list</h1>
+     * @param id String
+     * @return String
+     * the http response.
+     */
     public String list(String id)
     {
         JsonObject object = new JsonObject();
@@ -71,6 +108,13 @@ public class OverlordCommunicator {
         return null;
     }
 
+    /**
+     * <h1>list</h1>
+     * @param id String
+     * @param name String
+     * @return String
+     * the HTTP response
+     */
     public String list(String id,String name)
     {
         JsonObject object = new JsonObject();
@@ -86,6 +130,14 @@ public class OverlordCommunicator {
         return null;
     }
 
+    /**
+     * <h1>createNode</h1>
+     * Creates a new node for the cluster
+     * @param id String
+     * @param flavor String
+     * @return String
+     * the response is returned.
+     */
     public String createNode(String id,String flavor)
     {
         JsonObject object = new JsonObject();
@@ -100,6 +152,12 @@ public class OverlordCommunicator {
         return null;
     }
 
+    /**
+     * <h1>deleteNode</h1>
+     * Deletes given node from a cluster.
+     * @param id String
+     * @param nodeId String
+     */
     public void deleteNode(String id,String nodeId)
     {
         JsonObject object = new JsonObject();

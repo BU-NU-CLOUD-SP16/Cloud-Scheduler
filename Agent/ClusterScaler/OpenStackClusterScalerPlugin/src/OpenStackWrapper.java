@@ -9,7 +9,12 @@ import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
- * Created by Praveen on 3/26/2016.
+ * <h1>OpenStackWrapper</h1>
+ * Contains OpenStack Functionalities in Java.
+ *
+ * @author Praveen
+ * @version 1.0
+ * @since 2016-03-26
  */
 public class OpenStackWrapper implements Runnable {
 
@@ -28,6 +33,10 @@ public class OpenStackWrapper implements Runnable {
     private Image nodeImage;
     private Keypair osKeyPair;
 
+    /**
+     * <h1></h1>
+     * @return
+     */
     public LinkedBlockingQueue<OpenStackCommand> getWorkerQueue() {
         return workerQueue;
     }
@@ -36,6 +45,12 @@ public class OpenStackWrapper implements Runnable {
 
     private LinkedBlockingQueue<Object> responseQueue;
 
+    /**
+     * <h1>OpenStackWrapper</h1>
+     * Constructor
+     * @param username
+     * @param password
+     */
     public OpenStackWrapper(String username,String password)
     {
         this.workerQueue = new LinkedBlockingQueue<>();
@@ -44,11 +59,19 @@ public class OpenStackWrapper implements Runnable {
         this.password = password;
     }
 
+    /**
+     * <h1>getResponseQueue</h1>
+     * @return LinkedBlockingQueue<Object>
+     */
     public LinkedBlockingQueue<Object> getResponseQueue() {
         return responseQueue;
     }
 
 
+    /**
+     * <h1>initializeOpenStackClient</h1>
+     * Intializes the OpenStack client.
+     */
     public void initializeOpenStackClient(){
         this.osClientHandle = OSFactory.builder()
                 .endpoint(OS_AUTH_URL)
@@ -59,6 +82,13 @@ public class OpenStackWrapper implements Runnable {
         this.osClientHandle.useRegion(OS_REGION_NAME);
     }
 
+    /**
+     * <h1>createNewNode</h1>
+     * @param command
+     * @return Node
+     * @throws InterruptedException
+     * Creates a new node from OpenStack and returns it.
+     */
     public Node createNewNode(CreateCommand command) throws InterruptedException {
 
 
@@ -83,10 +113,21 @@ public class OpenStackWrapper implements Runnable {
         return  node;
     }
 
+    /**
+     * <h1>deleteNode</h1>
+     * @param command
+     * Deletes a given node.
+     */
     public void deleteNode(DeleteCommand command){
         this.osClientHandle.compute().servers().delete(command.getId());
     }
 
+    /**
+     * <h1>listNodes</h1>
+     * @param command
+     * @return ArrayList<OpenStackNode>
+     *     List of Nodes currently available in OpenStack.
+     */
     public ArrayList<OpenStackNode> listNodes(ListCommand command){
         // List all Servers
         ArrayList<OpenStackNode> serverIdList = new ArrayList<>();
@@ -123,6 +164,12 @@ public class OpenStackWrapper implements Runnable {
         return serverIdList;
     }
 
+    /**
+     * <h1>listNode</h1>
+     * @param command
+     * @return OpenStackNode
+     * Returns the details of node.
+     */
     public OpenStackNode listNode(ListCommand command)
     {
         List<? extends Server> servers = this.osClientHandle.compute().servers().list();
@@ -150,7 +197,11 @@ public class OpenStackWrapper implements Runnable {
     }
 
 
-
+    /**
+     * <h1>run</h1>
+     * Creates, Deletes or Lists the OpenStack Nodes.
+     * Else gives an unknown command message.
+     */
     @Override
     public void run() {
         initializeOpenStackClient();

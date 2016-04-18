@@ -9,7 +9,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Created by chemistry_sourabh on 3/25/16.
+ * <h1>OverlordClusterScalerPlugin</h1>
+ * Contains OpenStack Functionalities in with
+ * the help of overlord.
+ *
+ * @author Sourabh
+ * @version 1.0
+ * @since 2016-03-25
  */
 public class OverlordClusterScalerPlugin implements ClusterScalerPlugin  {
 
@@ -31,11 +37,21 @@ public class OverlordClusterScalerPlugin implements ClusterScalerPlugin  {
 
     private String id;
 
+    /**
+     * <h1>OverlordClusterScalerPlugin</h1>
+     * Constructor.
+     */
     public OverlordClusterScalerPlugin() {
         communicator = new OverlordCommunicator();
 
     }
 
+    /**
+     * <h1>setup</h1>
+     * Sets up the nodes given to the cluster.
+     * @param config
+     * @param nodes
+     */
     @Override
     public void setup(Config config, ArrayList<Node> nodes)
     {
@@ -114,6 +130,13 @@ public class OverlordClusterScalerPlugin implements ClusterScalerPlugin  {
 
     }
 
+    /**
+     * <h1>createNewNode</h1>
+     * @param node
+     * @return Node
+     * Creates a new node and returns the
+     * node which has just been created.
+     */
     @Override
     public Node createNewNode(Node node)
     {
@@ -223,6 +246,13 @@ public class OverlordClusterScalerPlugin implements ClusterScalerPlugin  {
         return newNode;
     }
 
+    /**
+     * <h1>deleteNode</h1>
+     * @param node
+     * @return Boolean
+     * Deletes the node and returns true if there
+     * was any slave to be deleted.
+     */
     @Override
     public boolean deleteNode(Node node)
     {
@@ -245,6 +275,12 @@ public class OverlordClusterScalerPlugin implements ClusterScalerPlugin  {
         return true;
     }
 
+    /**
+     * <h1>disconnectNode</h1>
+     * Disonnects the current node from the current
+     * cluster where it is being used.
+     * @param hostname
+     */
     private void disconnectNode(String hostname) {
         SshProxy proxy = new SshProxy(privateKey);
 
@@ -256,6 +292,13 @@ public class OverlordClusterScalerPlugin implements ClusterScalerPlugin  {
         }
     }
 
+    /**
+     * <h1>convertToMesosSlaves</h1>
+     * @param array
+     * @return ArrayList<MesosSlave>
+     * Converts the given openstack nodes to
+     * the current Cluster Slave Nodes.
+     */
     private ArrayList<MesosSlave> convertToMesosSlaves(JsonArray array)
     {
         ArrayList<MesosSlave> slaves = new ArrayList<>();
@@ -277,6 +320,12 @@ public class OverlordClusterScalerPlugin implements ClusterScalerPlugin  {
         return slaves;
     }
 
+    /**
+     * <h1>findSlave</h1>
+     * @param hostname
+     * @return MesosSlave
+     * Returns the Slave with the given hostname.
+     */
     private MesosSlave findSlave(String hostname)
     {
         for(MesosSlave slave : slaves)
@@ -289,6 +338,13 @@ public class OverlordClusterScalerPlugin implements ClusterScalerPlugin  {
         return null;
     }
 
+    /**
+     * <h1>getLargestSlaveNumber</h1>
+     * @return int
+     * The latest Slave which has been added to the
+     * cluster. The Slaves are numbered according
+     * to a serial increasing number.
+     */
     private int getLargestSlaveNumber()
     {
         String firstHost = null;
