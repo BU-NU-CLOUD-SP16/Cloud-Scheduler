@@ -88,7 +88,6 @@ public class AgingPolicyPlugin implements PolicyPlugin {
 
     @Override
     public String requestNode(String jsonString) {
-        System.out.println("Got request for new node");
         Gson gson = new Gson();
 
         logger.log(Level.FINE,"Json with Request = "+jsonString);

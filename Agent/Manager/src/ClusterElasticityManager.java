@@ -165,7 +165,7 @@ public class ClusterElasticityManager implements ClusterElasticityManagerFramewo
 
         scalerPlugin.setup(config,nodes);
         logger.log(Level.FINE,"Executed Setup on plugin",Constants.MANAGER_LOG_ID);
-        if(newNodes != null && authorizationAgent.canCreateNewNodes(newNodes.size())) {
+        if(newNodes != null && authorizationAgent.canCreateNewNodes(config.getValueForKey("Id"),newNodes.size())) {
             status = ClusterState.CREATE_STATUS;
             for (Node newNode : newNodes) {
                 Node node = scalerPlugin.createNewNode(newNode);

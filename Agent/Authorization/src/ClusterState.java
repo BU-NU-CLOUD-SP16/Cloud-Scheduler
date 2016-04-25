@@ -13,7 +13,6 @@ public class ClusterState {
     public static final int DELETE_STATUS = 2;
 
     private String id;
-    private double priority;
     private int minNodes;
     private String port;
     private ArrayList<Node> nodesInCluster;
@@ -25,14 +24,6 @@ public class ClusterState {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public double getPriority() {
-        return priority;
-    }
-
-    public void setPriority(double priority) {
-        this.priority = priority;
     }
 
     public int getMinNodes() {
@@ -72,7 +63,6 @@ public class ClusterState {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("id",id);
         jsonObject.addProperty("status",status);
-        jsonObject.addProperty("priority",priority);
         jsonObject.addProperty("port",port);
         jsonObject.addProperty("minNodes",minNodes);
         jsonObject.addProperty("status",status);

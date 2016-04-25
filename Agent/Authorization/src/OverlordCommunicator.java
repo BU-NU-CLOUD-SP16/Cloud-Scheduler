@@ -1,3 +1,4 @@
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mashape.unirest.http.HttpResponse;
@@ -15,7 +16,6 @@ public class OverlordCommunicator {
 
     private String overlordIp;
     private int overlordPort;
-    private String agentId;
 
 
     public OverlordCommunicator(String overlordIp, int overlordPort) {
@@ -25,23 +25,19 @@ public class OverlordCommunicator {
 
     public void register(String stateJson)
     {
-
         try {
-            Unirest.post("http://"+overlordIp+":"+overlordPort+"/registerCEAgent").body(stateJson.toString()).asString();
+            Unirest.post("http://"+overlordIp+":"+overlordPort+"/registerCEAgent").body(stateJson).asString();
         } catch (UnirestException e) {
             GlobalLogger.globalLogger.log(Level.SEVERE,e.getMessage(),GlobalLogger.MANAGER_LOG_ID);
         }
     }
 
 
-    public String createNode(int number)
+    public String createNode(String json)
     {
-        JsonObject object = new JsonObject();
-        object.addProperty("ceAgentID",agentId);
-        object.addProperty("number",number);
 
         try {
-           HttpResponse<String> response = Unirest.post("http://"+overlordIp+":"+overlordPort+"/requestNode").body(object.toString()).asString();
+           HttpResponse<String> response = Unirest.post("http://"+overlordIp+":"+overlordPort+"/requestNode").body(json).asString();
            return ""+response.getStatus();
         } catch (UnirestException e) {
             GlobalLogger.globalLogger.log(Level.SEVERE,e.getMessage(),GlobalLogger.MANAGER_LOG_ID);

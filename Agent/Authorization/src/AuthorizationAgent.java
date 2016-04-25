@@ -1,3 +1,5 @@
+import com.google.gson.JsonObject;
+
 import java.util.ArrayList;
 
 /**
@@ -22,7 +24,7 @@ public class AuthorizationAgent {
         this.waitingForResponse = waitingForResponse;
     }
 
-    public boolean canCreateNewNodes(int numberOfNodes)
+    public boolean canCreateNewNodes(String id,int numberOfNodes)
     {
         if (numberOfNodes == 0)
             return  false;
@@ -30,7 +32,12 @@ public class AuthorizationAgent {
         if(waitingForResponse)
             return false;
 
-        String status = overlordCommunicator.createNode(numberOfNodes);
+
+        JsonObject object = new JsonObject();
+        object.addProperty("ceAgentId",id);
+        object.addProperty("numberOfNodes",numberOfNodes);
+
+        String status = overlordCommunicator.createNode(object.toString());
 
         switch(status)
         {
