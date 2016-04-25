@@ -1,5 +1,11 @@
+
 /**
- * Created by chemistry_sourabh on 3/7/16.
+ * <h1>MesosSlave</h1>
+ * Getter Setters for MesosSlave for Overlord.
+ *
+ * @author Sourabh
+ * @version 1.0
+ * @since 2016-03-19
  */
 public class OpenStackNode extends Node {
 
@@ -16,18 +22,36 @@ public class OpenStackNode extends Node {
         this.flavor = flavor;
     }
 
+    /**
+     * <h1>getHostname</h1>
+     * @return String
+     * The hostname of the current mesos Slave.
+     */
     public String getHostname() {
         return hostname;
     }
 
+    /**
+     * <h1>setHostname</h1>
+     * @param hostname String
+     */
     public void setHostname(String hostname) {
         this.hostname = hostname;
     }
 
+    /**
+     * <h1>getFlavor</h1>
+     * @return String
+     * The flavor of the current Mesos slave Node.
+     */
     public String getFlavor() {
         return flavor;
     }
 
+    /**
+     * <h1>setFlavor</h1>
+     * @param flavor String
+     */
     public void setFlavor(String flavor) {
         this.flavor = flavor;
     }
@@ -40,10 +64,19 @@ public class OpenStackNode extends Node {
         this.id = id;
     }
 
+    /**
+     * <h1>getIp</h1>
+     * @return String
+     * The IP address of the MesosSlave.
+     */
     public String getIp() {
         return ip;
     }
 
+    /**
+     * <h1>setIp</h1>
+     * @param ip String
+     */
     public void setIp(String ip) {
         this.ip = ip;
     }

@@ -1,5 +1,9 @@
 /**
- * Created by Praveen on 3/2/2016.
+ * <h1>CommandLineArguments</h1>
+ *
+ * @author Praveen
+ * @version 1.0
+ * @since 2016-03-02
  */
 
 import com.google.gson.Gson;
@@ -58,6 +62,10 @@ public class CommandLineArguments {
     private String configFile;
     private  Config config;
 
+    /**
+     * <h1>CommandLineArguments</h1>
+     * Constructor
+     */
     public CommandLineArguments() {
 
         pollInterval = DEFAULT_INTERVAL;
@@ -65,11 +73,19 @@ public class CommandLineArguments {
         dbExecutorPluginMainClass = DEFAULT_DB_EXECUTOR;
     }
 
-
+    /**
+     * <h1>getConfig</h1>
+     * Returns the Config object.
+     * @return Config
+     */
     public Config getConfig() {
         return config;
     }
 
+    /**
+     * <h1>updateConfig</h1>
+     * Updates the config file.
+     */
     public void updateConfig()
     {
         File file = new File(configFile);
@@ -127,14 +143,27 @@ public class CommandLineArguments {
         }
     }
 
+    /**
+     * <h1>setConfig</h1>
+     * @param config
+     */
     public void setConfig(Config config) {
         this.config = config;
     }
 
+    /**
+     * <h1>getConfigFile</h1>
+     * @return String
+     */
     public String getConfigFile() {
         return configFile;
     }
 
+    /**
+     * <h1>setConfigFile</h1>
+     * Sets the config file with String given.
+     * @param configFile String
+     */
     @Option(name = "-config", usage = "Specifies location of config.json", required = true)
     public void setConfigFile(String configFile) {
         File file = new File(configFile);
@@ -193,19 +222,35 @@ public class CommandLineArguments {
         this.configFile = configFile;
     }
 
+    /**
+     * <h1>isVerbose</h1>
+     * @return Boolean
+     */
     public boolean isVerbose() {
         return verbose;
     }
 
+    /**
+     * <h1>setVerbose</h1>
+     * @param verbose Boolean
+     */
     @Option(name = "-v",usage = "turn on verbose scripting")
     public void setVerbose(boolean verbose) {
         this.verbose = verbose;
     }
 
+    /**
+     * <h1>getLogDir</h1>
+     * @return String
+     */
     public String getLogDir() {
         return logDir;
     }
 
+    /**
+     * <h1>setLogDir</h1>
+     * @param logDir String
+     */
     public void setLogDir(String logDir) {
         File dir = new File(logDir);
         if (!dir.exists()) {
@@ -214,10 +259,19 @@ public class CommandLineArguments {
         this.logDir = logDir;
     }
 
+    /**
+     * <h1>getClusterScalerPluginJar</h1>
+     * @return File
+     */
     public File getClusterScalerPluginJar() {
         return clusterScalerPluginJar;
     }
 
+    /**
+     * <h1>setClusterScalerPluginJar</h1>
+     * @param clusterScalerPluginJar
+     * @throws ClusterElasticityAgentException
+     */
     public void setClusterScalerPluginJar(File clusterScalerPluginJar) throws ClusterElasticityAgentException {
         if(clusterScalerPluginJar.exists())
             this.clusterScalerPluginJar = clusterScalerPluginJar;
@@ -225,10 +279,19 @@ public class CommandLineArguments {
             throw new ClusterElasticityAgentException("Cluster Scaler Plugin Jar File Not available!!");
     }
 
+    /**
+     * <h1>getDbExecutorPluginJar</h1>
+     * @return File
+     */
     public File getDbExecutorPluginJar() {
         return dbExecutorPluginJar;
     }
 
+    /**
+     * <h1>setDbExecutorPluginJar</h1>
+     * @param dbExecutorPluginJar
+     * @throws ClusterElasticityAgentException
+     */
     public void setDbExecutorPluginJar(File dbExecutorPluginJar) throws ClusterElasticityAgentException {
         if(dbExecutorPluginJar.exists())
             this.dbExecutorPluginJar = dbExecutorPluginJar;
@@ -236,34 +299,67 @@ public class CommandLineArguments {
             throw new ClusterElasticityAgentException("DB Executor Plugin Jar Not Available!!");
     }
 
+    /**
+     * <h1>getClusterScalerPluginMainClass</h1>
+     * @return String
+     */
     public String getClusterScalerPluginMainClass() {
         return clusterScalerPluginMainClass;
     }
 
+    /**
+     * <h1>setClusterScalerPluginMainClass</h1>
+     * @param clusterScalerPluginMainClass
+     */
     public void setClusterScalerPluginMainClass(String clusterScalerPluginMainClass) {
         this.clusterScalerPluginMainClass = clusterScalerPluginMainClass;
     }
 
+    /**
+     * <h1>getDbExecutorPluginMainClass</h1>
+     * @return String
+     */
     public String getDbExecutorPluginMainClass() {
         return dbExecutorPluginMainClass;
     }
 
+    /**
+     * <h1>setDbExecutorPluginMainClass</h1>
+     * @param dbExecutorPluginMainClass
+     */
     public void setDbExecutorPluginMainClass(String dbExecutorPluginMainClass) {
         this.dbExecutorPluginMainClass = dbExecutorPluginMainClass;
     }
 
+    /**
+     * <h1>getPollInterval</h1>
+     * @return Integer
+     */
     public Integer getPollInterval() {
         return pollInterval;
     }
 
+    /**
+     * <h1>setPollInterval</h1>
+     * @param pollInterval
+     */
     public void setPollInterval(Integer pollInterval) {
         this.pollInterval = pollInterval;
     }
 
+    /**
+     * <h1>getDd1File</h1>
+     * @return File
+     */
     public File getDdlFile() {
         return ddlFile;
     }
 
+    /**
+     * <h1>setDd1File</h1>
+     * @param ddlFile
+     * @throws ClusterElasticityAgentException
+     */
     public void setDdlFile(File ddlFile) throws ClusterElasticityAgentException {
         if(ddlFile.exists())
             this.ddlFile = ddlFile;
@@ -271,10 +367,19 @@ public class CommandLineArguments {
             throw new ClusterElasticityAgentException("DB Schema File doesn't exist");
     }
 
+    /**
+     * <h1>getCollectorPluginJar</h1>
+     * @return File
+     */
     public File getCollectorPluginJar() {
         return collectorPluginJar;
     }
 
+    /**
+     * <h1>setCollectorPluginJar</h1>
+     * @param collectorPluginJar
+     * @throws ClusterElasticityAgentException
+     */
     public void setCollectorPluginJar(File collectorPluginJar) throws ClusterElasticityAgentException {
         if(collectorPluginJar.exists())
             this.collectorPluginJar = collectorPluginJar;
@@ -282,10 +387,19 @@ public class CommandLineArguments {
             throw new ClusterElasticityAgentException("Collector Plugin Jar Doesn't Exit!!");
     }
 
+    /**
+     * <h1>getCemanagerPluginJar</h1>
+     * @return File
+     */
     public File getCemanagerPluginJar() {
         return cemanagerPluginJar;
     }
 
+    /**
+     * <h1>setCemanagerPluginJar</h1>
+     * @param cemanagerPluginJar
+     * @throws ClusterElasticityAgentException
+     */
     public void setCemanagerPluginJar(File cemanagerPluginJar) throws ClusterElasticityAgentException {
         if(cemanagerPluginJar.exists())
             this.cemanagerPluginJar = cemanagerPluginJar;
@@ -293,20 +407,38 @@ public class CommandLineArguments {
             throw new ClusterElasticityAgentException("CEManager Plugin Jar not found!!");
     }
 
+    /**
+     * <h1>getCollectorPluginMainClass</h1>
+     * @return String
+     */
     public String getCollectorPluginMainClass() {
         return collectorPluginMainClass;
     }
 
+    /**
+     * <h1>setCollectorPluginMainClass</h1>
+     * @param collectorPluginMainClass
+     */
     public void setCollectorPluginMainClass(String collectorPluginMainClass) {
         this.collectorPluginMainClass = collectorPluginMainClass;
     }
 
+    /**
+     * <h1>getCemanagerPluginMainClass</h1>
+     * @return String
+     */
     public String getCemanagerPluginMainClass() {
         return cemanagerPluginMainClass;
     }
 
     public File getPolicyInfoPluginJar() {
         return policyInfoPluginJar;
+    /**
+     * <h1>setCemanagerPluginMainClass</h1>
+     * @param cemanagerPluginMainClass
+     */
+    public void setCemanagerPluginMainClass(String cemanagerPluginMainClass) {
+        this.cemanagerPluginMainClass = cemanagerPluginMainClass;
     }
 
 
@@ -314,6 +446,11 @@ public class CommandLineArguments {
         return policyInfoMainClass;
     }
 
+    /**
+     * <h1>parseCommandLineArguments</h1>
+     * @param args
+     * @throws ClusterElasticityAgentException
+     */
     public void parseCommandLineArguments(String[] args) throws ClusterElasticityAgentException {
 
         CmdLineParser parser = new CmdLineParser(this);

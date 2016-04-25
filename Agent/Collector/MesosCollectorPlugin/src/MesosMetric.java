@@ -11,13 +11,27 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Created by kovit on 3/9/2016.
+ * <h1>MesosMetric</h1>
+ * This class fetches, processes and inserts data
+ * into respective tables from the data received from
+ * the Mesos Slave Nodes.
+ *
+ * @author Kovit
+ * @version 1.0
+ * @since 2016-03-09
  */
 
 public final class MesosMetric implements ICollectorPluginByTable {
 
     private final static Logger LOGGER = GlobalLogger.globalLogger;
 
+    /**
+     * <h1>fetch</h1>
+     * fetches the data from Slave Nodes and
+     * @param data type -> List<Data>
+     * @param masterAddr type -> String
+     * @return List<ITableInfo> Returns all the TableInfo from the slave
+     */
     @Override
     public List<ITableInfo> fetch(List<Data> data, String masterAddr) {
         List<SlaveDetails> slaveLst = new ArrayList<>();
@@ -46,6 +60,14 @@ public final class MesosMetric implements ICollectorPluginByTable {
         return null;
     }
 
+    /**
+     * <h1>convertIntoTableRows</h1>
+     * Converts the data into tables
+     * @param slaveLst
+     * @param frameworkDetailsLst
+     * @param runsOn
+     * @return List<ITableInfo>
+     */
     private List<ITableInfo> convertIntoTableRows(List<SlaveDetails> slaveLst,
                                                   List<FrameworkDetails> frameworkDetailsLst,
                                                   List<FrameworkSlaveRelationship> runsOn) {
@@ -57,6 +79,12 @@ public final class MesosMetric implements ICollectorPluginByTable {
         return lst;
     }
 
+    /**
+     * <h1>runsOnTableRows</h1>
+     * Fills te runsOn Table
+     * @param runsOn
+     * @param lst
+     */
     private void runsOnTableRows(List<FrameworkSlaveRelationship> runsOn, List<ITableInfo> lst) {
         for(FrameworkSlaveRelationship fsr: runsOn) {
             if (fsr.getSlave().isReachable()) {
@@ -74,6 +102,12 @@ public final class MesosMetric implements ICollectorPluginByTable {
         }
     }
 
+    /**
+     * <h1>frameworkTableRows</h1>
+     * Fills the Framework Table
+     * @param frameworkDetailsLst
+     * @param lst
+     */
     private void frameworkTableRows(List<FrameworkDetails> frameworkDetailsLst, List<ITableInfo> lst) {
         for(FrameworkDetails f: frameworkDetailsLst) {
             ITableInfo t = new TableInfo("Framework");
@@ -90,6 +124,12 @@ public final class MesosMetric implements ICollectorPluginByTable {
         }
     }
 
+    /**
+     * <h1>slaveTableRows</h1>
+     * Fills the Slave Table
+     * @param slaveLst
+     * @param lst
+     */
     private void slaveTableRows(List<SlaveDetails> slaveLst, List<ITableInfo> lst) {
         for(SlaveDetails s: slaveLst) {
             if (s.isReachable()) {
@@ -110,6 +150,11 @@ public final class MesosMetric implements ICollectorPluginByTable {
         }
     }
 
+    /**
+     * <h1>populateSlaveUtilization</h1>
+     * Populate All the Slave Objects
+     * @param slaveLst
+     */
     private void populateSlaveUtilization(List<SlaveDetails> slaveLst) {
         for(SlaveDetails slave: slaveLst) {
             String slaveMetrics = null;
@@ -136,6 +181,13 @@ public final class MesosMetric implements ICollectorPluginByTable {
         }
     }
 
+    /**
+     * <h1>parseSlaveMetrics</h1>
+     * Parse the Mesos Slave nodes and
+     * sets it into Slave objects
+     * @param slave
+     * @param slaveMetricsResp
+     */
     private void parseSlaveMetrics(SlaveDetails slave, String slaveMetricsResp) {
         JsonElement slaveMetrics = new JsonParser().parse(slaveMetricsResp);
         JsonObject smObj = slaveMetrics.getAsJsonObject();
@@ -146,6 +198,14 @@ public final class MesosMetric implements ICollectorPluginByTable {
                 .setLoad5Min(smObj.get("system/load_5min").getAsFloat());
     }
 
+    /**
+     * <h1>parseStateSummary</h1>
+     * gets the Framework and Slave details
+     * @param stateSummaryResp
+     * @param slaveLst
+     * @param frameworkDetailsLst
+     * @param runsOn
+     */
     private static void parseStateSummary(String stateSummaryResp, List<SlaveDetails> slaveLst,
                                           List<FrameworkDetails> frameworkDetailsLst,
                                           List<FrameworkSlaveRelationship> runsOn) {
@@ -157,6 +217,12 @@ public final class MesosMetric implements ICollectorPluginByTable {
         processFrameworkDetails(frameworks, frameworkDetailsLst);
     }
 
+    /**
+     * <h1>processFrameworkDetails</h1>
+     * processes the Framework Details.
+     * @param frameworks
+     * @param frameworkDetailsLst
+     */
     private static void processFrameworkDetails(JsonArray frameworks, List<FrameworkDetails> frameworkDetailsLst) {
         for(final JsonElement framework : frameworks) {
             JsonObject fObj = framework.getAsJsonObject();
@@ -168,10 +234,23 @@ public final class MesosMetric implements ICollectorPluginByTable {
         }
     }
 
+    /**
+     * <h1>getScheduledTasks</h1>
+     * Provides the Total number of tasks.
+     * @param fObj
+     * @return Tasks type Int
+     */
     private static int getScheduledTasks(JsonObject fObj) {
         return fObj.get("TASK_STAGING").getAsInt() + fObj.get("TASK_STARTING").getAsInt() + fObj.get("TASK_RUNNING").getAsInt();
     }
 
+    /**
+     * <h1>processSlaveDetails</h1>
+     * Processes all the Slave details.
+     * @param slaves
+     * @param slaveLst
+     * @param runsOn
+     */
     private static void processSlaveDetails(JsonArray slaves, List<SlaveDetails> slaveLst, List<FrameworkSlaveRelationship> runsOn) {
         for(final JsonElement slave : slaves) {
             SlaveDetails s = new SlaveDetails();

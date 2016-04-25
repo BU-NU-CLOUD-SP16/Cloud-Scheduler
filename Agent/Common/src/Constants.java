@@ -1,5 +1,9 @@
 /**
- * Created by chemistry_sourabh on 3/19/16.
+ * <h1>Constants</h1>
+ *
+ * @author Sourabh
+ * @version 1.0
+ * @since 2016-03-19
  */
 public class Constants {
 

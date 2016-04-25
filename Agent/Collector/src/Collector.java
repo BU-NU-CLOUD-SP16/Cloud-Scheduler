@@ -6,7 +6,13 @@ import java.util.*;
 import java.util.logging.*;
 
 /**
- * Created by Kovit on 3/8/2016.
+ * <h1>Collector</h1>
+ * Collects the mesos slave metrics
+ * and inserts into the SqliteDatabase.
+ *
+ * @author Kovit
+ * @version 1.0
+ * @since 2016-03-08
  */
 
 
@@ -34,6 +40,11 @@ public final class Collector implements ClusterElasticityAgentFramework {
 
     private String id;
 
+    /**
+     * <h1>Collector</h1>
+     * Constructor.
+     * @param argumentList
+     */
     public Collector(CommandLineArguments argumentList) {
         masterIpAddress = argumentList.getConfig().getValueForKey("Mesos-Master-Ip") + ":" + argumentList.getConfig().getValueForKey("Mesos-Master-Port");
         databasePluginClassName = argumentList.getDbExecutorPluginMainClass();
@@ -42,6 +53,9 @@ public final class Collector implements ClusterElasticityAgentFramework {
         createInstances();
     }
 
+    /**
+     * <h1>createInstances</h1>
+     */
     public void createInstances() {
         try
         {
@@ -64,8 +78,11 @@ public final class Collector implements ClusterElasticityAgentFramework {
         }
     }
 
-
-
+    /**
+     * <h1>getCPluginClsIntances</h1>
+     * @param collectorPluginMainClass
+     * @return List<Object>
+     */
     private List<Object> getCPluginClsIntances(String collectorPluginMainClass) {
         String[] classNamesLst = collectorPluginMainClass.split(",");
         List<Object> classInstance = new ArrayList<>(classNamesLst.length);
@@ -83,6 +100,10 @@ public final class Collector implements ClusterElasticityAgentFramework {
         return classInstance;
     }
 
+    /**
+     * <h1>notifyTimerExpiry</h1>
+     * @throws ClusterElasticityAgentException
+     */
     @Override
     public void notifyTimerExpiry() throws ClusterElasticityAgentException {
         List<ITableInfo> tableLst = new ArrayList<>();
@@ -105,6 +126,11 @@ public final class Collector implements ClusterElasticityAgentFramework {
         }
     }
 
+    /**
+     * <h1>processCollectorPluginClass</h1>
+     * @param cpClassInstance
+     * @param tableLst
+     */
     private void processCollectorPluginClass(Object cpClassInstance, List<ITableInfo> tableLst) {
         Class cls = cpClassInstance.getClass();
         logger.log(Level.FINE, "[Collector Plugin] Processing class " + cls,Constants.COLLECTOR_LOG_ID);
@@ -121,6 +147,11 @@ public final class Collector implements ClusterElasticityAgentFramework {
         }
     }
 
+    /**
+     * <h1>callFetchByTable</h1>
+     * @param cpClassInstance
+     * @return Collection<? extends ITableInfo>
+     */
     private Collection<? extends ITableInfo> callFetchByTable(ICollectorPluginByTable cpClassInstance) {
         Method fetchMthd = null;
         Class cls = cpClassInstance.getClass();
@@ -143,6 +174,11 @@ public final class Collector implements ClusterElasticityAgentFramework {
         }
     }
 
+    /**
+     * <h1>collectorPluginByRow</h1>
+     * @param cpClassInstance
+     * @param tableLst
+     */
     private void collectorPluginByRow(ICollectorPluginByRow cpClassInstance, List<ITableInfo> tableLst) {
         Class cls = cpClassInstance.getClass();
         if (cls.isAnnotationPresent(Table.class)) {
@@ -175,6 +211,11 @@ public final class Collector implements ClusterElasticityAgentFramework {
         }
     }
 
+    /**
+     * <h1>processClassMethods</h1>
+     * @param tInfo
+     * @param cpClassInstance
+     */
     private void processClassMethods(ITableInfo tInfo, ICollectorPluginByRow cpClassInstance) {
         Class cls = cpClassInstance.getClass();
         for (Method m : cls.getMethods()) {
@@ -205,6 +246,13 @@ public final class Collector implements ClusterElasticityAgentFramework {
         }
     }
 
+    /**
+     * <h1>invokeMethod</h1>
+     * @param isString
+     * @param tInfo
+     * @param cpClassInstance
+     * @param mthd
+     */
     private void invokeMethod(boolean isString, ITableInfo tInfo, ICollectorPluginByRow cpClassInstance, Method mthd) {
         try {
             logger.log(Level.FINE, "[CollectorFramework] Invoking method " + mthd.getName(),Constants.COLLECTOR_LOG_ID);
@@ -218,6 +266,12 @@ public final class Collector implements ClusterElasticityAgentFramework {
         }
     }
 
+    /**
+     * <h1>callFetch</h1>
+     * @param cls
+     * @return int
+     * number of iterations fetch has been called.
+     */
     private int callFetch(Class cls) {
         Method fetchMthd = null;
         try {
@@ -243,10 +297,22 @@ public final class Collector implements ClusterElasticityAgentFramework {
         return numOfIterations;
     }
 
+    /**
+     * <h1>query</h1>
+     * Insert query is returned as a message.
+     * @param info
+     * @return String
+     */
     public String query(ITableInfo info) {
         return MessageFormat.format(INSERT_SQL_STMT, info.getTableName(), info.colNameToString(), info.colValueToString());
     }
 
+    /**
+     * <h1>processQueryAnnotation</h1>
+     * Using the annotation, creates a query and runs it.
+     * @param mthd
+     * @return List<Data>
+     */
     private List<Data> processQueryAnnotation(Method mthd) {
         if (mthd.isAnnotationPresent(DataQuery.class)) {
             logger.log(Level.FINE, "@DataQuery annotation found",Constants.COLLECTOR_LOG_ID);
@@ -259,6 +325,13 @@ public final class Collector implements ClusterElasticityAgentFramework {
         return null;
     }
 
+    /**
+     * <h1>executeQueries</h1>
+     * @param queries
+     * @return List<Data>
+     * returns the data received after running
+     * the queries.
+     */
     private List<Data> executeQueries(String[] queries) {
         List<Data> resultLst = new ArrayList<>();
         for (String query : queries) {
