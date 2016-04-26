@@ -44,6 +44,7 @@ public class OpenStackWrapper implements Runnable {
     private final LinkedBlockingQueue<OpenStackCommand> workerQueue;
 
     private LinkedBlockingQueue<Object> responseQueue;
+    private LinkedBlockingQueue<Object> createResponseQueue;
 
     /**
      * <h1>OpenStackWrapper</h1>
@@ -55,6 +56,7 @@ public class OpenStackWrapper implements Runnable {
     {
         this.workerQueue = new LinkedBlockingQueue<>();
         this.responseQueue = new LinkedBlockingQueue<>();
+        this.createResponseQueue = new LinkedBlockingQueue<>();
         this.username = username;
         this.password = password;
     }
@@ -67,6 +69,9 @@ public class OpenStackWrapper implements Runnable {
         return responseQueue;
     }
 
+    public LinkedBlockingQueue<Object> getCreateResponseQueue() {
+        return createResponseQueue;
+    }
 
     /**
      * <h1>initializeOpenStackClient</h1>
@@ -109,7 +114,7 @@ public class OpenStackWrapper implements Runnable {
 
         OpenStackNode node = new OpenStackNode();
         node.setHostname(command.getName());
-        responseQueue.add(node);
+        createResponseQueue.add(node);
         return  node;
     }
 
@@ -206,6 +211,7 @@ public class OpenStackWrapper implements Runnable {
     public void run() {
         initializeOpenStackClient();
 
+        while (true) {
             try {
                 OpenStackCommand command = this.workerQueue.take();
 
@@ -224,12 +230,13 @@ public class OpenStackWrapper implements Runnable {
                         break;
 
                     default:
-                        System.out.println("Unknown Command "+command.getClass().getName());
+                        System.out.println("Unknown Command " + command.getClass().getName());
                         break;
                 }
 
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+        }
     }
 }

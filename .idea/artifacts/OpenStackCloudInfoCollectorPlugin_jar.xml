@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
   <artifact type="jar" build-on-make="true" name="OpenStackCloudInfoCollectorPlugin:jar">
-    <output-path>$PROJECT_DIR$/Release</output-path>
+    <output-path>$PROJECT_DIR$/Release/</output-path>
     <root id="archive" name="OpenStackCloudInfoCollectorPlugin.jar">
       <element id="module-output" name="OpenStackCloudInfoCollectorPlugin" />
       <element id="module-output" name="OverlordPlugin" />

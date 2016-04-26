@@ -38,6 +38,7 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
 
     private String id;
 
+    private OpenStackWrapper openStackWrapper = null;
 
     private Logger logger = GlobalLogger.globalLogger;
 
@@ -107,14 +108,18 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
             }
         }
 
+        if (openStackWrapper == null)
+        {
+            openStackWrapper = new OpenStackWrapper(username,password);
+            Thread t = new Thread(openStackWrapper);
+            t.start();
+        }
+
         try {
-            OpenStackWrapper openStackWrapper = new OpenStackWrapper(username,password);
+
             ListCommand listCommand = new ListCommand(clusterNetworkName);
             openStackWrapper.getWorkerQueue().add(listCommand);
-            new Thread(openStackWrapper).start();
-
             ArrayList<OpenStackNode> openStackNodes = (ArrayList<OpenStackNode>) openStackWrapper.getResponseQueue().take();
-
             slaves = convertToMesosSlaves(openStackNodes);
             slaveCount = getLargestSlaveNumber() + 1;
 
@@ -332,7 +337,6 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
      */
     private void createNode(OpenStackNode openStackNode) throws IOException, InterruptedException {
 
-        OpenStackWrapper openStackWrapper = new OpenStackWrapper(username,password);
         CreateCommand openStackCommand = new CreateCommand();
         openStackCommand.setName(prefix+"-"+id+"-"+slaveCount+suffix);
         openStackCommand.setSecurityGroup(clusterSecurityGroup);
@@ -341,9 +345,7 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
         openStackCommand.setKeyPair(keyname);
         openStackCommand.setNetwork(clusterNetworkId);
         openStackWrapper.getWorkerQueue().add(openStackCommand);
-        Thread t = new Thread(openStackWrapper);
-        t.start();
-        openStackWrapper.getResponseQueue().take();
+        openStackWrapper.getCreateResponseQueue().take();
     }
 
     /**
@@ -355,14 +357,13 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
      */
     private ArrayList<OpenStackNode> listNode(String name) throws IOException {
 
-        OpenStackWrapper openStackWrapper = new OpenStackWrapper(username,password);
         ListCommand openStackCommand = new ListCommand(clusterNetworkName);
         openStackCommand.setName(name);
         openStackWrapper.getWorkerQueue().add(openStackCommand);
-        new Thread(openStackWrapper).start();
 
         try {
-            return (ArrayList<OpenStackNode>) openStackWrapper.getResponseQueue().take();
+            ArrayList<OpenStackNode> openStackNodes = (ArrayList<OpenStackNode>) openStackWrapper.getResponseQueue().take();
+            return openStackNodes;
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -377,11 +378,9 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
      * @throws InterruptedException
      */
     private void deleteNode(OpenStackNode node) throws IOException, InterruptedException {
-        OpenStackWrapper openStackWrapper = new OpenStackWrapper(username,password);
         DeleteCommand deleteCommand = new DeleteCommand();
         deleteCommand.setId(node.getId());
         openStackWrapper.getWorkerQueue().add(deleteCommand);
-        new Thread(openStackWrapper).start();
     }
 
 }

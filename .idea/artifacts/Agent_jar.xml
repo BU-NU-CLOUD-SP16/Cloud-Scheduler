@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
-  <artifact type="jar" name="Agent:jar">
-    <output-path>$PROJECT_DIR$/Release/Cluster_Elasticity_Agent/jars</output-path>
+  <artifact type="jar" build-on-make="true" name="Agent:jar">
+    <output-path>$PROJECT_DIR$/Release/</output-path>
     <root id="archive" name="Agent.jar">
       <element id="module-output" name="Agent" />
       <element id="module-output" name="ClusterScaler" />
@@ -11,10 +11,10 @@
       <element id="module-output" name="SQLiteDBExecutorPlugin" />
       <element id="module-output" name="Manager" />
       <element id="module-output" name="MesosElasticityPlugin" />
-      <element id="module-output" name="Node" />
       <element id="module-output" name="Utilities" />
       <element id="module-output" name="OpenStackClusterScalerPlugin" />
       <element id="module-output" name="Authorization" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/sqlite-jdbc-3.8.11.2.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/jsch-0.1.53.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/unirest-java-1.4.8.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/httpclient-4.3.6.jar" path-in-jar="/" />
@@ -25,24 +25,8 @@
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/httpcore-nio-4.3.2.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/httpmime-4.3.6.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/json-20140107.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/spark-core-2.3.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/slf4j-api-1.7.12.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/slf4j-simple-1.7.12.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/jetty-server-9.3.2.v20150730.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/javax.servlet-api-3.1.0.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/jetty-http-9.3.2.v20150730.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/jetty-util-9.3.2.v20150730.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/jetty-io-9.3.2.v20150730.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/jetty-webapp-9.3.2.v20150730.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/jetty-xml-9.3.2.v20150730.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/jetty-servlet-9.3.2.v20150730.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/jetty-security-9.3.2.v20150730.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/websocket-server-9.3.2.v20150730.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/websocket-common-9.3.2.v20150730.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/websocket-api-9.3.2.v20150730.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/websocket-client-9.3.2.v20150730.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/websocket-servlet-9.3.2.v20150730.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/args4j-2.33.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/gson-2.6.2.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/openstack4j-2.11.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/openstack4j-jersey2-2.11.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/jersey-client-2.10.1.jar" path-in-jar="/" />
@@ -68,8 +52,23 @@
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/guava-17.0.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/jackson-dataformat-yaml-2.4.1.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/jsr305-2.0.0.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/sqlite-jdbc-3.8.11.2.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/gson-2.6.2.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/spark-core-2.3.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/slf4j-api-1.7.12.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/slf4j-simple-1.7.12.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/jetty-server-9.3.2.v20150730.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/javax.servlet-api-3.1.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/jetty-http-9.3.2.v20150730.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/jetty-util-9.3.2.v20150730.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/jetty-io-9.3.2.v20150730.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/jetty-webapp-9.3.2.v20150730.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/jetty-xml-9.3.2.v20150730.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/jetty-servlet-9.3.2.v20150730.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/jetty-security-9.3.2.v20150730.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/websocket-server-9.3.2.v20150730.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/websocket-common-9.3.2.v20150730.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/websocket-api-9.3.2.v20150730.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/websocket-client-9.3.2.v20150730.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/websocket-servlet-9.3.2.v20150730.jar" path-in-jar="/" />
     </root>
   </artifact>
 </component>

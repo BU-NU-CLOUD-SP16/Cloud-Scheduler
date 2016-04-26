@@ -16,24 +16,26 @@
   "Overlord-Ip": "localhost",
   "Overlord-Port": "6000",
   "Id": "2",
-  "Base-Priority": "5",
+  "Base-Priority": "3",
   "Log": "./logs/",
 
-  "Node-Name-Prefix": "Mesos-Slave",
+  "Node-Name-Prefix": "spark-slave",
   "Node-Name-Suffix": ".cloud",
 
-  "Mesos-HDFS-Master": "192.168.1.42",
+  "SSH-Host" : "129.10.3.71",
+  "SSH-Port" : "6501",
+  "Mesos-HDFS-Master": "192.168.1.67",
   "SSH-Private-Key": "/Users/chemistry_sourabh/.ssh/id_rsa",
   "Min-Nodes": "2",
-  "No-Delete-Slaves": ["mesos-slave-2-1.cloud","mesos-slave-2-2.cloud"],
+  "No-Delete-Slaves": ["spark-slave-2-1.cloud","spark-slave-2-2.cloud"],
   "Cluster-Security-Group": "Cluster-2",
   "Cluster-Network": "Mesos-Cluster-2",
   "Cluster-Network-Id": "23842fc1-8810-473f-9ebf-f9182bb7e7e4",
-  "New-Node-Flavor": "dcc95f79-1f29-49c3-a44c-2f915c4cf44e",
+  "New-Node-Flavor": "4",
   "Key-Name": "Sourabh-OSX",
   "Username": "Enter here",
   "Password": "Enter here",
-  "Image-Name": "0418168d-724a-4517-b96c-9d627c64b17d",
+  "Image-Name": "ed195dc4-29db-4d0d-878f-4865aea33f1e",
   "Mesos-Master-Ip": "129.10.3.71",
   "Mesos-Master-Port": "5050",
   "Scale-Up-Cluster-Load": 0.85,
@@ -45,6 +47,6 @@
   "Scale-Up-Slave-Memory": 0.1,
   "Scale-Down-Slave-Memory": 0.7,
 
-  "Framework-Priorities": [{"name":"PageRank","priority":2},{"name":"Hadoop","priority":1}]
+  "Framework-Priorities": [{"name":"PythonPageRank","priority":2},{"name":"Hadoop","priority":1}]
 
 }

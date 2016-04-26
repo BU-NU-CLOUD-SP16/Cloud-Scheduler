@@ -177,7 +177,8 @@ public class AgingPolicyPlugin implements PolicyPlugin {
 
     @Override
     public void updateState(HashMap<String,String> clusterStates,ArrayList<Node> nodesInCloud) {
-        ArrayList<Agent> agents = registeredAgents.getAll();
+
+        nodeList.clear();
 
         for (Node node : nodesInCloud)
         {

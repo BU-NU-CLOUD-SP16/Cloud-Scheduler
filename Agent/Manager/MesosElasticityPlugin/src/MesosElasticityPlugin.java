@@ -73,6 +73,8 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
     private String newNodeFlavor;
     private String privateKey;
     private String hdfsIp;
+    private String sshHost;
+    private int sshPort;
 
     /**
      * <h1>MesosElasticityPlugin Constructor</h1>
@@ -107,7 +109,10 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         Data runsOnData = data.get(2);
 
         privateKey = config.getValueForKey("SSH-Private-Key");
+
         hdfsIp = config.getValueForKey("Mesos-HDFS-Master");
+        sshHost = config.getValueForKey("SSH-Host");
+        sshPort = Integer.parseInt(config.getValueForKey("SSH-Port"));
         JsonArray json = new Gson().fromJson(config.getValueForKey("No-Delete-Slaves"),JsonArray.class);
 
         NO_DELETE_SLAVES = new ArrayList<String>();
@@ -152,6 +157,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
             if(s.isFilterSet())
             {
                 s.setFilterTime(s.getFilterTime() - (int) (current_time - last_time));
+                logger.log(Level.INFO,"Slave "+s.getHostname()+" filter = "+s.getFilterTime(),GlobalLogger.MANAGER_LOG_ID);
             }
         }
 
@@ -429,13 +435,16 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         OpenStackNode openStackNode = (OpenStackNode) node;
 
         String s4 = "sudo hostname "+ openStackNode.getHostname();
-//        String s0 = "sudo sed -i '1s/^/nameserver 192.168.0.51\\n /' /etc/resolv.conf";
-//        String s1 =  "sudo sed -i '1s/^/" + openStackNode.getIp() + " " + openStackNode.getHostname() + "\\n /' /etc/hosts";
         String s1 = "sudo sed -i '1s/^/"+hdfsIp+" mesos-hdfs-master\\n /' /etc/hosts";
         String s2 = "nohup ./hadoop-2.5.0-cdh5.2.0/bin/hadoop-daemon.sh start datanode &>/dev/null &";
-        String s3 = "nohup mesos slave --master="+hdfsIp+":5050 --quiet &>/dev/null &";
+        String s3 = "nohup sudo mesos slave --master="+hdfsIp+":5050 --quiet &>/dev/null &";
+        String s5 = "sudo service mesos-master stop";
+        String s6 = "sudo service mesos-slave stop";
+        String s7 = "sudo service ganglia-monitor stop && sudo service gmetad stop && sudo service apache2 stop";
+        String s8 = "sudo perl -i -p0e 's/\\/\\*\\nudp_send_channel {.*?#mcast_join = 239.2.11.71.*?host = localhost.*?port = 8649 .*?ttl = 1 .*?}.*?\\*\\/\\n/udp_send_channel {\\nhost = "+hdfsIp+"\\nport=8649\\nttl=1\\n}\\n/s' /etc/ganglia/gmond.conf";
+        String s9 = "sudo service ganglia-monitor start";
 
-        SshProxy proxy = new SshProxy(privateKey);
+        SshProxy proxy = new SshProxy(sshHost,sshPort,privateKey);
 
         while (true)
         {
@@ -455,33 +464,53 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
             }
         }
 
+        int exit;
+        exit = tryExecutingForever(proxy,openStackNode.getIp(),s4);
+        logger.log(Level.INFO, "Executed " + s4 + " with status " + exit, GlobalLogger.MANAGER_LOG_ID);
+        exit = tryExecutingForever(proxy,openStackNode.getIp(),s1);
+        logger.log(Level.INFO,"Executed "+s1+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
+        exit = tryExecutingForever(proxy,openStackNode.getIp(),s2);
+        logger.log(Level.INFO,"Executed "+s2+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
+        exit = tryExecutingForever(proxy,openStackNode.getIp(),s5);
+        logger.log(Level.INFO,"Executed "+s5+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
+        exit = tryExecutingForever(proxy,openStackNode.getIp(),s6);
+        logger.log(Level.INFO,"Executed "+s6+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
+        exit = tryExecutingForever(proxy,openStackNode.getIp(),s7);
+        logger.log(Level.INFO,"Executed "+s7+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
+        exit = tryExecutingForever(proxy,openStackNode.getIp(),s8);
+        logger.log(Level.INFO,"Executed "+s8+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
+        exit = tryExecutingForever(proxy,openStackNode.getIp(),s9);
+        logger.log(Level.INFO,"Executed "+s9+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
+        exit = tryExecutingForever(proxy,openStackNode.getIp(),s3);
+        logger.log(Level.INFO,"Executed "+s3+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
 
 
-        try {
-            int exit = proxy.executeCommand(openStackNode.getIp(),s4);
-            logger.log(Level.INFO,"Executed "+s4+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
 //            exit = proxy.executeCommand(openStackNode.getIp(),s0);
 //            logger.log(Level.INFO,"Executed "+s0+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
-            exit = proxy.executeCommand(openStackNode.getIp(),s1);
-            logger.log(Level.INFO,"Executed "+s1+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
-            exit = proxy.executeCommand(openStackNode.getIp(),s2);
-            logger.log(Level.INFO,"Executed "+s2+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
-            exit = proxy.executeCommand(openStackNode.getIp(),s3);
-            logger.log(Level.INFO,"Executed "+s3+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
         logger.log(Level.INFO,"Finished Connecting Node to Mesos",GlobalLogger.MANAGER_LOG_ID);
 
-        Slave slave = new Slave();
-        slave.setHostname(openStackNode.getHostname());
-        slave.setIp(openStackNode.getIp());
-        slave.setFilterTime(SLAVE_NEW_FILTER);
-        slave.setFilterSet(true);
-        slaves.add(slave);
         noScaleUpFilter = 300000;
         noScaleUpFilterSet = true;
+    }
+
+    private int tryExecutingForever(SshProxy proxy,String ip, String command) {
+        int exit = 0;
+        while (true) {
+            try {
+                exit = proxy.executeCommand(ip, command);
+                break;
+            } catch (Exception ex) {
+                proxy.closeSessions();
+                logger.log(Level.INFO,"Trying "+command+" again!!",GlobalLogger.MANAGER_LOG_ID);
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        }
+        return exit;
     }
 
     /**
@@ -752,6 +781,8 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
             Slave existingS = findSlaveWithHostname(newS.getHostname(),oldSlaves);
             if(existingS == null)
             {
+                newS.setFilterTime(SLAVE_NEW_FILTER);
+                newS.setFilterSet(true);
                 slaves.add(newS);
             }
 

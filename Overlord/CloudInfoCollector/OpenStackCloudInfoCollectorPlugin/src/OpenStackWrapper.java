@@ -49,10 +49,13 @@ public class OpenStackWrapper implements Runnable {
 
 
     public void initializeOpenStackClient(){
+        org.openstack4j.core.transport.Config config = org.openstack4j.core.transport.Config.newConfig();
+        config.withMaxConnections(10);
         this.osClientHandle = OSFactory.builder()
                 .endpoint(OS_AUTH_URL)
                 .credentials(username,password)
                 .tenantName(OS_TENANT_NAME)
+                .withConfig(config)
                 .authenticate();
 
         this.osClientHandle.useRegion(OS_REGION_NAME);
@@ -147,7 +150,7 @@ public class OpenStackWrapper implements Runnable {
     @Override
     public void run() {
         initializeOpenStackClient();
-
+        while (true) {
             try {
                 ListCommand command = this.workerQueue.take();
 
@@ -156,5 +159,6 @@ public class OpenStackWrapper implements Runnable {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+        }
     }
 }

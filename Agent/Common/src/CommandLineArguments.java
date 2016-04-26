@@ -433,6 +433,7 @@ public class CommandLineArguments {
 
     public File getPolicyInfoPluginJar() {
         return policyInfoPluginJar;
+    }
     /**
      * <h1>setCemanagerPluginMainClass</h1>
      * @param cemanagerPluginMainClass

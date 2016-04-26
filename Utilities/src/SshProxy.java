@@ -7,35 +7,36 @@ import java.io.InputStream;
  */
 public class SshProxy {
 
-    private  String privateKey;
-
+    private String privateKey;
+    private String host;
+    private int port;
     private Session session;
     private Session secondSession;
     private Channel channel;
 
-    public SshProxy(String privateKey) {
+    public SshProxy(String host,int port,String privateKey) {
         this.privateKey = privateKey;
+        this.host = host;
+        this.port = port;
     }
 
     public int executeCommand(String finalHost, String command) throws Exception{
 
         int exitStatus = 1;
 
-        String host="129.10.3.91"; // First level target
         String user="ubuntu";
-        int port=22;
 
         JSch jsch=new JSch();
         jsch.addIdentity(privateKey);
-        session=jsch.getSession(user, host, port);
-        session.setConfig("StrictHostKeyChecking", "no");
-        session.setConfig("UserKnownHostsFile","/dev/null");
-        session.setPortForwardingL(2233, finalHost, 22);
-        session.connect();
-        Channel ch = session.openChannel("direct-tcpip");
+//        session=jsch.getSession(user, host, 22);
+//        session.setConfig("StrictHostKeyChecking", "no");
+//        session.setConfig("UserKnownHostsFile","/dev/null");
+//        session.setPortForwardingL(port, finalHost, 22);
+//        session.connect();
+//        Channel ch = session.openChannel("direct-tcpip");
 
 
-        secondSession = jsch.getSession(user, "localhost", 2233);
+        secondSession = jsch.getSession(user, host, 22);
         secondSession.setConfig("StrictHostKeyChecking", "no");
         secondSession.setConfig("UserKnownHostsFile","/dev/null");
         secondSession.connect(); // now we're connected to the secondary system
@@ -59,7 +60,7 @@ public class SshProxy {
         channel.disconnect();
 
         secondSession.disconnect();
-        session.disconnect();
+//        session.disconnect();
 
         return exitStatus;
     }
@@ -71,6 +72,6 @@ public class SshProxy {
             channel.disconnect();
         }
         secondSession.disconnect();
-        session.disconnect();
+//        session.disconnect();
     }
 }

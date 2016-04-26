@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
   <artifact type="jar" build-on-make="true" name="AgingPolicyPlugin:jar">
-    <output-path>$PROJECT_DIR$/Release</output-path>
+    <output-path>$PROJECT_DIR$/Release/</output-path>
     <root id="archive" name="AgingPolicyPlugin.jar">
       <element id="module-output" name="AgingPolicyPlugin" />
       <element id="module-output" name="OverlordPlugin" />
