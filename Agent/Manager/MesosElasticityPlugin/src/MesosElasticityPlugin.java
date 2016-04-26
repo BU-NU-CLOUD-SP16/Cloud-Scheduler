@@ -47,6 +47,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
 
     private static final int FRAMEWORK_FILTER = 30000;
     private static final int SLAVE_NEW_FILTER = 300000;
+    private static final int DECREMENT_TIME = 5000;
 
     private static final int MIN_SLAVES = 2;
 
@@ -148,7 +149,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         {
             if(f.isFilterSet())
             {
-                f.setFilterTime(f.getFilterTime() - (int) (current_time - last_time));
+                f.setFilterTime(f.getFilterTime() - (int) DECREMENT_TIME);
             }
         }
 
@@ -156,7 +157,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         {
             if(s.isFilterSet())
             {
-                s.setFilterTime(s.getFilterTime() - (int) (current_time - last_time));
+                s.setFilterTime(s.getFilterTime() - (int) DECREMENT_TIME);
                 logger.log(Level.INFO,"Slave "+s.getHostname()+" filter = "+s.getFilterTime(),GlobalLogger.MANAGER_LOG_ID);
             }
         }
