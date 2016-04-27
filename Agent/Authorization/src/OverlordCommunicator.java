@@ -60,7 +60,7 @@ public class OverlordCommunicator {
 
         try {
            HttpResponse<String> response = Unirest.post("http://"+overlordIp+":"+overlordPort+"/requestNode").body(json).asString();
-           return ""+response.getStatus();
+           return ""+response.getBody();
         } catch (UnirestException e) {
             GlobalLogger.globalLogger.log(Level.SEVERE,e.getMessage(),GlobalLogger.MANAGER_LOG_ID);
         }

@@ -23,7 +23,6 @@
       <module fileurl="file://$PROJECT_DIR$/Overlord/Policy/Policy.iml" filepath="$PROJECT_DIR$/Overlord/Policy/Policy.iml" />
       <module fileurl="file://$PROJECT_DIR$/Agent/PolicyInfo/PolicyInfo.iml" filepath="$PROJECT_DIR$/Agent/PolicyInfo/PolicyInfo.iml" />
       <module fileurl="file://$PROJECT_DIR$/Agent/Database/SQLiteDBExecutorPlugin/SQLiteDBExecutorPlugin.iml" filepath="$PROJECT_DIR$/Agent/Database/SQLiteDBExecutorPlugin/SQLiteDBExecutorPlugin.iml" />
-      <module fileurl="file://$PROJECT_DIR$/Utilities/Utilities.iml" filepath="$PROJECT_DIR$/Utilities/Utilities.iml" />
     </modules>
   </component>
 </project>

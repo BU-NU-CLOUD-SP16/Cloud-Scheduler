@@ -1,4 +1,7 @@
-import com.jcraft.jsch.*;
+import com.jcraft.jsch.Channel;
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.Session;
 
 import java.io.InputStream;
 
@@ -14,7 +17,7 @@ public class SshProxy {
     private Session secondSession;
     private Channel channel;
 
-    public SshProxy(String host,int port,String privateKey) {
+    public SshProxy(String host, int port, String privateKey) {
         this.privateKey = privateKey;
         this.host = host;
         this.port = port;
@@ -39,6 +42,7 @@ public class SshProxy {
         secondSession = jsch.getSession(user, finalHost, 22);
         secondSession.setConfig("StrictHostKeyChecking", "no");
         secondSession.setConfig("UserKnownHostsFile","/dev/null");
+        secondSession.setTimeout(5);
         secondSession.connect(); // now we're connected to the secondary system
         channel =secondSession.openChannel("exec");
         ((ChannelExec)channel).setCommand(command);
