@@ -165,7 +165,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
 
         if(noScaleUpFilterSet)
         {
-           noScaleUpFilter = noScaleUpFilter - (current_time - last_time);
+           noScaleUpFilter = noScaleUpFilter - DECREMENT_TIME;
         }
         last_time = current_time;
         logger.log(Level.FINER,"Exiting fetch",GlobalLogger.MANAGER_LOG_ID);
@@ -345,18 +345,9 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         ArrayList<Node> toBeDeleted = new ArrayList<>();
         double[] clusterMetrics = calculateClusterMetrics();
 
-        if(slaves.size() <= MIN_SLAVES)
-        {
-            logger.log(Level.FINE,"Skipping since Min number of slaves are present",GlobalLogger.MANAGER_LOG_ID);
-            return toBeDeleted;
-        }
 
-        for(Slave slave : slaves)
+        for (Slave slave : slaves)
         {
-            OpenStackNode node = new OpenStackNode(newNodeFlavor);
-            node.setHostname(slave.getHostname());
-            node.setIp(slave.getIp());
-
             if(slave.isFilterSet())
             {
                 if(slave.getFilterTime() > 0)
@@ -370,6 +361,21 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
                     slave.setFilterTime(0);
                 }
             }
+        }
+
+        if(slaves.size() <= MIN_SLAVES)
+        {
+            logger.log(Level.FINE,"Skipping since Min number of slaves are present",GlobalLogger.MANAGER_LOG_ID);
+            return toBeDeleted;
+        }
+
+        for(Slave slave : slaves)
+        {
+            OpenStackNode node = new OpenStackNode(newNodeFlavor);
+            node.setHostname(slave.getHostname());
+            node.setIp(slave.getIp());
+
+            if (slave.isFilterSet() && slave.getFilterTime() > 0) continue;
 
             if(NO_DELETE_SLAVES.contains(slave.getHostname().toLowerCase()))
             {
