@@ -198,13 +198,17 @@ public class ClusterElasticityAgent {
             ConsoleHandler consoleHandler = new ConsoleHandler();
             managerFileHandler.setFormatter(new SimpleFormatter());
             managerFileHandler.setFilter(record -> record.getParameters()[0].equals(Constants.MANAGER_LOG_ID));
+            managerFileHandler.setLevel(Level.FINE);
             collectorFileHandler.setFormatter(new SimpleFormatter());
             collectorFileHandler.setFilter(record -> record.getParameters()[0].equals(Constants.COLLECTOR_LOG_ID));
+            collectorFileHandler.setLevel(Level.FINE);
             centralFileHandler.setFormatter(new SimpleFormatter());
+            centralFileHandler.setLevel(Level.FINE);
             mainFileHandler.setFilter(record -> record.getParameters()[0].equals(Constants.MAIN_LOG_ID));
             mainFileHandler.setFormatter(new SimpleFormatter());
+            mainFileHandler.setLevel(Level.FINE);
             consoleHandler.setFormatter(new SimpleFormatter());
-            consoleHandler.setFilter(record -> record.getLevel().toString().toLowerCase().equals("info") || record.getLevel().toString().toLowerCase().equals("severe") || record.getLevel().toString().toLowerCase().equals("config"));
+            consoleHandler.setLevel(Level.INFO);
             logger.addHandler(managerFileHandler);
             logger.addHandler(collectorFileHandler);
             logger.addHandler(centralFileHandler);
