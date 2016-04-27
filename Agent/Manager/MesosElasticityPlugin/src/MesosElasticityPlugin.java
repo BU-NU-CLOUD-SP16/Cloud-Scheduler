@@ -2,6 +2,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.sun.tools.internal.ws.wsdl.framework.GlobalEntity;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -503,6 +504,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
                 break;
             } catch (Exception ex) {
                 proxy.closeSessions();
+                logger.log(Level.SEVERE,""+ex.getMessage(), GlobalLogger.MANAGER_LOG_ID);
                 logger.log(Level.INFO,"Trying "+command+" again!!",GlobalLogger.MANAGER_LOG_ID);
                 try {
                     Thread.sleep(1000);
