@@ -14,7 +14,6 @@
     <orderEntry type="module" module-name="Manager" />
     <orderEntry type="module" module-name="Plugin" />
     <orderEntry type="module" module-name="SQLiteDBExecutorPlugin" />
-    <orderEntry type="module" module-name="Utilities" />
     <orderEntry type="library" name="com.google.code.gson:gson:2.6.2" level="project" />
     <orderEntry type="library" name="com.sparkjava:spark-core:2.3" level="project" />
     <orderEntry type="module" module-name="Authorization" />
