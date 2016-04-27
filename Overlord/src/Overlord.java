@@ -183,7 +183,7 @@ public class Overlord {
 
                 sleep(commandLineArguments.getPollInterval());
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                logger.log(Level.SEVERE,""+e.getMessage());
             }
         }
 
