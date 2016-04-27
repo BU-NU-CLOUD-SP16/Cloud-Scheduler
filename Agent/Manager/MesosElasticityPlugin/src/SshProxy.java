@@ -42,7 +42,7 @@ public class SshProxy {
         secondSession = jsch.getSession(user, finalHost, 22);
         secondSession.setConfig("StrictHostKeyChecking", "no");
         secondSession.setConfig("UserKnownHostsFile","/dev/null");
-        secondSession.setTimeout(5);
+        secondSession.setTimeout(5000);
         secondSession.connect(); // now we're connected to the secondary system
         channel =secondSession.openChannel("exec");
         ((ChannelExec)channel).setCommand(command);
