@@ -36,7 +36,7 @@ public class SshProxy {
 //        Channel ch = session.openChannel("direct-tcpip");
 
 
-        secondSession = jsch.getSession(user, host, 22);
+        secondSession = jsch.getSession(user, finalHost, 22);
         secondSession.setConfig("StrictHostKeyChecking", "no");
         secondSession.setConfig("UserKnownHostsFile","/dev/null");
         secondSession.connect(); // now we're connected to the secondary system

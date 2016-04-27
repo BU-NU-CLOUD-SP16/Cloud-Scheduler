@@ -453,6 +453,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
             try {
                 proxy.executeCommand(openStackNode.getIp(),"hostname");
                 logger.log(Level.INFO,"New Node Ready",GlobalLogger.MANAGER_LOG_ID);
+                Thread.sleep(1000);
                 break;
             }
             catch (Exception e)
@@ -477,12 +478,12 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         logger.log(Level.INFO,"Executed "+s5+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
         exit = tryExecutingForever(proxy,openStackNode.getIp(),s6);
         logger.log(Level.INFO,"Executed "+s6+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
-        exit = tryExecutingForever(proxy,openStackNode.getIp(),s7);
-        logger.log(Level.INFO,"Executed "+s7+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
-        exit = tryExecutingForever(proxy,openStackNode.getIp(),s8);
-        logger.log(Level.INFO,"Executed "+s8+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
-        exit = tryExecutingForever(proxy,openStackNode.getIp(),s9);
-        logger.log(Level.INFO,"Executed "+s9+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
+//        exit = tryExecutingForever(proxy,openStackNode.getIp(),s7);
+//        logger.log(Level.INFO,"Executed "+s7+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
+//        exit = tryExecutingForever(proxy,openStackNode.getIp(),s8);
+//        logger.log(Level.INFO,"Executed "+s8+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
+//        exit = tryExecutingForever(proxy,openStackNode.getIp(),s9);
+//        logger.log(Level.INFO,"Executed "+s9+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
         exit = tryExecutingForever(proxy,openStackNode.getIp(),s3);
         logger.log(Level.INFO,"Executed "+s3+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
 
@@ -501,6 +502,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         while (true) {
             try {
                 exit = proxy.executeCommand(ip, command);
+                Thread.sleep(1000);
                 break;
             } catch (Exception ex) {
                 proxy.closeSessions();
