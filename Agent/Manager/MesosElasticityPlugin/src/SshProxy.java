@@ -23,7 +23,7 @@ public class SshProxy {
         this.port = port;
     }
 
-    public int executeCommand(String finalHost, String command) throws Exception{
+    public int executeCommand(String finalHost, String command,int timeout) throws Exception{
 
         int exitStatus = 1;
 
@@ -42,8 +42,8 @@ public class SshProxy {
         secondSession = jsch.getSession(user, finalHost, 22);
         secondSession.setConfig("StrictHostKeyChecking", "no");
         secondSession.setConfig("UserKnownHostsFile","/dev/null");
-        secondSession.setTimeout(5000);
-        secondSession.connect(5000); // now we're connected to the secondary system
+        secondSession.setTimeout(timeout);
+        secondSession.connect(timeout); // now we're connected to the secondary system
         channel =secondSession.openChannel("exec");
         ((ChannelExec)channel).setCommand(command);
 

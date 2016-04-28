@@ -455,8 +455,9 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
 
         while (true)
         {
+            int timeout = 5000;
             try {
-                proxy.executeCommand(openStackNode.getIp(),"hostname");
+                proxy.executeCommand(openStackNode.getIp(),"hostname",timeout);
                 logger.log(Level.INFO,"New Node Ready",GlobalLogger.MANAGER_LOG_ID);
                 Thread.sleep(1000);
                 break;
@@ -465,6 +466,11 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
             {
                 proxy.closeSessions();
                 logger.log(Level.SEVERE,e.getMessage(),GlobalLogger.MANAGER_LOG_ID);
+                if (e.getMessage().equalsIgnoreCase("timeout: socket is not established"))
+                {
+                    timeout += 5000;
+                    logger.log(Level.INFO,"New Timeout = "+timeout,GlobalLogger.MANAGER_LOG_ID);
+                }
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e1) {
@@ -506,14 +512,19 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
     private int tryExecutingForever(SshProxy proxy,String ip, String command) {
         int exit = 0;
         while (true) {
+            int timeout = 5000;
             try {
-                exit = proxy.executeCommand(ip, command);
+                exit = proxy.executeCommand(ip, command,timeout);
                 Thread.sleep(1000);
                 break;
             } catch (Exception ex) {
                 proxy.closeSessions();
-                logger.log(Level.SEVERE,""+ex.getMessage(), GlobalLogger.MANAGER_LOG_ID);
-                logger.log(Level.INFO,"Trying "+command+" again!!",GlobalLogger.MANAGER_LOG_ID);
+                logger.log(Level.SEVERE,ex.getMessage(),GlobalLogger.MANAGER_LOG_ID);
+                if (ex.getMessage().equalsIgnoreCase("timeout: socket is not established"))
+                {
+                    timeout += 5000;
+                    logger.log(Level.INFO,"New Timeout = "+timeout,GlobalLogger.MANAGER_LOG_ID);
+                }
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e1) {
