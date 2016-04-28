@@ -464,6 +464,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
             catch (Exception e)
             {
                 proxy.closeSessions();
+                logger.log(Level.SEVERE,e.getMessage(),GlobalLogger.MANAGER_LOG_ID);
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e1) {
