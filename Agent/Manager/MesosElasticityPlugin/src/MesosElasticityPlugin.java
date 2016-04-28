@@ -452,7 +452,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         String s9 = "sudo service ganglia-monitor start";
 
 
-        String s = s4 + " && "+s1+" && "+s2+ " && "+s5+" && "+s6+" && "+s3;
+        String s = "("+s4 + "; "+s1+"; "+s2+ "; "+s5+"; "+s6+"; "+s3+") &";
 
         SshProxy proxy = new SshProxy(sshHost,sshPort,privateKey);
 
@@ -469,7 +469,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
             {
                 proxy.closeSessions();
                 logger.log(Level.SEVERE,e.getMessage(),GlobalLogger.MANAGER_LOG_ID);
-                if (e.getMessage().contains("No Route") || e.getMessage().contains("Connection Refused"))
+                if (e.getMessage().toLowerCase().contains("no route") || e.getMessage().toLowerCase().contains("connection refused"))
                 {
                     try {
                         Thread.sleep(1000);
