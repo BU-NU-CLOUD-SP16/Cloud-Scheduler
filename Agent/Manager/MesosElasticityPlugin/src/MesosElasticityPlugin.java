@@ -444,7 +444,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         String s4 = "sudo hostname "+ openStackNode.getHostname();
         String s1 = "sudo sed -i '1s/^/"+hdfsIp+" mesos-hdfs-master\\n /' /etc/hosts";
         String s2 = "nohup hadoop-daemon.sh start datanode &>/dev/null &";
-        String s3 = "nohup sudo mesos slave --master="+hdfsIp+":5050 --quiet &>/dev/null &";
+        String s3 = "nohup sudo mesos slave --master="+hdfsIp+":5050 --quiet --hadoop_home='/home/ubuntu/hadoop-2.5.0-cdh5.2.0' &>/dev/null &";
         String s5 = "sudo service mesos-master stop";
         String s6 = "sudo service mesos-slave stop";
         String s7 = "sudo service ganglia-monitor stop && sudo service gmetad stop && sudo service apache2 stop";
@@ -468,7 +468,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
                 logger.log(Level.SEVERE,e.getMessage(),GlobalLogger.MANAGER_LOG_ID);
                 if (e.getMessage().equalsIgnoreCase("timeout: socket is not established"))
                 {
-                    timeout += 5000;
+                    timeout = 40000;
                     logger.log(Level.INFO,"New Timeout = "+timeout,GlobalLogger.MANAGER_LOG_ID);
                 }
                 try {
@@ -522,7 +522,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
                 logger.log(Level.SEVERE,ex.getMessage(),GlobalLogger.MANAGER_LOG_ID);
                 if (ex.getMessage().equalsIgnoreCase("timeout: socket is not established"))
                 {
-                    timeout += 5000;
+                    timeout = 40000;
                     logger.log(Level.INFO,"New Timeout = "+timeout,GlobalLogger.MANAGER_LOG_ID);
                 }
                 try {
