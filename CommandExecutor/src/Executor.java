@@ -57,6 +57,7 @@ public class Executor {
                         while ((ch = bi.readLine()) != null) {
                             System.out.println(ch);
                         }
+                        System.out.println("Executed "+command);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     } catch (IOException e) {

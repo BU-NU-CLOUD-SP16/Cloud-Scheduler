@@ -447,13 +447,13 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         String s4 = "sudo hostname "+ openStackNode.getHostname();
         String s1 = "sed "+hdfsIp;
         String s2 = "/home/ubuntu/hadoop-2.5.0-cdh5.2.0/bin/hadoop-daemon.sh start datanode";
-        String s3 = "sudo mesos slave --master="+hdfsIp+":5050 --quiet --hadoop_home=/home/ubuntu/hadoop-2.5.0-cdh5.2.0 &>/dev/null &";
+        String s3 = "nohup mesos slave --master="+hdfsIp+":5050 --quiet --hadoop_home=/home/ubuntu/hadoop-2.5.0-cdh5.2.0";
         String s5 = "sudo service mesos-master stop";
         String s6 = "sudo service mesos-slave stop";
         String s7 = "sudo service ganglia-monitor stop && sudo service gmetad stop && sudo service apache2 stop";
         String s8 = "sudo perl -i -p0e 's/\\/\\*\\nudp_send_channel {.*?#mcast_join = 239.2.11.71.*?host = localhost.*?port = 8649 .*?ttl = 1 .*?}.*?\\*\\/\\n/udp_send_channel {\\nhost = "+hdfsIp+"\\nport=8649\\nttl=1\\n}\\n/s' /etc/ganglia/gmond.conf";
         String s9 = "sudo service ganglia-monitor start";
-        String s10 = "java -Djava.library.path=/home/ubuntu/monitor/libs -cp /home/ubuntu/monitor/Monitor.jar Slave "+hdfsIp;
+        String s10 = "nohup java -Djava.library.path=/home/ubuntu/monitor/libs -cp /home/ubuntu/monitor/Monitor.jar Slave "+hdfsIp;
 
 
         waitTillSlaveIsUp(openStackNode.getIp());
@@ -470,8 +470,8 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         logger.log(Level.INFO,"Executed "+s5,GlobalLogger.MANAGER_LOG_ID);
         executeCommandHttp(openStackNode.getIp(),s6);
         logger.log(Level.INFO,"Executed "+s6,GlobalLogger.MANAGER_LOG_ID);
-        executeCommandHttp(openStackNode.getIp(),s10);
-        logger.log(Level.INFO,"Executed "+s10,GlobalLogger.MANAGER_LOG_ID);
+//        executeCommandHttp(openStackNode.getIp(),s10);
+//        logger.log(Level.INFO,"Executed "+s10,GlobalLogger.MANAGER_LOG_ID);
         executeCommandHttp(openStackNode.getIp(),s3);
         logger.log(Level.INFO,"Executed "+s3,GlobalLogger.MANAGER_LOG_ID);
 
