@@ -453,9 +453,9 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
 
         SshProxy proxy = new SshProxy(sshHost,sshPort,privateKey);
 
+        int timeout = 5000;
         while (true)
         {
-            int timeout = 5000;
             try {
                 proxy.executeCommand(openStackNode.getIp(),"hostname",timeout);
                 logger.log(Level.INFO,"New Node Ready",GlobalLogger.MANAGER_LOG_ID);
@@ -511,8 +511,8 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
 
     private int tryExecutingForever(SshProxy proxy,String ip, String command) {
         int exit = 0;
+        int timeout = 5000;
         while (true) {
-            int timeout = 5000;
             try {
                 exit = proxy.executeCommand(ip, command,timeout);
                 Thread.sleep(1000);
