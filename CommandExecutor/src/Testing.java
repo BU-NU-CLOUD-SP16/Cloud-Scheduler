@@ -13,7 +13,7 @@ public class Testing {
 
         try
         {
-            HttpResponse<String> response = Unirest.post("http://129.10.3.91:8000/execute").body("hadoop-daemon.sh start datanode").asString();
+            HttpResponse<String> response = Unirest.post("http://129.10.3.91:8000/execute").body("/home/ubuntu/hadoop-2.5.0-cdh5.2.0/bin/hadoop-daemon.sh start datanode").asString();
             System.out.println(response.getBody());
         }
 

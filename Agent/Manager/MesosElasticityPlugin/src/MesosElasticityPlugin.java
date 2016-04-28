@@ -446,8 +446,8 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
 
         String s4 = "sudo hostname "+ openStackNode.getHostname();
         String s1 = "sed "+hdfsIp;
-        String s2 = "/home/ubuntu/hadoop-2.5.0-cdh5.2.0/bin/hadoop datanode > /dev/null &";
-        String s3 = "sudo mesos slave --master="+hdfsIp+":5050 --quiet --hadoop_home='/home/ubuntu/hadoop-2.5.0-cdh5.2.0' &>/dev/null &";
+        String s2 = "/home/ubuntu/hadoop-2.5.0-cdh5.2.0/bin/hadoop-daemon.sh start datanode";
+        String s3 = "sudo mesos slave --master="+hdfsIp+":5050 --quiet --hadoop_home=/home/ubuntu/hadoop-2.5.0-cdh5.2.0 &>/dev/null &";
         String s5 = "sudo service mesos-master stop";
         String s6 = "sudo service mesos-slave stop";
         String s7 = "sudo service ganglia-monitor stop && sudo service gmetad stop && sudo service apache2 stop";
