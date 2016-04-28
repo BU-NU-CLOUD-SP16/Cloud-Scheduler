@@ -443,7 +443,7 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
 
         String s4 = "sudo hostname "+ openStackNode.getHostname();
         String s1 = "sudo sed -i '1s/^/"+hdfsIp+" mesos-hdfs-master\\n /' /etc/hosts";
-        String s2 = "nohup ./hadoop-2.5.0-cdh5.2.0/bin/hadoop-daemon.sh start datanode &>/dev/null &";
+        String s2 = "nohup hadoop-daemon.sh start datanode &>/dev/null &";
         String s3 = "nohup sudo mesos slave --master="+hdfsIp+":5050 --quiet &>/dev/null &";
         String s5 = "sudo service mesos-master stop";
         String s6 = "sudo service mesos-slave stop";
