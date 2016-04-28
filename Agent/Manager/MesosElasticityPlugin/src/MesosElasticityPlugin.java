@@ -2,6 +2,9 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -450,75 +453,125 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         String s7 = "sudo service ganglia-monitor stop && sudo service gmetad stop && sudo service apache2 stop";
         String s8 = "sudo perl -i -p0e 's/\\/\\*\\nudp_send_channel {.*?#mcast_join = 239.2.11.71.*?host = localhost.*?port = 8649 .*?ttl = 1 .*?}.*?\\*\\/\\n/udp_send_channel {\\nhost = "+hdfsIp+"\\nport=8649\\nttl=1\\n}\\n/s' /etc/ganglia/gmond.conf";
         String s9 = "sudo service ganglia-monitor start";
+        String s10 = "java -jar /home/ubuntu/Monitor.jar Slave "+hdfsIp;
 
 
-        String s = "("+s4 + "; "+s1+"; "+s2+ "; "+s5+"; "+s6+"; "+s3+") &";
+        waitTillSlaveIsUp(openStackNode.getIp());
 
-        SshProxy proxy = new SshProxy(sshHost,sshPort,privateKey);
+        logger.log(Level.INFO,"New Node Ready",GlobalLogger.MANAGER_LOG_ID);
 
-        int timeout = 5000;
-        while (true)
-        {
-            try {
-                proxy.executeCommand(openStackNode.getIp(),"hostname",timeout);
-                logger.log(Level.INFO,"New Node Ready",GlobalLogger.MANAGER_LOG_ID);
-                Thread.sleep(1000);
-                break;
-            }
-            catch (Exception e)
-            {
-                proxy.closeSessions();
-                logger.log(Level.SEVERE,e.getMessage(),GlobalLogger.MANAGER_LOG_ID);
-                if (e.getMessage().toLowerCase().contains("no route") || e.getMessage().toLowerCase().contains("connection refused"))
-                {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e1) {
-                        e1.printStackTrace();
-                    }
-                    continue;
-                }
+        executeCommandHttp(openStackNode.getIp(),s4);
+        logger.log(Level.INFO,"Executed "+s4,GlobalLogger.MANAGER_LOG_ID);
+        executeCommandHttp(openStackNode.getIp(),s1);
+        logger.log(Level.INFO,"Executed "+s1,GlobalLogger.MANAGER_LOG_ID);
+        executeCommandHttp(openStackNode.getIp(),s2);
+        logger.log(Level.INFO,"Executed "+s2,GlobalLogger.MANAGER_LOG_ID);
+        executeCommandHttp(openStackNode.getIp(),s5);
+        logger.log(Level.INFO,"Executed "+s5,GlobalLogger.MANAGER_LOG_ID);
+        executeCommandHttp(openStackNode.getIp(),s6);
+        logger.log(Level.INFO,"Executed "+s6,GlobalLogger.MANAGER_LOG_ID);
+        executeCommandHttp(openStackNode.getIp(),s10);
+        logger.log(Level.INFO,"Executed "+s10,GlobalLogger.MANAGER_LOG_ID);
+        executeCommandHttp(openStackNode.getIp(),s3);
+        logger.log(Level.INFO,"Executed "+s3,GlobalLogger.MANAGER_LOG_ID);
 
-                else
-                {
-                    break;
-                }
-//                if (e.getMessage().equalsIgnoreCase("timeout: socket is not established"))
+//        String s = "("+s4 + "; "+s1+"; "+s2+ "; "+s5+"; "+s6+"; "+s3+") &";
+//
+//        SshProxy proxy = new SshProxy(sshHost,sshPort,privateKey);
+//
+//        int timeout = 5000;
+//        while (true)
+//        {
+//            try {
+//                proxy.executeCommand(openStackNode.getIp(),"hostname",timeout);
+//                logger.log(Level.INFO,"New Node Ready",GlobalLogger.MANAGER_LOG_ID);
+//                Thread.sleep(1000);
+//                break;
+//            }
+//            catch (Exception e)
+//            {
+//                proxy.closeSessions();
+//                logger.log(Level.SEVERE,e.getMessage(),GlobalLogger.MANAGER_LOG_ID);
+//                if (e.getMessage().toLowerCase().contains("no route") || e.getMessage().toLowerCase().contains("connection refused"))
 //                {
-//                    timeout = 40000;
-//                    logger.log(Level.INFO,"New Timeout = "+timeout,GlobalLogger.MANAGER_LOG_ID);
+//                    try {
+//                        Thread.sleep(1000);
+//                    } catch (InterruptedException e1) {
+//                        e1.printStackTrace();
+//                    }
+//                    continue;
 //                }
-            }
-        }
-
-        int exit;
-        exit = tryExecutingForever(proxy,openStackNode.getIp(),s);
-        logger.log(Level.INFO, "Executed " + s + " with status " + exit, GlobalLogger.MANAGER_LOG_ID);
-//        exit = tryExecutingForever(proxy,openStackNode.getIp(),s1);
-//        logger.log(Level.INFO,"Executed "+s1+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
-//        exit = tryExecutingForever(proxy,openStackNode.getIp(),s2);
-//        logger.log(Level.INFO,"Executed "+s2+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
-//        exit = tryExecutingForever(proxy,openStackNode.getIp(),s5);
-//        logger.log(Level.INFO,"Executed "+s5+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
-//        exit = tryExecutingForever(proxy,openStackNode.getIp(),s6);
-//        logger.log(Level.INFO,"Executed "+s6+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
-////        exit = tryExecutingForever(proxy,openStackNode.getIp(),s7);
-////        logger.log(Level.INFO,"Executed "+s7+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
-////        exit = tryExecutingForever(proxy,openStackNode.getIp(),s8);
-////        logger.log(Level.INFO,"Executed "+s8+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
-////        exit = tryExecutingForever(proxy,openStackNode.getIp(),s9);
-////        logger.log(Level.INFO,"Executed "+s9+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
-//        exit = tryExecutingForever(proxy,openStackNode.getIp(),s3);
-//        logger.log(Level.INFO,"Executed "+s3+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
-
-
-//            exit = proxy.executeCommand(openStackNode.getIp(),s0);
-//            logger.log(Level.INFO,"Executed "+s0+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
+//
+//                else
+//                {
+//                    break;
+//                }
+////                if (e.getMessage().equalsIgnoreCase("timeout: socket is not established"))
+////                {
+////                    timeout = 40000;
+////                    logger.log(Level.INFO,"New Timeout = "+timeout,GlobalLogger.MANAGER_LOG_ID);
+////                }
+//            }
+//        }
+//
+//        int exit;
+//        exit = tryExecutingForever(proxy,openStackNode.getIp(),s);
+//        logger.log(Level.INFO, "Executed " + s + " with status " + exit, GlobalLogger.MANAGER_LOG_ID);
+////        exit = tryExecutingForever(proxy,openStackNode.getIp(),s1);
+////        logger.log(Level.INFO,"Executed "+s1+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
+////        exit = tryExecutingForever(proxy,openStackNode.getIp(),s2);
+////        logger.log(Level.INFO,"Executed "+s2+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
+////        exit = tryExecutingForever(proxy,openStackNode.getIp(),s5);
+////        logger.log(Level.INFO,"Executed "+s5+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
+////        exit = tryExecutingForever(proxy,openStackNode.getIp(),s6);
+////        logger.log(Level.INFO,"Executed "+s6+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
+//////        exit = tryExecutingForever(proxy,openStackNode.getIp(),s7);
+//////        logger.log(Level.INFO,"Executed "+s7+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
+//////        exit = tryExecutingForever(proxy,openStackNode.getIp(),s8);
+//////        logger.log(Level.INFO,"Executed "+s8+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
+//////        exit = tryExecutingForever(proxy,openStackNode.getIp(),s9);
+//////        logger.log(Level.INFO,"Executed "+s9+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
+////        exit = tryExecutingForever(proxy,openStackNode.getIp(),s3);
+////        logger.log(Level.INFO,"Executed "+s3+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
+//
+//
+////            exit = proxy.executeCommand(openStackNode.getIp(),s0);
+////            logger.log(Level.INFO,"Executed "+s0+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
 
         logger.log(Level.INFO,"Finished Connecting Node to Mesos",GlobalLogger.MANAGER_LOG_ID);
 
         noScaleUpFilter = 300000;
         noScaleUpFilterSet = true;
+    }
+
+
+    private void waitTillSlaveIsUp(String ip)
+    {
+        while (true)
+        {
+            try {
+                HttpResponse<String> response = Unirest.post("http://"+ip+":8000/execute").body("running").asString();
+                if (response.getBody().equalsIgnoreCase("yes"))
+                {
+                    break;
+                }
+            }
+            catch (UnirestException ex)
+            {
+
+            }
+        }
+    }
+
+    private void executeCommandHttp(String ip, String command)
+    {
+        try {
+            HttpResponse<String> response = Unirest.post("http://"+ip+":8000/execute").body(command).asString();
+        }
+        catch (UnirestException ex)
+        {
+
+        }
     }
 
     private int tryExecutingForever(SshProxy proxy,String ip, String command) {
