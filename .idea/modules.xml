@@ -10,6 +10,7 @@
       <module fileurl="file://$PROJECT_DIR$/Overlord/CloudInfoCollector/CloudInfoCollector.iml" filepath="$PROJECT_DIR$/Overlord/CloudInfoCollector/CloudInfoCollector.iml" />
       <module fileurl="file://$PROJECT_DIR$/Agent/ClusterScaler/ClusterScaler.iml" filepath="$PROJECT_DIR$/Agent/ClusterScaler/ClusterScaler.iml" />
       <module fileurl="file://$PROJECT_DIR$/Agent/Collector/Collector.iml" filepath="$PROJECT_DIR$/Agent/Collector/Collector.iml" />
+      <module fileurl="file://$PROJECT_DIR$/CommandExecutor/CommandExecutor.iml" filepath="$PROJECT_DIR$/CommandExecutor/CommandExecutor.iml" />
       <module fileurl="file://$PROJECT_DIR$/Agent/Common/Common.iml" filepath="$PROJECT_DIR$/Agent/Common/Common.iml" />
       <module fileurl="file://$PROJECT_DIR$/Agent/Database/Database.iml" filepath="$PROJECT_DIR$/Agent/Database/Database.iml" />
       <module fileurl="file://$PROJECT_DIR$/Agent/Manager/Manager.iml" filepath="$PROJECT_DIR$/Agent/Manager/Manager.iml" />
