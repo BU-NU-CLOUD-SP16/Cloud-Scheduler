@@ -11,11 +11,31 @@ public class SQLiteDBExecutor implements DBExecutor {
     private Connection c =null;
     private Statement stmt = null;
 
+    private String dblocation = "";
+    private String id;
+
+
+    private void createConnection()
+    {
+        try {
+        Class.forName("org.sqlite.JDBC");
+            if (!dblocation.equals(""))
+                c = DriverManager.getConnection("jdbc:sqlite:" + dblocation);
+            else
+                c = DriverManager.getConnection("jdbc:sqlite:cloudScheduler"+id+".db");
+
+    } catch (Exception e){
+        e.printStackTrace();
+        System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+    }
+    }
+
     //Executes a Select statement and returns a Double Dimensional String array
     public ArrayList<String[]> executeSelect(String str){
 
         ArrayList<String[]> table_values = new ArrayList<>();
         try {
+            createConnection();
             stmt = c.createStatement();
             ResultSet rs = stmt.executeQuery(str);
             ResultSetMetaData rsmd= rs.getMetaData();
@@ -28,8 +48,8 @@ public class SQLiteDBExecutor implements DBExecutor {
                 table_values.add(values);
             }
             rs.close();
-//            stmt.close();
-//            c.close();
+            stmt.close();
+            c.close();
         } catch(Exception e){
             e.printStackTrace();
             System.err.println( e.getClass().getName()
@@ -41,10 +61,11 @@ public class SQLiteDBExecutor implements DBExecutor {
     public void executeUpdate(String str){
         try{
             String sql = str;
+            createConnection();
             stmt = c.createStatement();
             stmt.executeUpdate(sql);
-//            stmt.close();
-//            c.close();
+            stmt.close();
+            c.close();
         } catch ( Exception e ) {
             System.out.println("here??????");
             e.printStackTrace();
@@ -66,12 +87,13 @@ public class SQLiteDBExecutor implements DBExecutor {
             String all_Sql = sb.toString();
             String[] sql = all_Sql.split(";");
 
+            createConnection();
             stmt = c.createStatement();
             for (int i = 0; i < sql.length; i++) {
                 stmt.executeUpdate(sql[i]);
             }
-//            stmt.close();
-//            c.close();
+            stmt.close();
+            c.close();
         }catch ( Exception e ) {
             System.out.println("Exception??????");
             e.printStackTrace();
@@ -83,6 +105,7 @@ public class SQLiteDBExecutor implements DBExecutor {
     //Deletes all the rows in all the tables in DB
     public void clearDB(){
         try {
+            createConnection();
             stmt = c.createStatement();
             String sql = "Delete from Framework;";
             stmt.executeUpdate(sql);
@@ -92,8 +115,8 @@ public class SQLiteDBExecutor implements DBExecutor {
 
             sql = "Delete from Runs_On";
             stmt.executeUpdate(sql);
-//            stmt.close();
-//            c.close();
+            stmt.close();
+            c.close();
         } catch ( Exception e ) {
             System.out.println("here??????");
             e.printStackTrace();
@@ -115,25 +138,13 @@ public class SQLiteDBExecutor implements DBExecutor {
 
 
     public SQLiteDBExecutor(String id){
-        try {
-            Class.forName("org.sqlite.JDBC");
-            c = DriverManager.getConnection("jdbc:sqlite:cloudScheduler"+id+".db");
-        } catch (Exception e){
-            e.printStackTrace();
-            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
-        }
+       this.id = id;
 
     }
 
     public SQLiteDBExecutor(String id,String dbLocation){
-        try {
-            Class.forName("org.sqlite.JDBC");
-            c = DriverManager.getConnection("jdbc:sqlite:" + dbLocation);
-        } catch (Exception e){
-            e.printStackTrace();
-            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
-        }
-
+        this.id = id;
+        this.dblocation = dbLocation;
     }
 
 }

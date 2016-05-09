@@ -175,10 +175,9 @@ public class ClusterElasticityAgent {
                 logger.log(Level.FINE,"Manager finished timer expiry",Constants.MAIN_LOG_ID);
 
                 Thread.sleep(argumentList.getPollInterval());
-            } catch(InterruptedException ex) {
-                Thread.currentThread().interrupt();
-            } catch (ClusterElasticityAgentException e) {
-                e.printStackTrace();
+            } catch (Exception ex)
+            {
+                logger.log(Level.SEVERE,ex.getMessage(),Constants.MAIN_LOG_ID);
             }
         }
 

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.Level;
 
 /**
  * <h1>OpenStackWrapper</h1>
@@ -146,23 +147,42 @@ public class OpenStackWrapper implements Runnable {
             return serverIdList;
         }
 
-        List<? extends Server> servers = this.osClientHandle.compute().servers().list();
+        GlobalLogger.globalLogger.log(Level.FINE,"Before getting list",GlobalLogger.MANAGER_LOG_ID);
+        List<? extends Server> servers = null;
+        while (true) {
+            try {
+                servers = this.osClientHandle.compute().servers().list();
+                break;
+            } catch (Exception ex) {
+                GlobalLogger.globalLogger.log(Level.SEVERE, "" + ex.getMessage(), GlobalLogger.MANAGER_LOG_ID);
+            }
+        }
+        GlobalLogger.globalLogger.log(Level.FINE,"After getting list",GlobalLogger.MANAGER_LOG_ID);
+        GlobalLogger.globalLogger.log(Level.FINE,""+servers,GlobalLogger.MANAGER_LOG_ID);
+        GlobalLogger.globalLogger.log(Level.FINE,""+servers.size(),GlobalLogger.MANAGER_LOG_ID);
 
-        for (Server server: servers ) {
 
-            if(server.getName().toLowerCase().contains("slave")) {
-                OpenStackNode node = new OpenStackNode();
-                node.setHostname(server.getName());
-                node.setId(server.getId());
-                node.setFlavor(server.getFlavor().getId());
-                node.setStatus(server.getStatus().value());
-                try {
-                    node.setIp(server.getAddresses().getAddresses(command.getNetwork()).get(0).getAddr());
-                    serverIdList.add(node);
-                } catch (Exception e) {
+        try {
 
+            for (Server server : servers) {
+                if (server.getName().toLowerCase().contains("slave")) {
+                    OpenStackNode node = new OpenStackNode();
+                    node.setHostname(server.getName());
+                    node.setId(server.getId());
+                    node.setFlavor(server.getFlavor().getId());
+                    node.setStatus(server.getStatus().value());
+                    try {
+                        node.setIp(server.getAddresses().getAddresses(command.getNetwork()).get(0).getAddr());
+                        serverIdList.add(node);
+                    } catch (Exception e) {
+
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            GlobalLogger.globalLogger.log(Level.SEVERE,ex.getMessage(),GlobalLogger.MANAGER_LOG_ID);
         }
 
         responseQueue.add(serverIdList);
@@ -235,7 +255,7 @@ public class OpenStackWrapper implements Runnable {
                 }
 
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                GlobalLogger.globalLogger.log(Level.SEVERE,e.getMessage(),GlobalLogger.MANAGER_LOG_ID);
             }
         }
     }

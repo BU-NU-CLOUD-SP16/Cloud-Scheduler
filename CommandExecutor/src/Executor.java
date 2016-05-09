@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import static spark.Spark.port;
 import static spark.Spark.post;
@@ -28,6 +29,14 @@ public class Executor {
                 return "yes";
             }
 
+            if (request.body().equalsIgnoreCase("done"))
+            {
+                if (commandQueue.isEmpty())
+                    return "yes";
+                else
+                    return "no";
+            }
+
 
             commandQueue.add(request.body());
 
@@ -50,12 +59,10 @@ public class Executor {
                             p.waitFor();
                         } else {
                             p = Runtime.getRuntime().exec(command);
-                            p.waitFor();
-                        }
-                        BufferedReader bi = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-                        String ch;
-                        while ((ch = bi.readLine()) != null) {
-                            System.out.println(ch);
+                            if (command.toLowerCase().startsWith("nohup"))
+                                p.waitFor(1, TimeUnit.SECONDS);
+                            else
+                                p.waitFor();
                         }
                         System.out.println("Executed "+command);
                     } catch (InterruptedException e) {

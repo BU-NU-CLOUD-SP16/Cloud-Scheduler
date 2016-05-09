@@ -51,8 +51,7 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
     @Override
     public void setup(Config config, ArrayList<Node> nodes)
     {
-        logger.log(Level.FINER,"Entering setup()",GlobalLogger.MANAGER_LOG_ID);
-        String output = "";
+        logger.log(Level.FINE,"Entering setup()",GlobalLogger.MANAGER_LOG_ID);
 
         keyname = config.getValueForKey("Key-Name");
         imageName = config.getValueForKey("Image-Name");
@@ -78,35 +77,35 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
             this.password = pass;
         }
 
-        if(username == null)
-        {
-            BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-            System.out.print("Enter Username: ");
-            try {
-                this.username = br.readLine();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        if(password == null)
-        {
-            Console console = System.console();
-            if(console == null)
-            {
-                BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-                System.out.print("Enter password:");
-                try {
-                    this.password = br.readLine();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            else {
-                password = new String(console.readPassword("Enter password:"));
-            }
-        }
+//        if(username == null)
+//        {
+//            BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+//            System.out.print("Enter Username: ");
+//            try {
+//                this.username = br.readLine();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//
+//        if(password == null)
+//        {
+//            Console console = System.console();
+//            if(console == null)
+//            {
+//                BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+//                System.out.print("Enter password:");
+//                try {
+//                    this.password = br.readLine();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//
+//            else {
+//                password = new String(console.readPassword("Enter password:"));
+//            }
+//        }
 
         if (openStackWrapper == null)
         {
@@ -119,13 +118,16 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
 
             ListCommand listCommand = new ListCommand(clusterNetworkName);
             openStackWrapper.getWorkerQueue().add(listCommand);
+            logger.log(Level.FINE,"Before get response",GlobalLogger.MANAGER_LOG_ID);
             ArrayList<OpenStackNode> openStackNodes = (ArrayList<OpenStackNode>) openStackWrapper.getResponseQueue().take();
+            logger.log(Level.FINE,"After get response",GlobalLogger.MANAGER_LOG_ID);
             slaves = convertToMesosSlaves(openStackNodes);
             slaveCount = getLargestSlaveNumber() + 1;
 
-            logger.log(Level.FINER,"Exiting setup()",GlobalLogger.MANAGER_LOG_ID);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            logger.log(Level.FINE,"Exiting setup()",GlobalLogger.MANAGER_LOG_ID);
+        } catch (Exception ex)
+        {
+            logger.log(Level.SEVERE, ex.getMessage(),GlobalLogger.MANAGER_LOG_ID);
         }
 
     }
@@ -189,12 +191,8 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
             logger.log(Level.INFO,"Created new node with IP "+slave.getIp(),GlobalLogger.MANAGER_LOG_ID);
 
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, e.getMessage(),GlobalLogger.MANAGER_LOG_ID);
         }
 
         OpenStackNode newNode = new OpenStackNode(openStackNode.getFlavor());
@@ -238,10 +236,8 @@ public class OpenStackClusterScalerPlugin implements ClusterScalerPlugin {
                     break;
                 }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, e.getMessage(),GlobalLogger.MANAGER_LOG_ID);
         }
         logger.log(Level.INFO,"Deleted Node "+node1.getIp(),GlobalLogger.MANAGER_LOG_ID);
         return true;

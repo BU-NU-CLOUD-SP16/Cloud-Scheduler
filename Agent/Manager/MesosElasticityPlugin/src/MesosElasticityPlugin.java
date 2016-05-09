@@ -447,13 +447,10 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         String s4 = "sudo hostname "+ openStackNode.getHostname();
         String s1 = "sed "+hdfsIp;
         String s2 = "/home/ubuntu/hadoop-2.5.0-cdh5.2.0/bin/hadoop-daemon.sh start datanode";
-        String s3 = "nohup mesos slave --master="+hdfsIp+":5050 --quiet --hadoop_home=/home/ubuntu/hadoop-2.5.0-cdh5.2.0";
+        String s3 = "nohup sudo mesos slave --master="+hdfsIp+":5050 --quiet --hadoop_home=/home/ubuntu/hadoop-2.5.0-cdh5.2.0 &> /dev/null &";
         String s5 = "sudo service mesos-master stop";
         String s6 = "sudo service mesos-slave stop";
-        String s7 = "sudo service ganglia-monitor stop && sudo service gmetad stop && sudo service apache2 stop";
-        String s8 = "sudo perl -i -p0e 's/\\/\\*\\nudp_send_channel {.*?#mcast_join = 239.2.11.71.*?host = localhost.*?port = 8649 .*?ttl = 1 .*?}.*?\\*\\/\\n/udp_send_channel {\\nhost = "+hdfsIp+"\\nport=8649\\nttl=1\\n}\\n/s' /etc/ganglia/gmond.conf";
-        String s9 = "sudo service ganglia-monitor start";
-        String s10 = "nohup java -Djava.library.path=/home/ubuntu/monitor/libs -cp /home/ubuntu/monitor/Monitor.jar Slave "+hdfsIp;
+        String s10 = "nohup java -Djava.library.path=/home/ubuntu/monitor/libs -cp /home/ubuntu/monitor/ Slave "+hdfsIp+" &> /dev/null &";
 
 
         waitTillSlaveIsUp(openStackNode.getIp());
@@ -461,19 +458,19 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         logger.log(Level.INFO,"New Node Ready",GlobalLogger.MANAGER_LOG_ID);
 
         executeCommandHttp(openStackNode.getIp(),s4);
-        logger.log(Level.INFO,"Executed "+s4,GlobalLogger.MANAGER_LOG_ID);
+        logger.log(Level.INFO,"Sent "+s4,GlobalLogger.MANAGER_LOG_ID);
         executeCommandHttp(openStackNode.getIp(),s1);
-        logger.log(Level.INFO,"Executed "+s1,GlobalLogger.MANAGER_LOG_ID);
+        logger.log(Level.INFO,"Sent "+s1,GlobalLogger.MANAGER_LOG_ID);
         executeCommandHttp(openStackNode.getIp(),s2);
-        logger.log(Level.INFO,"Executed "+s2,GlobalLogger.MANAGER_LOG_ID);
+        logger.log(Level.INFO,"Sent "+s2,GlobalLogger.MANAGER_LOG_ID);
         executeCommandHttp(openStackNode.getIp(),s5);
-        logger.log(Level.INFO,"Executed "+s5,GlobalLogger.MANAGER_LOG_ID);
+        logger.log(Level.INFO,"Sent "+s5,GlobalLogger.MANAGER_LOG_ID);
         executeCommandHttp(openStackNode.getIp(),s6);
-        logger.log(Level.INFO,"Executed "+s6,GlobalLogger.MANAGER_LOG_ID);
-//        executeCommandHttp(openStackNode.getIp(),s10);
-//        logger.log(Level.INFO,"Executed "+s10,GlobalLogger.MANAGER_LOG_ID);
+        logger.log(Level.INFO,"Sent "+s6,GlobalLogger.MANAGER_LOG_ID);
+        executeCommandHttp(openStackNode.getIp(),s10);
+        logger.log(Level.INFO,"Sent "+s10,GlobalLogger.MANAGER_LOG_ID);
         executeCommandHttp(openStackNode.getIp(),s3);
-        logger.log(Level.INFO,"Executed "+s3,GlobalLogger.MANAGER_LOG_ID);
+        logger.log(Level.INFO,"Sent "+s3,GlobalLogger.MANAGER_LOG_ID);
 
 //        String s = "("+s4 + "; "+s1+"; "+s2+ "; "+s5+"; "+s6+"; "+s3+") &";
 //
@@ -538,6 +535,8 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
 ////            exit = proxy.executeCommand(openStackNode.getIp(),s0);
 ////            logger.log(Level.INFO,"Executed "+s0+" with status "+exit,GlobalLogger.MANAGER_LOG_ID);
 
+        waitTillAllCommandsExecuted(openStackNode.getIp());
+
         logger.log(Level.INFO,"Finished Connecting Node to Mesos",GlobalLogger.MANAGER_LOG_ID);
 
         noScaleUpFilter = 300000;
@@ -551,6 +550,24 @@ public class MesosElasticityPlugin implements ElasticityPlugin {
         {
             try {
                 HttpResponse<String> response = Unirest.post("http://"+ip+":8000/execute").body("running").asString();
+                if (response.getBody().equalsIgnoreCase("yes"))
+                {
+                    break;
+                }
+            }
+            catch (UnirestException ex)
+            {
+
+            }
+        }
+    }
+
+    private void waitTillAllCommandsExecuted(String ip)
+    {
+        while (true)
+        {
+            try {
+                HttpResponse<String> response = Unirest.post("http://"+ip+":8000/execute").body("done").asString();
                 if (response.getBody().equalsIgnoreCase("yes"))
                 {
                     break;
